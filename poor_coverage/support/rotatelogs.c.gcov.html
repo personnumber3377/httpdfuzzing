@@ -1,0 +1,855 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - poor_coverage.lcov_info_final - support/rotatelogs.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">support</a> - rotatelogs.c<span style="font-size: 80%;"> (source / <a href="rotatelogs.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">poor_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">359</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 17:33:32</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : #include &quot;apr.h&quot;</a>
+<a name="18"><span class="lineNum">      18 </span>            : #include &quot;apr_lib.h&quot;</a>
+<a name="19"><span class="lineNum">      19 </span>            : #include &quot;apr_strings.h&quot;</a>
+<a name="20"><span class="lineNum">      20 </span>            : #include &quot;apr_errno.h&quot;</a>
+<a name="21"><span class="lineNum">      21 </span>            : #include &quot;apr_file_io.h&quot;</a>
+<a name="22"><span class="lineNum">      22 </span>            : #include &quot;apr_file_info.h&quot;</a>
+<a name="23"><span class="lineNum">      23 </span>            : #include &quot;apr_general.h&quot;</a>
+<a name="24"><span class="lineNum">      24 </span>            : #include &quot;apr_time.h&quot;</a>
+<a name="25"><span class="lineNum">      25 </span>            : #include &quot;apr_getopt.h&quot;</a>
+<a name="26"><span class="lineNum">      26 </span>            : #include &quot;apr_thread_proc.h&quot;</a>
+<a name="27"><span class="lineNum">      27 </span>            : #include &quot;apr_signal.h&quot;</a>
+<a name="28"><span class="lineNum">      28 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="29"><span class="lineNum">      29 </span>            : #include &quot;apr_poll.h&quot;</a>
+<a name="30"><span class="lineNum">      30 </span>            : #endif</a>
+<a name="31"><span class="lineNum">      31 </span>            : </a>
+<a name="32"><span class="lineNum">      32 </span>            : #if APR_HAVE_STDLIB_H</a>
+<a name="33"><span class="lineNum">      33 </span>            : #include &lt;stdlib.h&gt;</a>
+<a name="34"><span class="lineNum">      34 </span>            : #endif</a>
+<a name="35"><span class="lineNum">      35 </span>            : #define APR_WANT_STRFUNC</a>
+<a name="36"><span class="lineNum">      36 </span>            : #include &quot;apr_want.h&quot;</a>
+<a name="37"><span class="lineNum">      37 </span>            : </a>
+<a name="38"><span class="lineNum">      38 </span>            : #define BUFSIZE         65536</a>
+<a name="39"><span class="lineNum">      39 </span>            : </a>
+<a name="40"><span class="lineNum">      40 </span>            : #define ROTATE_NONE     0</a>
+<a name="41"><span class="lineNum">      41 </span>            : #define ROTATE_NEW      1</a>
+<a name="42"><span class="lineNum">      42 </span>            : #define ROTATE_TIME     2</a>
+<a name="43"><span class="lineNum">      43 </span>            : #define ROTATE_SIZE     3</a>
+<a name="44"><span class="lineNum">      44 </span>            : #define ROTATE_FORCE    4</a>
+<a name="45"><span class="lineNum">      45 </span>            : </a>
+<a name="46"><span class="lineNum">      46 </span>            : static const char *const ROTATE_REASONS[] = {</a>
+<a name="47"><span class="lineNum">      47 </span>            :     &quot;None&quot;,</a>
+<a name="48"><span class="lineNum">      48 </span>            :     &quot;Open a new file&quot;,</a>
+<a name="49"><span class="lineNum">      49 </span>            :     &quot;Time interval expired&quot;,</a>
+<a name="50"><span class="lineNum">      50 </span>            :     &quot;Maximum size reached&quot;,</a>
+<a name="51"><span class="lineNum">      51 </span>            :     &quot;Forced rotation&quot;,</a>
+<a name="52"><span class="lineNum">      52 </span>            :     NULL</a>
+<a name="53"><span class="lineNum">      53 </span>            : };</a>
+<a name="54"><span class="lineNum">      54 </span>            : </a>
+<a name="55"><span class="lineNum">      55 </span>            : typedef struct rotate_config rotate_config_t;</a>
+<a name="56"><span class="lineNum">      56 </span>            : </a>
+<a name="57"><span class="lineNum">      57 </span>            : struct rotate_config {</a>
+<a name="58"><span class="lineNum">      58 </span>            :     unsigned int sRotation;</a>
+<a name="59"><span class="lineNum">      59 </span>            :     int tRotation;</a>
+<a name="60"><span class="lineNum">      60 </span>            :     int utc_offset;</a>
+<a name="61"><span class="lineNum">      61 </span>            :     int use_localtime;</a>
+<a name="62"><span class="lineNum">      62 </span>            :     int use_strftime;</a>
+<a name="63"><span class="lineNum">      63 </span>            :     int force_open;</a>
+<a name="64"><span class="lineNum">      64 </span>            :     int verbose;</a>
+<a name="65"><span class="lineNum">      65 </span>            :     int echo;</a>
+<a name="66"><span class="lineNum">      66 </span>            :     char *szLogRoot;</a>
+<a name="67"><span class="lineNum">      67 </span>            :     int truncate;</a>
+<a name="68"><span class="lineNum">      68 </span>            :     const char *linkfile;</a>
+<a name="69"><span class="lineNum">      69 </span>            :     const char *postrotate_prog;</a>
+<a name="70"><span class="lineNum">      70 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="71"><span class="lineNum">      71 </span>            :     int create_empty;</a>
+<a name="72"><span class="lineNum">      72 </span>            : #endif</a>
+<a name="73"><span class="lineNum">      73 </span>            :     int num_files;</a>
+<a name="74"><span class="lineNum">      74 </span>            :     int create_path;</a>
+<a name="75"><span class="lineNum">      75 </span>            : };</a>
+<a name="76"><span class="lineNum">      76 </span>            : </a>
+<a name="77"><span class="lineNum">      77 </span>            : typedef struct rotate_status rotate_status_t;</a>
+<a name="78"><span class="lineNum">      78 </span>            : </a>
+<a name="79"><span class="lineNum">      79 </span>            : /* &quot;adjusted_time_t&quot; is used to store Unix time (seconds since epoch)</a>
+<a name="80"><span class="lineNum">      80 </span>            :  * which has been adjusted for some timezone fudge factor.  It should</a>
+<a name="81"><span class="lineNum">      81 </span>            :  * be used for storing the return values from get_now().  A typedef is</a>
+<a name="82"><span class="lineNum">      82 </span>            :  * used since this type is similar to time_t, but different. */</a>
+<a name="83"><span class="lineNum">      83 </span>            : typedef long adjusted_time_t;</a>
+<a name="84"><span class="lineNum">      84 </span>            : </a>
+<a name="85"><span class="lineNum">      85 </span>            : /* Structure to contain relevant logfile state: fd, pool and</a>
+<a name="86"><span class="lineNum">      86 </span>            :  * filename. */</a>
+<a name="87"><span class="lineNum">      87 </span>            : struct logfile {</a>
+<a name="88"><span class="lineNum">      88 </span>            :     apr_pool_t *pool;</a>
+<a name="89"><span class="lineNum">      89 </span>            :     apr_file_t *fd;</a>
+<a name="90"><span class="lineNum">      90 </span>            :     char name[APR_PATH_MAX];</a>
+<a name="91"><span class="lineNum">      91 </span>            : };</a>
+<a name="92"><span class="lineNum">      92 </span>            : </a>
+<a name="93"><span class="lineNum">      93 </span>            : struct rotate_status {</a>
+<a name="94"><span class="lineNum">      94 </span>            :     struct logfile current; /* current logfile. */</a>
+<a name="95"><span class="lineNum">      95 </span>            :     apr_pool_t *pool; /* top-level pool */</a>
+<a name="96"><span class="lineNum">      96 </span>            :     int rotateReason;</a>
+<a name="97"><span class="lineNum">      97 </span>            :     adjusted_time_t tLogEnd;</a>
+<a name="98"><span class="lineNum">      98 </span>            :     int nMessCount;</a>
+<a name="99"><span class="lineNum">      99 </span>            :     int fileNum;</a>
+<a name="100"><span class="lineNum">     100 </span>            : };</a>
+<a name="101"><span class="lineNum">     101 </span>            : </a>
+<a name="102"><span class="lineNum">     102 </span>            : static rotate_config_t config;</a>
+<a name="103"><span class="lineNum">     103 </span>            : static rotate_status_t status;</a>
+<a name="104"><span class="lineNum">     104 </span>            : </a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 : static void usage(const char *argv0, const char *reason)</span></a>
+<a name="106"><span class="lineNum">     106 </span>            : {</a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :     if (reason) {</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;%s\n&quot;, reason);</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :     fprintf(stderr,</span></a>
+<a name="111"><span class="lineNum">     111 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="112"><span class="lineNum">     112 </span>            :             &quot;Usage: %s [-v] [-l] [-L linkname] [-p prog] [-f] [-D] [-t] [-e] [-c] [-n number] &lt;logfile&gt; &quot;</a>
+<a name="113"><span class="lineNum">     113 </span>            : #else</a>
+<a name="114"><span class="lineNum">     114 </span>            :             &quot;Usage: %s [-v] [-l] [-L linkname] [-p prog] [-f] [-D] [-t] [-e] [-n number] &lt;logfile&gt; &quot;</a>
+<a name="115"><span class="lineNum">     115 </span>            : #endif</a>
+<a name="116"><span class="lineNum">     116 </span>            :             &quot;{&lt;rotation time in seconds&gt;|&lt;rotation size&gt;(B|K|M|G)} &quot;</a>
+<a name="117"><span class="lineNum">     117 </span>            :             &quot;[offset minutes from UTC]\n\n&quot;,</a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 :             argv0);</span></a>
+<a name="119"><span class="lineNum">     119 </span>            : #ifdef OS2</a>
+<a name="120"><span class="lineNum">     120 </span>            :     fprintf(stderr,</a>
+<a name="121"><span class="lineNum">     121 </span>            :             &quot;Add this:\n\nTransferLog \&quot;|%s.exe /some/where 86400\&quot;\n\n&quot;,</a>
+<a name="122"><span class="lineNum">     122 </span>            :             argv0);</a>
+<a name="123"><span class="lineNum">     123 </span>            : #else</a>
+<a name="124"><span class="lineNum">     124 </span><span class="lineNoCov">          0 :     fprintf(stderr,</span></a>
+<a name="125"><span class="lineNum">     125 </span>            :             &quot;Add this:\n\nTransferLog \&quot;|%s /some/where 86400\&quot;\n\n&quot;,</a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :             argv0);</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :     fprintf(stderr,</span></a>
+<a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 :             &quot;or \n\nTransferLog \&quot;|%s /some/where 5M\&quot;\n\n&quot;, argv0);</span></a>
+<a name="129"><span class="lineNum">     129 </span>            : #endif</a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :     fprintf(stderr,</span></a>
+<a name="131"><span class="lineNum">     131 </span>            :             &quot;to httpd.conf. By default, the generated name will be\n&quot;</a>
+<a name="132"><span class="lineNum">     132 </span>            :             &quot;&lt;logfile&gt;.nnnn where nnnn is the system time at which the log\n&quot;</a>
+<a name="133"><span class="lineNum">     133 </span>            :             &quot;nominally starts (N.B. if using a rotation time, the time will\n&quot;</a>
+<a name="134"><span class="lineNum">     134 </span>            :             &quot;always be a multiple of the rotation time, so you can synchronize\n&quot;</a>
+<a name="135"><span class="lineNum">     135 </span>            :             &quot;cron scripts with it). If &lt;logfile&gt; contains strftime conversion\n&quot;</a>
+<a name="136"><span class="lineNum">     136 </span>            :             &quot;specifications, those will be used instead. At the end of each\n&quot;</a>
+<a name="137"><span class="lineNum">     137 </span>            :             &quot;rotation time or when the file size is reached a new log is\n&quot;</a>
+<a name="138"><span class="lineNum">     138 </span>            :             &quot;started.\n&quot;</a>
+<a name="139"><span class="lineNum">     139 </span>            :             &quot;\n&quot;</a>
+<a name="140"><span class="lineNum">     140 </span>            :             &quot;Options:\n&quot;</a>
+<a name="141"><span class="lineNum">     141 </span>            :             &quot;  -v       Verbose operation. Messages are written to stderr.\n&quot;</a>
+<a name="142"><span class="lineNum">     142 </span>            :             &quot;  -l       Base rotation on local time instead of UTC.\n&quot;</a>
+<a name="143"><span class="lineNum">     143 </span>            :             &quot;  -L path  Create hard link from current log to specified path.\n&quot;</a>
+<a name="144"><span class="lineNum">     144 </span>            :             &quot;  -p prog  Run specified program after opening a new log file. See below.\n&quot;</a>
+<a name="145"><span class="lineNum">     145 </span>            :             &quot;  -f       Force opening of log on program start.\n&quot;</a>
+<a name="146"><span class="lineNum">     146 </span>            :             &quot;  -D       Create parent directories of log file.\n&quot; </a>
+<a name="147"><span class="lineNum">     147 </span>            :             &quot;  -t       Truncate logfile instead of rotating, tail friendly.\n&quot;</a>
+<a name="148"><span class="lineNum">     148 </span>            :             &quot;  -e       Echo log to stdout for further processing.\n&quot;</a>
+<a name="149"><span class="lineNum">     149 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="150"><span class="lineNum">     150 </span>            :             &quot;  -c       Create log even if it is empty.\n&quot;</a>
+<a name="151"><span class="lineNum">     151 </span>            : #endif</a>
+<a name="152"><span class="lineNum">     152 </span>            :             &quot;  -n num   Rotate file by adding suffixes '.1', '.2', ..., '.num'.\n&quot;</a>
+<a name="153"><span class="lineNum">     153 </span>            :             &quot;\n&quot;</a>
+<a name="154"><span class="lineNum">     154 </span>            :             &quot;The program for '-p' is invoked as \&quot;[prog] &lt;curfile&gt; [&lt;prevfile&gt;]\&quot;\n&quot;</a>
+<a name="155"><span class="lineNum">     155 </span>            :             &quot;where &lt;curfile&gt; is the filename of the newly opened logfile, and\n&quot;</a>
+<a name="156"><span class="lineNum">     156 </span>            :             &quot;&lt;prevfile&gt;, if given, is the filename of the previously used logfile.\n&quot;</a>
+<a name="157"><span class="lineNum">     157 </span>            :             &quot;\n&quot;);</a>
+<a name="158"><span class="lineNum">     158 </span><span class="lineNoCov">          0 :     exit(1);</span></a>
+<a name="159"><span class="lineNum">     159 </span>            : }</a>
+<a name="160"><span class="lineNum">     160 </span>            : </a>
+<a name="161"><span class="lineNum">     161 </span>            : /* This function returns the current Unix time (time_t) adjusted for</a>
+<a name="162"><span class="lineNum">     162 </span>            :  * any configured or derived local time offset.  The offset applied is</a>
+<a name="163"><span class="lineNum">     163 </span>            :  * returned via *offset. */</a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 : static adjusted_time_t get_now(rotate_config_t *config, apr_int32_t *offset)</span></a>
+<a name="165"><span class="lineNum">     165 </span>            : {</a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :     apr_time_t tNow = apr_time_now();</span></a>
+<a name="167"><span class="lineNum">     167 </span>            :     apr_int32_t utc_offset;</a>
+<a name="168"><span class="lineNum">     168 </span>            : </a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :     if (config-&gt;use_localtime) {</span></a>
+<a name="170"><span class="lineNum">     170 </span>            :         /* Check for our UTC offset before using it, since it might</a>
+<a name="171"><span class="lineNum">     171 </span>            :          * change if there's a switch between standard and daylight</a>
+<a name="172"><span class="lineNum">     172 </span>            :          * savings time.</a>
+<a name="173"><span class="lineNum">     173 </span>            :          */</a>
+<a name="174"><span class="lineNum">     174 </span>            :         apr_time_exp_t lt;</a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :         apr_time_exp_lt(&amp;lt, tNow);</span></a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :         utc_offset = lt.tm_gmtoff;</span></a>
+<a name="177"><span class="lineNum">     177 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="178"><span class="lineNum">     178 </span>            :     else {</a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineNoCov">          0 :         utc_offset = config-&gt;utc_offset;</span></a>
+<a name="180"><span class="lineNum">     180 </span>            :     }</a>
+<a name="181"><span class="lineNum">     181 </span>            : </a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :     if (offset)</span></a>
+<a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 :         *offset = utc_offset;</span></a>
+<a name="184"><span class="lineNum">     184 </span>            : </a>
+<a name="185"><span class="lineNum">     185 </span><span class="lineNoCov">          0 :     return apr_time_sec(tNow) + utc_offset;</span></a>
+<a name="186"><span class="lineNum">     186 </span>            : }</a>
+<a name="187"><span class="lineNum">     187 </span>            : </a>
+<a name="188"><span class="lineNum">     188 </span>            : /*</a>
+<a name="189"><span class="lineNum">     189 </span>            :  * Close a file and destroy the associated pool.</a>
+<a name="190"><span class="lineNum">     190 </span>            :  */</a>
+<a name="191"><span class="lineNum">     191 </span><span class="lineNoCov">          0 : static void close_logfile(rotate_config_t *config, struct logfile *logfile)</span></a>
+<a name="192"><span class="lineNum">     192 </span>            : {</a>
+<a name="193"><span class="lineNum">     193 </span><span class="lineNoCov">          0 :     if (config-&gt;verbose) {</span></a>
+<a name="194"><span class="lineNum">     194 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Closing file %s\n&quot;, logfile-&gt;name);</span></a>
+<a name="195"><span class="lineNum">     195 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="196"><span class="lineNum">     196 </span><span class="lineNoCov">          0 :     apr_file_close(logfile-&gt;fd);</span></a>
+<a name="197"><span class="lineNum">     197 </span><span class="lineNoCov">          0 :     apr_pool_destroy(logfile-&gt;pool);</span></a>
+<a name="198"><span class="lineNum">     198 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="199"><span class="lineNum">     199 </span>            : </a>
+<a name="200"><span class="lineNum">     200 </span>            : /*</a>
+<a name="201"><span class="lineNum">     201 </span>            :  * Dump the configuration parsing result to STDERR.</a>
+<a name="202"><span class="lineNum">     202 </span>            :  */</a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 : static void dumpConfig (rotate_config_t *config)</span></a>
+<a name="204"><span class="lineNum">     204 </span>            : {</a>
+<a name="205"><span class="lineNum">     205 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation time interval:      %12d\n&quot;, config-&gt;tRotation);</span></a>
+<a name="206"><span class="lineNum">     206 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation size interval:      %12d\n&quot;, config-&gt;sRotation);</span></a>
+<a name="207"><span class="lineNum">     207 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation time UTC offset:    %12d\n&quot;, config-&gt;utc_offset);</span></a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation based on localtime: %12s\n&quot;, config-&gt;use_localtime ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation file date pattern:  %12s\n&quot;, config-&gt;use_strftime ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation file forced open:   %12s\n&quot;, config-&gt;force_open ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Create parent directories:   %12s\n&quot;, config-&gt;create_path ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="212"><span class="lineNum">     212 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation verbose:            %12s\n&quot;, config-&gt;verbose ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="213"><span class="lineNum">     213 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation create empty logs:  %12s\n&quot;, config-&gt;create_empty ? &quot;yes&quot; : &quot;no&quot;);</span></a>
+<a name="215"><span class="lineNum">     215 </span>            : #endif</a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Rotation file name: %21s\n&quot;, config-&gt;szLogRoot);</span></a>
+<a name="217"><span class="lineNum">     217 </span><span class="lineNoCov">          0 :     fprintf(stderr, &quot;Post-rotation prog: %21s\n&quot;, config-&gt;postrotate_prog ? config-&gt;postrotate_prog : &quot;not used&quot;);</span></a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="219"><span class="lineNum">     219 </span>            : </a>
+<a name="220"><span class="lineNum">     220 </span>            : /*</a>
+<a name="221"><span class="lineNum">     221 </span>            :  * Check whether we need to rotate.</a>
+<a name="222"><span class="lineNum">     222 </span>            :  * Possible reasons are:</a>
+<a name="223"><span class="lineNum">     223 </span>            :  * - No log file open (ROTATE_NEW)</a>
+<a name="224"><span class="lineNum">     224 </span>            :  * - User forces us to rotate (ROTATE_FORCE)</a>
+<a name="225"><span class="lineNum">     225 </span>            :  * - Our log file size is already bigger than the</a>
+<a name="226"><span class="lineNum">     226 </span>            :  *   allowed maximum (ROTATE_SIZE)</a>
+<a name="227"><span class="lineNum">     227 </span>            :  * - The next log time interval expired (ROTATE_TIME)</a>
+<a name="228"><span class="lineNum">     228 </span>            :  *</a>
+<a name="229"><span class="lineNum">     229 </span>            :  * When size and time constraints are both given,</a>
+<a name="230"><span class="lineNum">     230 </span>            :  * it suffices that one of them is fulfilled.</a>
+<a name="231"><span class="lineNum">     231 </span>            :  */</a>
+<a name="232"><span class="lineNum">     232 </span><span class="lineNoCov">          0 : static void checkRotate(rotate_config_t *config, rotate_status_t *status)</span></a>
+<a name="233"><span class="lineNum">     233 </span>            : {</a>
+<a name="234"><span class="lineNum">     234 </span><span class="lineNoCov">          0 :     if (status-&gt;current.fd == NULL) {</span></a>
+<a name="235"><span class="lineNum">     235 </span><span class="lineNoCov">          0 :         status-&gt;rotateReason = ROTATE_NEW;</span></a>
+<a name="236"><span class="lineNum">     236 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="237"><span class="lineNum">     237 </span><span class="lineNoCov">          0 :     else if (config-&gt;sRotation) {</span></a>
+<a name="238"><span class="lineNum">     238 </span>            :         apr_finfo_t finfo;</a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineNoCov">          0 :         apr_off_t current_size = -1;</span></a>
+<a name="240"><span class="lineNum">     240 </span>            : </a>
+<a name="241"><span class="lineNum">     241 </span><span class="lineNoCov">          0 :         if (apr_file_info_get(&amp;finfo, APR_FINFO_SIZE, status-&gt;current.fd) == APR_SUCCESS) {</span></a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineNoCov">          0 :             current_size = finfo.size;</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="244"><span class="lineNum">     244 </span>            : </a>
+<a name="245"><span class="lineNum">     245 </span><span class="lineNoCov">          0 :         if (current_size &gt; config-&gt;sRotation) {</span></a>
+<a name="246"><span class="lineNum">     246 </span><span class="lineNoCov">          0 :             status-&gt;rotateReason = ROTATE_SIZE;</span></a>
+<a name="247"><span class="lineNum">     247 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="248"><span class="lineNum">     248 </span><span class="lineNoCov">          0 :         else if (config-&gt;tRotation) {</span></a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineNoCov">          0 :             if (get_now(config, NULL) &gt;= status-&gt;tLogEnd) {</span></a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineNoCov">          0 :                 status-&gt;rotateReason = ROTATE_TIME;</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="253"><span class="lineNum">     253 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineNoCov">          0 :     else if (config-&gt;tRotation) {</span></a>
+<a name="255"><span class="lineNum">     255 </span><span class="lineNoCov">          0 :         if (get_now(config, NULL) &gt;= status-&gt;tLogEnd) {</span></a>
+<a name="256"><span class="lineNum">     256 </span><span class="lineNoCov">          0 :             status-&gt;rotateReason = ROTATE_TIME;</span></a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="259"><span class="lineNum">     259 </span>            :     else {</a>
+<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;No rotation time or size specified\n&quot;);</span></a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineNoCov">          0 :         exit(2);</span></a>
+<a name="262"><span class="lineNum">     262 </span>            :     }</a>
+<a name="263"><span class="lineNum">     263 </span>            : </a>
+<a name="264"><span class="lineNum">     264 </span><span class="lineNoCov">          0 :     if (status-&gt;rotateReason != ROTATE_NONE &amp;&amp; config-&gt;verbose) {</span></a>
+<a name="265"><span class="lineNum">     265 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;File rotation needed, reason: %s\n&quot;, ROTATE_REASONS[status-&gt;rotateReason]);</span></a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="268"><span class="lineNum">     268 </span>            : </a>
+<a name="269"><span class="lineNum">     269 </span>            : /*</a>
+<a name="270"><span class="lineNum">     270 </span>            :  * Handle post-rotate processing.</a>
+<a name="271"><span class="lineNum">     271 </span>            :  */</a>
+<a name="272"><span class="lineNum">     272 </span><span class="lineNoCov">          0 : static void post_rotate(apr_pool_t *pool, struct logfile *newlog,</span></a>
+<a name="273"><span class="lineNum">     273 </span>            :                         rotate_config_t *config, rotate_status_t *status)</a>
+<a name="274"><span class="lineNum">     274 </span>            : {</a>
+<a name="275"><span class="lineNum">     275 </span>            :     apr_status_t rv;</a>
+<a name="276"><span class="lineNum">     276 </span>            :     apr_procattr_t *pattr;</a>
+<a name="277"><span class="lineNum">     277 </span>            :     const char *argv[4];</a>
+<a name="278"><span class="lineNum">     278 </span>            :     apr_proc_t proc;</a>
+<a name="279"><span class="lineNum">     279 </span>            : </a>
+<a name="280"><span class="lineNum">     280 </span>            :     /* Handle link file, if configured. */</a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :     if (config-&gt;linkfile) {</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineNoCov">          0 :         apr_file_remove(config-&gt;linkfile, newlog-&gt;pool);</span></a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 :         if (config-&gt;verbose) {</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;Linking %s to %s\n&quot;, newlog-&gt;name, config-&gt;linkfile);</span></a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :         rv = apr_file_link(newlog-&gt;name, config-&gt;linkfile);</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :         if (rv != APR_SUCCESS) {</span></a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :             char *error = apr_psprintf(pool, &quot;Error linking file %s to %s (%pm)\n&quot;,</span></a>
+<a name="289"><span class="lineNum">     289 </span><span class="lineNoCov">          0 :                                        newlog-&gt;name, config-&gt;linkfile, &amp;rv);</span></a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :             fputs(error, stderr);</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :             exit(2);</span></a>
+<a name="292"><span class="lineNum">     292 </span>            :         }</a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="294"><span class="lineNum">     294 </span>            : </a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineNoCov">          0 :     if (!config-&gt;postrotate_prog) {</span></a>
+<a name="296"><span class="lineNum">     296 </span>            :         /* Nothing more to do. */</a>
+<a name="297"><span class="lineNum">     297 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="298"><span class="lineNum">     298 </span>            :     }</a>
+<a name="299"><span class="lineNum">     299 </span>            : </a>
+<a name="300"><span class="lineNum">     300 </span>            :     /* Collect any zombies from a previous run, but don't wait. */</a>
+<a name="301"><span class="lineNum">     301 </span><span class="lineNoCov">          0 :     while (apr_proc_wait_all_procs(&amp;proc, NULL, NULL, APR_NOWAIT, pool) == APR_CHILD_DONE)</span></a>
+<a name="302"><span class="lineNum">     302 </span>            :         /* noop */;</a>
+<a name="303"><span class="lineNum">     303 </span>            : </a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :     if ((rv = apr_procattr_create(&amp;pattr, pool)) != APR_SUCCESS) {</span></a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineNoCov">          0 :         char *error = apr_psprintf(pool, &quot;post_rotate: apr_procattr_create failed &quot; \</span></a>
+<a name="306"><span class="lineNum">     306 </span><span class="lineNoCov">          0 :                                          &quot;for '%s': %pm\n&quot;, config-&gt;postrotate_prog, &amp;rv);</span></a>
+<a name="307"><span class="lineNum">     307 </span><span class="lineNoCov">          0 :         fputs(error, stderr);</span></a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="309"><span class="lineNum">     309 </span>            :     }</a>
+<a name="310"><span class="lineNum">     310 </span>            : </a>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 :     rv = apr_procattr_error_check_set(pattr, 1);</span></a>
+<a name="312"><span class="lineNum">     312 </span><span class="lineNoCov">          0 :     if (rv == APR_SUCCESS)</span></a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineNoCov">          0 :         rv = apr_procattr_cmdtype_set(pattr, APR_PROGRAM_ENV);</span></a>
+<a name="314"><span class="lineNum">     314 </span>            : </a>
+<a name="315"><span class="lineNum">     315 </span><span class="lineNoCov">          0 :     if (rv != APR_SUCCESS) {</span></a>
+<a name="316"><span class="lineNum">     316 </span><span class="lineNoCov">          0 :         char *error = apr_psprintf(pool, &quot;post_rotate: could not set up process &quot; \</span></a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :                                    &quot;attributes for '%s': %pm\n&quot;, config-&gt;postrotate_prog,</span></a>
+<a name="318"><span class="lineNum">     318 </span>            :                                    &amp;rv);</a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :         fputs(error, stderr);</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="321"><span class="lineNum">     321 </span>            :     }</a>
+<a name="322"><span class="lineNum">     322 </span>            : </a>
+<a name="323"><span class="lineNum">     323 </span><span class="lineNoCov">          0 :     argv[0] = config-&gt;postrotate_prog;</span></a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineNoCov">          0 :     argv[1] = newlog-&gt;name;</span></a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineNoCov">          0 :     if (status-&gt;current.fd) {</span></a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineNoCov">          0 :         argv[2] = status-&gt;current.name;</span></a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineNoCov">          0 :         argv[3] = NULL;</span></a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="329"><span class="lineNum">     329 </span>            :     else {</a>
+<a name="330"><span class="lineNum">     330 </span><span class="lineNoCov">          0 :         argv[2] = NULL;</span></a>
+<a name="331"><span class="lineNum">     331 </span>            :     }</a>
+<a name="332"><span class="lineNum">     332 </span>            : </a>
+<a name="333"><span class="lineNum">     333 </span><span class="lineNoCov">          0 :     if (config-&gt;verbose)</span></a>
+<a name="334"><span class="lineNum">     334 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Calling post-rotate program: %s\n&quot;, argv[0]);</span></a>
+<a name="335"><span class="lineNum">     335 </span>            : </a>
+<a name="336"><span class="lineNum">     336 </span><span class="lineNoCov">          0 :     rv = apr_proc_create(&amp;proc, argv[0], argv, NULL, pattr, pool);</span></a>
+<a name="337"><span class="lineNum">     337 </span><span class="lineNoCov">          0 :     if (rv != APR_SUCCESS) {</span></a>
+<a name="338"><span class="lineNum">     338 </span><span class="lineNoCov">          0 :         char *error = apr_psprintf(pool, &quot;Could not spawn post-rotate process &quot; \</span></a>
+<a name="339"><span class="lineNum">     339 </span><span class="lineNoCov">          0 :                                    &quot;'%s': %pm\n&quot;, config-&gt;postrotate_prog, &amp;rv);</span></a>
+<a name="340"><span class="lineNum">     340 </span><span class="lineNoCov">          0 :         fputs(error, stderr);</span></a>
+<a name="341"><span class="lineNum">     341 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="342"><span class="lineNum">     342 </span>            :     }</a>
+<a name="343"><span class="lineNum">     343 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="344"><span class="lineNum">     344 </span>            : </a>
+<a name="345"><span class="lineNum">     345 </span>            : /* After a error, truncate the current file and write out an error</a>
+<a name="346"><span class="lineNum">     346 </span>            :  * message, which must be contained in message.  The process is</a>
+<a name="347"><span class="lineNum">     347 </span>            :  * terminated on failure.  */</a>
+<a name="348"><span class="lineNum">     348 </span><span class="lineNoCov">          0 : static void truncate_and_write_error(rotate_status_t *status, const char *message)</span></a>
+<a name="349"><span class="lineNum">     349 </span>            : {</a>
+<a name="350"><span class="lineNum">     350 </span><span class="lineNoCov">          0 :     apr_size_t buflen = strlen(message);</span></a>
+<a name="351"><span class="lineNum">     351 </span>            : </a>
+<a name="352"><span class="lineNum">     352 </span><span class="lineNoCov">          0 :     if (apr_file_trunc(status-&gt;current.fd, 0) != APR_SUCCESS) {</span></a>
+<a name="353"><span class="lineNum">     353 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Error truncating the file %s\n&quot;, status-&gt;current.name);</span></a>
+<a name="354"><span class="lineNum">     354 </span><span class="lineNoCov">          0 :         exit(2);</span></a>
+<a name="355"><span class="lineNum">     355 </span>            :     }</a>
+<a name="356"><span class="lineNum">     356 </span><span class="lineNoCov">          0 :     if (apr_file_write_full(status-&gt;current.fd, message, buflen, NULL) != APR_SUCCESS) {</span></a>
+<a name="357"><span class="lineNum">     357 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Error writing error (%s) to the file %s\n&quot;, </span></a>
+<a name="358"><span class="lineNum">     358 </span><span class="lineNoCov">          0 :                 message, status-&gt;current.name);</span></a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineNoCov">          0 :         exit(2);</span></a>
+<a name="360"><span class="lineNum">     360 </span>            :     }</a>
+<a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="362"><span class="lineNum">     362 </span>            : </a>
+<a name="363"><span class="lineNum">     363 </span>            : /*</a>
+<a name="364"><span class="lineNum">     364 </span>            :  * Open a new log file, and if successful</a>
+<a name="365"><span class="lineNum">     365 </span>            :  * also close the old one.</a>
+<a name="366"><span class="lineNum">     366 </span>            :  *</a>
+<a name="367"><span class="lineNum">     367 </span>            :  * The timestamp for the calculation of the file</a>
+<a name="368"><span class="lineNum">     368 </span>            :  * name of the new log file will be the actual millisecond</a>
+<a name="369"><span class="lineNum">     369 </span>            :  * timestamp, except when a regular rotation based on a time</a>
+<a name="370"><span class="lineNum">     370 </span>            :  * interval is configured and the previous interval</a>
+<a name="371"><span class="lineNum">     371 </span>            :  * is over. Then the timestamp is the starting time</a>
+<a name="372"><span class="lineNum">     372 </span>            :  * of the actual interval.</a>
+<a name="373"><span class="lineNum">     373 </span>            :  */</a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 : static void doRotate(rotate_config_t *config, rotate_status_t *status)</span></a>
+<a name="375"><span class="lineNum">     375 </span>            : {</a>
+<a name="376"><span class="lineNum">     376 </span>            :     apr_int32_t offset;</a>
+<a name="377"><span class="lineNum">     377 </span>            :     adjusted_time_t now, tLogStart;</a>
+<a name="378"><span class="lineNum">     378 </span>            :     apr_status_t rv;</a>
+<a name="379"><span class="lineNum">     379 </span>            :     struct logfile newlog;</a>
+<a name="380"><span class="lineNum">     380 </span><span class="lineNoCov">          0 :     int thisLogNum = -1;</span></a>
+<a name="381"><span class="lineNum">     381 </span>            : </a>
+<a name="382"><span class="lineNum">     382 </span>            :     /* Retrieve local-time-adjusted-Unix-time. */</a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :     now = get_now(config, &amp;offset);</span></a>
+<a name="384"><span class="lineNum">     384 </span>            : </a>
+<a name="385"><span class="lineNum">     385 </span><span class="lineNoCov">          0 :     status-&gt;rotateReason = ROTATE_NONE;</span></a>
+<a name="386"><span class="lineNum">     386 </span>            : </a>
+<a name="387"><span class="lineNum">     387 </span><span class="lineNoCov">          0 :     if (config-&gt;tRotation) {</span></a>
+<a name="388"><span class="lineNum">     388 </span>            :         adjusted_time_t tLogEnd;</a>
+<a name="389"><span class="lineNum">     389 </span>            : </a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineNoCov">          0 :         tLogStart = (now / config-&gt;tRotation) * config-&gt;tRotation;</span></a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineNoCov">          0 :         tLogEnd = tLogStart + config-&gt;tRotation;</span></a>
+<a name="392"><span class="lineNum">     392 </span>            :         /*</a>
+<a name="393"><span class="lineNum">     393 </span>            :          * Check if rotation was forced and the last rotation</a>
+<a name="394"><span class="lineNum">     394 </span>            :          * interval is not yet over. Use the value of now instead</a>
+<a name="395"><span class="lineNum">     395 </span>            :          * of the time interval boundary for the file name then.</a>
+<a name="396"><span class="lineNum">     396 </span>            :          */</a>
+<a name="397"><span class="lineNum">     397 </span><span class="lineNoCov">          0 :         if (tLogStart &lt; status-&gt;tLogEnd) {</span></a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :             tLogStart = now;</span></a>
+<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineNoCov">          0 :         status-&gt;tLogEnd = tLogEnd;</span></a>
+<a name="401"><span class="lineNum">     401 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="402"><span class="lineNum">     402 </span>            :     else {</a>
+<a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :         tLogStart = now;</span></a>
+<a name="404"><span class="lineNum">     404 </span>            :     }</a>
+<a name="405"><span class="lineNum">     405 </span>            : </a>
+<a name="406"><span class="lineNum">     406 </span><span class="lineNoCov">          0 :     if (config-&gt;use_strftime) {</span></a>
+<a name="407"><span class="lineNum">     407 </span><span class="lineNoCov">          0 :         apr_time_t tNow = apr_time_from_sec(tLogStart);</span></a>
+<a name="408"><span class="lineNum">     408 </span>            :         apr_time_exp_t e;</a>
+<a name="409"><span class="lineNum">     409 </span>            :         apr_size_t rs;</a>
+<a name="410"><span class="lineNum">     410 </span>            : </a>
+<a name="411"><span class="lineNum">     411 </span>            :         /* Explode the local-time-adjusted-Unix-time into a struct tm,</a>
+<a name="412"><span class="lineNum">     412 </span>            :          * first *reversing* local-time-adjustment applied by</a>
+<a name="413"><span class="lineNum">     413 </span>            :          * get_now() if we are using localtime. */</a>
+<a name="414"><span class="lineNum">     414 </span><span class="lineNoCov">          0 :         if (config-&gt;use_localtime)</span></a>
+<a name="415"><span class="lineNum">     415 </span><span class="lineNoCov">          0 :             apr_time_exp_lt(&amp;e, tNow - apr_time_from_sec(offset));</span></a>
+<a name="416"><span class="lineNum">     416 </span>            :         else</a>
+<a name="417"><span class="lineNum">     417 </span><span class="lineNoCov">          0 :             apr_time_exp_gmt(&amp;e, tNow);</span></a>
+<a name="418"><span class="lineNum">     418 </span><span class="lineNoCov">          0 :         apr_strftime(newlog.name, &amp;rs, sizeof(newlog.name), config-&gt;szLogRoot, &amp;e);</span></a>
+<a name="419"><span class="lineNum">     419 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="420"><span class="lineNum">     420 </span>            :     else {</a>
+<a name="421"><span class="lineNum">     421 </span><span class="lineNoCov">          0 :         if (config-&gt;truncate) {</span></a>
+<a name="422"><span class="lineNum">     422 </span><span class="lineNoCov">          0 :             apr_snprintf(newlog.name, sizeof(newlog.name), &quot;%s&quot;, config-&gt;szLogRoot);</span></a>
+<a name="423"><span class="lineNum">     423 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="424"><span class="lineNum">     424 </span><span class="lineNoCov">          0 :         else if (config-&gt;num_files &gt; 0) { </span></a>
+<a name="425"><span class="lineNum">     425 </span><span class="lineNoCov">          0 :             if (status-&gt;fileNum == -1 || status-&gt;fileNum == (config-&gt;num_files - 1)) {</span></a>
+<a name="426"><span class="lineNum">     426 </span><span class="lineNoCov">          0 :                 thisLogNum = 0;</span></a>
+<a name="427"><span class="lineNum">     427 </span><span class="lineNoCov">          0 :                 apr_snprintf(newlog.name, sizeof(newlog.name), &quot;%s&quot;, config-&gt;szLogRoot);</span></a>
+<a name="428"><span class="lineNum">     428 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="429"><span class="lineNum">     429 </span>            :             else { </a>
+<a name="430"><span class="lineNum">     430 </span><span class="lineNoCov">          0 :                 thisLogNum = status-&gt;fileNum + 1;</span></a>
+<a name="431"><span class="lineNum">     431 </span><span class="lineNoCov">          0 :                 apr_snprintf(newlog.name, sizeof(newlog.name), &quot;%s.%d&quot;, config-&gt;szLogRoot, thisLogNum);</span></a>
+<a name="432"><span class="lineNum">     432 </span>            :             }</a>
+<a name="433"><span class="lineNum">     433 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="434"><span class="lineNum">     434 </span>            :         else {</a>
+<a name="435"><span class="lineNum">     435 </span><span class="lineNoCov">          0 :             apr_snprintf(newlog.name, sizeof(newlog.name), &quot;%s.%010ld&quot;, config-&gt;szLogRoot,</span></a>
+<a name="436"><span class="lineNum">     436 </span><span class="lineNoCov">          0 :                          tLogStart);</span></a>
+<a name="437"><span class="lineNum">     437 </span>            :         }</a>
+<a name="438"><span class="lineNum">     438 </span>            :     }</a>
+<a name="439"><span class="lineNum">     439 </span><span class="lineNoCov">          0 :     apr_pool_create(&amp;newlog.pool, status-&gt;pool);</span></a>
+<a name="440"><span class="lineNum">     440 </span><span class="lineNoCov">          0 :     if (config-&gt;create_path) {</span></a>
+<a name="441"><span class="lineNum">     441 </span><span class="lineNoCov">          0 :         char *ptr = strrchr(newlog.name, '/');</span></a>
+<a name="442"><span class="lineNum">     442 </span><span class="lineNoCov">          0 :         if (ptr &amp;&amp; ptr &gt; newlog.name) {</span></a>
+<a name="443"><span class="lineNum">     443 </span><span class="lineNoCov">          0 :             char *path = apr_pstrmemdup(newlog.pool, newlog.name, ptr - newlog.name);</span></a>
+<a name="444"><span class="lineNum">     444 </span><span class="lineNoCov">          0 :             if (config-&gt;verbose) {</span></a>
+<a name="445"><span class="lineNum">     445 </span><span class="lineNoCov">          0 :                 fprintf(stderr, &quot;Creating directory tree %s\n&quot;, path);</span></a>
+<a name="446"><span class="lineNum">     446 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="447"><span class="lineNum">     447 </span><span class="lineNoCov">          0 :             rv = apr_dir_make_recursive(path, APR_FPROT_OS_DEFAULT, newlog.pool);</span></a>
+<a name="448"><span class="lineNum">     448 </span><span class="lineNoCov">          0 :             if (rv != APR_SUCCESS) {</span></a>
+<a name="449"><span class="lineNum">     449 </span><span class="lineNoCov">          0 :                 char *error = apr_psprintf(newlog.pool,</span></a>
+<a name="450"><span class="lineNum">     450 </span>            :                                            &quot;Could not create directory '%s' (%pm)\n&quot;,</a>
+<a name="451"><span class="lineNum">     451 </span><span class="lineNoCov">          0 :                                            path, &amp;rv);</span></a>
+<a name="452"><span class="lineNum">     452 </span><span class="lineNoCov">          0 :                 fputs(error, stderr);</span></a>
+<a name="453"><span class="lineNum">     453 </span><span class="lineNoCov">          0 :                 exit(2);</span></a>
+<a name="454"><span class="lineNum">     454 </span>            :             }</a>
+<a name="455"><span class="lineNum">     455 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="456"><span class="lineNum">     456 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="457"><span class="lineNum">     457 </span><span class="lineNoCov">          0 :     if (config-&gt;verbose) {</span></a>
+<a name="458"><span class="lineNum">     458 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Opening file %s\n&quot;, newlog.name);</span></a>
+<a name="459"><span class="lineNum">     459 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="460"><span class="lineNum">     460 </span><span class="lineNoCov">          0 :     rv = apr_file_open(&amp;newlog.fd, newlog.name, APR_WRITE | APR_CREATE | APR_APPEND</span></a>
+<a name="461"><span class="lineNum">     461 </span><span class="lineNoCov">          0 :                        | (config-&gt;truncate || (config-&gt;num_files &gt; 0 &amp;&amp; status-&gt;current.fd) ? APR_TRUNCATE : 0), </span></a>
+<a name="462"><span class="lineNum">     462 </span><span class="lineNoCov">          0 :                        APR_OS_DEFAULT, newlog.pool);</span></a>
+<a name="463"><span class="lineNum">     463 </span><span class="lineNoCov">          0 :     if (rv == APR_SUCCESS) {</span></a>
+<a name="464"><span class="lineNum">     464 </span>            :         /* Handle post-rotate processing. */</a>
+<a name="465"><span class="lineNum">     465 </span><span class="lineNoCov">          0 :         post_rotate(newlog.pool, &amp;newlog, config, status);</span></a>
+<a name="466"><span class="lineNum">     466 </span>            : </a>
+<a name="467"><span class="lineNum">     467 </span><span class="lineNoCov">          0 :         status-&gt;fileNum = thisLogNum;</span></a>
+<a name="468"><span class="lineNum">     468 </span>            :         /* Close out old (previously 'current') logfile, if any. */</a>
+<a name="469"><span class="lineNum">     469 </span><span class="lineNoCov">          0 :         if (status-&gt;current.fd) {</span></a>
+<a name="470"><span class="lineNum">     470 </span><span class="lineNoCov">          0 :             close_logfile(config, &amp;status-&gt;current);</span></a>
+<a name="471"><span class="lineNum">     471 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="472"><span class="lineNum">     472 </span>            : </a>
+<a name="473"><span class="lineNum">     473 </span>            :         /* New log file is now 'current'. */</a>
+<a name="474"><span class="lineNum">     474 </span><span class="lineNoCov">          0 :         status-&gt;current = newlog;</span></a>
+<a name="475"><span class="lineNum">     475 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="476"><span class="lineNum">     476 </span>            :     else {</a>
+<a name="477"><span class="lineNum">     477 </span><span class="lineNoCov">          0 :         char *error = apr_psprintf(newlog.pool, &quot;%pm&quot;, &amp;rv);</span></a>
+<a name="478"><span class="lineNum">     478 </span>            :         char *message;</a>
+<a name="479"><span class="lineNum">     479 </span>            : </a>
+<a name="480"><span class="lineNum">     480 </span>            :         /* Uh-oh. Failed to open the new log file. Try to clear</a>
+<a name="481"><span class="lineNum">     481 </span>            :          * the previous log file, note the lost log entries,</a>
+<a name="482"><span class="lineNum">     482 </span>            :          * and keep on truckin'. */</a>
+<a name="483"><span class="lineNum">     483 </span><span class="lineNoCov">          0 :         if (status-&gt;current.fd == NULL) {</span></a>
+<a name="484"><span class="lineNum">     484 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;Could not open log file '%s' (%s)\n&quot;, newlog.name, error);</span></a>
+<a name="485"><span class="lineNum">     485 </span><span class="lineNoCov">          0 :             exit(2);</span></a>
+<a name="486"><span class="lineNum">     486 </span>            :         }</a>
+<a name="487"><span class="lineNum">     487 </span>            : </a>
+<a name="488"><span class="lineNum">     488 </span>            :         /* Try to keep this error message constant length</a>
+<a name="489"><span class="lineNum">     489 </span>            :          * in case it occurs several times. */</a>
+<a name="490"><span class="lineNum">     490 </span><span class="lineNoCov">          0 :         message = apr_psprintf(newlog.pool,</span></a>
+<a name="491"><span class="lineNum">     491 </span>            :                                &quot;Resetting log file due to error opening &quot;</a>
+<a name="492"><span class="lineNum">     492 </span>            :                                &quot;new log file, %10d messages lost: %-25.25s\n&quot;,</a>
+<a name="493"><span class="lineNum">     493 </span><span class="lineNoCov">          0 :                                status-&gt;nMessCount, error);</span></a>
+<a name="494"><span class="lineNum">     494 </span>            : </a>
+<a name="495"><span class="lineNum">     495 </span><span class="lineNoCov">          0 :         truncate_and_write_error(status, message);</span></a>
+<a name="496"><span class="lineNum">     496 </span>            : </a>
+<a name="497"><span class="lineNum">     497 </span>            :         /* Throw away new state; it isn't going to be used. */</a>
+<a name="498"><span class="lineNum">     498 </span><span class="lineNoCov">          0 :         apr_pool_destroy(newlog.pool);</span></a>
+<a name="499"><span class="lineNum">     499 </span>            :     }</a>
+<a name="500"><span class="lineNum">     500 </span>            : </a>
+<a name="501"><span class="lineNum">     501 </span><span class="lineNoCov">          0 :     status-&gt;nMessCount = 0;</span></a>
+<a name="502"><span class="lineNum">     502 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="503"><span class="lineNum">     503 </span>            : </a>
+<a name="504"><span class="lineNum">     504 </span>            : /*</a>
+<a name="505"><span class="lineNum">     505 </span>            :  * Get a size or time param from a string.</a>
+<a name="506"><span class="lineNum">     506 </span>            :  * Parameter 'last' indicates, whether the</a>
+<a name="507"><span class="lineNum">     507 </span>            :  * argument is the last commandline argument.</a>
+<a name="508"><span class="lineNum">     508 </span>            :  * UTC offset is only allowed as a last argument</a>
+<a name="509"><span class="lineNum">     509 </span>            :  * in order to make is distinguishable from the</a>
+<a name="510"><span class="lineNum">     510 </span>            :  * rotation interval time.</a>
+<a name="511"><span class="lineNum">     511 </span>            :  */</a>
+<a name="512"><span class="lineNum">     512 </span><span class="lineNoCov">          0 : static const char *get_time_or_size(rotate_config_t *config,</span></a>
+<a name="513"><span class="lineNum">     513 </span>            :                                     const char *arg, int last) {</a>
+<a name="514"><span class="lineNum">     514 </span><span class="lineNoCov">          0 :     char *ptr = NULL;</span></a>
+<a name="515"><span class="lineNum">     515 </span>            :     /* Byte multiplier */</a>
+<a name="516"><span class="lineNum">     516 </span><span class="lineNoCov">          0 :     unsigned int mult = 1;</span></a>
+<a name="517"><span class="lineNum">     517 </span><span class="lineNoCov">          0 :     if ((ptr = strchr(arg, 'B')) != NULL) { /* Found KB size */</span></a>
+<a name="518"><span class="lineNum">     518 </span><span class="lineNoCov">          0 :         mult = 1;</span></a>
+<a name="519"><span class="lineNum">     519 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="520"><span class="lineNum">     520 </span><span class="lineNoCov">          0 :     else if ((ptr = strchr(arg, 'K')) != NULL) { /* Found KB size */</span></a>
+<a name="521"><span class="lineNum">     521 </span><span class="lineNoCov">          0 :         mult = 1024;</span></a>
+<a name="522"><span class="lineNum">     522 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="523"><span class="lineNum">     523 </span><span class="lineNoCov">          0 :     else if ((ptr = strchr(arg, 'M')) != NULL) { /* Found MB size */</span></a>
+<a name="524"><span class="lineNum">     524 </span><span class="lineNoCov">          0 :         mult = 1024 * 1024;</span></a>
+<a name="525"><span class="lineNum">     525 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="526"><span class="lineNum">     526 </span><span class="lineNoCov">          0 :     else if ((ptr = strchr(arg, 'G')) != NULL) { /* Found GB size */</span></a>
+<a name="527"><span class="lineNum">     527 </span><span class="lineNoCov">          0 :         mult = 1024 * 1024 * 1024;</span></a>
+<a name="528"><span class="lineNum">     528 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="529"><span class="lineNum">     529 </span><span class="lineNoCov">          0 :     if (ptr) { /* rotation based on file size */</span></a>
+<a name="530"><span class="lineNum">     530 </span><span class="lineNoCov">          0 :         if (config-&gt;sRotation &gt; 0) {</span></a>
+<a name="531"><span class="lineNum">     531 </span><span class="lineNoCov">          0 :             return &quot;Rotation size parameter allowed only once&quot;;</span></a>
+<a name="532"><span class="lineNum">     532 </span>            :         }</a>
+<a name="533"><span class="lineNum">     533 </span><span class="lineNoCov">          0 :         if (*(ptr+1) == '\0') {</span></a>
+<a name="534"><span class="lineNum">     534 </span><span class="lineNoCov">          0 :             config-&gt;sRotation = atoi(arg) * mult;</span></a>
+<a name="535"><span class="lineNum">     535 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="536"><span class="lineNum">     536 </span><span class="lineNoCov">          0 :         if (config-&gt;sRotation == 0) {</span></a>
+<a name="537"><span class="lineNum">     537 </span><span class="lineNoCov">          0 :             return &quot;Invalid rotation size parameter&quot;;</span></a>
+<a name="538"><span class="lineNum">     538 </span>            :         }</a>
+<a name="539"><span class="lineNum">     539 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="540"><span class="lineNum">     540 </span><span class="lineNoCov">          0 :     else if ((config-&gt;sRotation &gt; 0 || config-&gt;tRotation &gt; 0) &amp;&amp; last) {</span></a>
+<a name="541"><span class="lineNum">     541 </span>            :         /* rotation based on elapsed time */</a>
+<a name="542"><span class="lineNum">     542 </span><span class="lineNoCov">          0 :         if (config-&gt;use_localtime) {</span></a>
+<a name="543"><span class="lineNum">     543 </span><span class="lineNoCov">          0 :             return &quot;UTC offset parameter is not valid with -l&quot;;</span></a>
+<a name="544"><span class="lineNum">     544 </span>            :         }</a>
+<a name="545"><span class="lineNum">     545 </span><span class="lineNoCov">          0 :         config-&gt;utc_offset = atoi(arg) * 60;</span></a>
+<a name="546"><span class="lineNum">     546 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="547"><span class="lineNum">     547 </span>            :     else { /* rotation based on elapsed time */</a>
+<a name="548"><span class="lineNum">     548 </span><span class="lineNoCov">          0 :         if (config-&gt;tRotation &gt; 0) {</span></a>
+<a name="549"><span class="lineNum">     549 </span><span class="lineNoCov">          0 :             return &quot;Rotation time parameter allowed only once&quot;;</span></a>
+<a name="550"><span class="lineNum">     550 </span>            :         }</a>
+<a name="551"><span class="lineNum">     551 </span><span class="lineNoCov">          0 :         config-&gt;tRotation = atoi(arg);</span></a>
+<a name="552"><span class="lineNum">     552 </span><span class="lineNoCov">          0 :         if (config-&gt;tRotation &lt;= 0) {</span></a>
+<a name="553"><span class="lineNum">     553 </span><span class="lineNoCov">          0 :             return &quot;Invalid rotation time parameter&quot;;</span></a>
+<a name="554"><span class="lineNum">     554 </span>            :         }</a>
+<a name="555"><span class="lineNum">     555 </span>            :     }</a>
+<a name="556"><span class="lineNum">     556 </span><span class="lineNoCov">          0 :     return NULL;</span></a>
+<a name="557"><span class="lineNum">     557 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="558"><span class="lineNum">     558 </span>            : </a>
+<a name="559"><span class="lineNum">     559 </span><span class="lineNoCov">          0 : int main (int argc, const char * const argv[])</span></a>
+<a name="560"><span class="lineNum">     560 </span>            : {</a>
+<a name="561"><span class="lineNum">     561 </span>            :     char buf[BUFSIZE];</a>
+<a name="562"><span class="lineNum">     562 </span>            :     apr_size_t nRead, nWrite;</a>
+<a name="563"><span class="lineNum">     563 </span>            :     apr_file_t *f_stdin;</a>
+<a name="564"><span class="lineNum">     564 </span>            :     apr_file_t *f_stdout;</a>
+<a name="565"><span class="lineNum">     565 </span>            :     apr_getopt_t *opt;</a>
+<a name="566"><span class="lineNum">     566 </span>            :     apr_status_t rv;</a>
+<a name="567"><span class="lineNum">     567 </span>            :     char c;</a>
+<a name="568"><span class="lineNum">     568 </span>            :     const char *opt_arg;</a>
+<a name="569"><span class="lineNum">     569 </span><span class="lineNoCov">          0 :     const char *err = NULL;</span></a>
+<a name="570"><span class="lineNum">     570 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="571"><span class="lineNum">     571 </span><span class="lineNoCov">          0 :     apr_pollfd_t pollfd = { 0 };</span></a>
+<a name="572"><span class="lineNum">     572 </span><span class="lineNoCov">          0 :     apr_status_t pollret = APR_SUCCESS;</span></a>
+<a name="573"><span class="lineNum">     573 </span>            :     long polltimeout;</a>
+<a name="574"><span class="lineNum">     574 </span>            : #endif</a>
+<a name="575"><span class="lineNum">     575 </span>            : </a>
+<a name="576"><span class="lineNum">     576 </span><span class="lineNoCov">          0 :     apr_app_initialize(&amp;argc, &amp;argv, NULL);</span></a>
+<a name="577"><span class="lineNum">     577 </span><span class="lineNoCov">          0 :     atexit(apr_terminate);</span></a>
+<a name="578"><span class="lineNum">     578 </span>            : </a>
+<a name="579"><span class="lineNum">     579 </span><span class="lineNoCov">          0 :     memset(&amp;config, 0, sizeof config);</span></a>
+<a name="580"><span class="lineNum">     580 </span><span class="lineNoCov">          0 :     memset(&amp;status, 0, sizeof status);</span></a>
+<a name="581"><span class="lineNum">     581 </span><span class="lineNoCov">          0 :     status.rotateReason = ROTATE_NONE;</span></a>
+<a name="582"><span class="lineNum">     582 </span>            : </a>
+<a name="583"><span class="lineNum">     583 </span><span class="lineNoCov">          0 :     apr_pool_create(&amp;status.pool, NULL);</span></a>
+<a name="584"><span class="lineNum">     584 </span><span class="lineNoCov">          0 :     apr_getopt_init(&amp;opt, status.pool, argc, argv);</span></a>
+<a name="585"><span class="lineNum">     585 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="586"><span class="lineNum">     586 </span><span class="lineNoCov">          0 :     while ((rv = apr_getopt(opt, &quot;lL:p:fDtvecn:&quot;, &amp;c, &amp;opt_arg)) == APR_SUCCESS) {</span></a>
+<a name="587"><span class="lineNum">     587 </span>            : #else</a>
+<a name="588"><span class="lineNum">     588 </span>            :     while ((rv = apr_getopt(opt, &quot;lL:p:fDtven:&quot;, &amp;c, &amp;opt_arg)) == APR_SUCCESS) {</a>
+<a name="589"><span class="lineNum">     589 </span>            : #endif</a>
+<a name="590"><span class="lineNum">     590 </span><span class="lineNoCov">          0 :         switch (c) {</span></a>
+<a name="591"><span class="lineNum">     591 </span>            :         case 'l':</a>
+<a name="592"><span class="lineNum">     592 </span><span class="lineNoCov">          0 :             config.use_localtime = 1;</span></a>
+<a name="593"><span class="lineNum">     593 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="594"><span class="lineNum">     594 </span>            :         case 'L':</a>
+<a name="595"><span class="lineNum">     595 </span><span class="lineNoCov">          0 :             config.linkfile = opt_arg;</span></a>
+<a name="596"><span class="lineNum">     596 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="597"><span class="lineNum">     597 </span>            :         case 'p':</a>
+<a name="598"><span class="lineNum">     598 </span><span class="lineNoCov">          0 :             config.postrotate_prog = opt_arg;</span></a>
+<a name="599"><span class="lineNum">     599 </span>            : #ifdef SIGCHLD</a>
+<a name="600"><span class="lineNum">     600 </span>            :             /* Prevent creation of zombies (on modern Unix systems). */</a>
+<a name="601"><span class="lineNum">     601 </span><span class="lineNoCov">          0 :             apr_signal(SIGCHLD, SIG_IGN);</span></a>
+<a name="602"><span class="lineNum">     602 </span>            : #endif</a>
+<a name="603"><span class="lineNum">     603 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="604"><span class="lineNum">     604 </span>            :         case 'f':</a>
+<a name="605"><span class="lineNum">     605 </span><span class="lineNoCov">          0 :             config.force_open = 1;</span></a>
+<a name="606"><span class="lineNum">     606 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="607"><span class="lineNum">     607 </span>            :         case 'D':</a>
+<a name="608"><span class="lineNum">     608 </span><span class="lineNoCov">          0 :             config.create_path = 1;</span></a>
+<a name="609"><span class="lineNum">     609 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="610"><span class="lineNum">     610 </span>            :         case 't':</a>
+<a name="611"><span class="lineNum">     611 </span><span class="lineNoCov">          0 :             config.truncate = 1;</span></a>
+<a name="612"><span class="lineNum">     612 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="613"><span class="lineNum">     613 </span>            :         case 'v':</a>
+<a name="614"><span class="lineNum">     614 </span><span class="lineNoCov">          0 :             config.verbose = 1;</span></a>
+<a name="615"><span class="lineNum">     615 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="616"><span class="lineNum">     616 </span>            :         case 'e':</a>
+<a name="617"><span class="lineNum">     617 </span><span class="lineNoCov">          0 :             config.echo = 1;</span></a>
+<a name="618"><span class="lineNum">     618 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="619"><span class="lineNum">     619 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="620"><span class="lineNum">     620 </span>            :         case 'c':</a>
+<a name="621"><span class="lineNum">     621 </span><span class="lineNoCov">          0 :             config.create_empty = 1;</span></a>
+<a name="622"><span class="lineNum">     622 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="623"><span class="lineNum">     623 </span>            : #endif</a>
+<a name="624"><span class="lineNum">     624 </span>            :         case 'n':</a>
+<a name="625"><span class="lineNum">     625 </span><span class="lineNoCov">          0 :             config.num_files = atoi(opt_arg);</span></a>
+<a name="626"><span class="lineNum">     626 </span><span class="lineNoCov">          0 :             status.fileNum = -1;</span></a>
+<a name="627"><span class="lineNum">     627 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="628"><span class="lineNum">     628 </span>            :         }</a>
+<a name="629"><span class="lineNum">     629 </span>            :     }</a>
+<a name="630"><span class="lineNum">     630 </span>            : </a>
+<a name="631"><span class="lineNum">     631 </span><span class="lineNoCov">          0 :     if (rv != APR_EOF) {</span></a>
+<a name="632"><span class="lineNum">     632 </span><span class="lineNoCov">          0 :         usage(argv[0], NULL /* specific error message already issued */ );</span></a>
+<a name="633"><span class="lineNum">     633 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="634"><span class="lineNum">     634 </span>            : </a>
+<a name="635"><span class="lineNum">     635 </span>            :     /*</a>
+<a name="636"><span class="lineNum">     636 </span>            :      * After the initial flags we need 2 to 4 arguments,</a>
+<a name="637"><span class="lineNum">     637 </span>            :      * the file name, either the rotation interval time or size</a>
+<a name="638"><span class="lineNum">     638 </span>            :      * or both of them, and optionally the UTC offset.</a>
+<a name="639"><span class="lineNum">     639 </span>            :      */</a>
+<a name="640"><span class="lineNum">     640 </span><span class="lineNoCov">          0 :     if ((argc - opt-&gt;ind &lt; 2) || (argc - opt-&gt;ind &gt; 4) ) {</span></a>
+<a name="641"><span class="lineNum">     641 </span><span class="lineNoCov">          0 :         usage(argv[0], &quot;Incorrect number of arguments&quot;);</span></a>
+<a name="642"><span class="lineNum">     642 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="643"><span class="lineNum">     643 </span>            : </a>
+<a name="644"><span class="lineNum">     644 </span><span class="lineNoCov">          0 :     rv = apr_filepath_merge(&amp;config.szLogRoot, &quot;&quot;, argv[opt-&gt;ind++],</span></a>
+<a name="645"><span class="lineNum">     645 </span><span class="lineNoCov">          0 :                             APR_FILEPATH_TRUENAME, status.pool);</span></a>
+<a name="646"><span class="lineNum">     646 </span><span class="lineNoCov">          0 :     if (rv != APR_SUCCESS &amp;&amp; rv != APR_EPATHWILD) {</span></a>
+<a name="647"><span class="lineNum">     647 </span><span class="lineNoCov">          0 :         usage(argv[0], &quot;Invalid filename given&quot;);</span></a>
+<a name="648"><span class="lineNum">     648 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="649"><span class="lineNum">     649 </span>            : </a>
+<a name="650"><span class="lineNum">     650 </span>            :     /* Read in the remaining flags, namely time, size and UTC offset. */</a>
+<a name="651"><span class="lineNum">     651 </span><span class="lineNoCov">          0 :     for(; opt-&gt;ind &lt; argc; opt-&gt;ind++) {</span></a>
+<a name="652"><span class="lineNum">     652 </span><span class="lineNoCov">          0 :         if ((err = get_time_or_size(&amp;config, argv[opt-&gt;ind],</span></a>
+<a name="653"><span class="lineNum">     653 </span><span class="lineNoCov">          0 :                                     opt-&gt;ind &lt; argc - 1 ? 0 : 1)) != NULL) {</span></a>
+<a name="654"><span class="lineNum">     654 </span><span class="lineNoCov">          0 :             usage(argv[0], err);</span></a>
+<a name="655"><span class="lineNum">     655 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="656"><span class="lineNum">     656 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="657"><span class="lineNum">     657 </span>            : </a>
+<a name="658"><span class="lineNum">     658 </span><span class="lineNoCov">          0 :     config.use_strftime = (strchr(config.szLogRoot, '%') != NULL);</span></a>
+<a name="659"><span class="lineNum">     659 </span>            : </a>
+<a name="660"><span class="lineNum">     660 </span><span class="lineNoCov">          0 :     if (config.use_strftime &amp;&amp; config.num_files &gt; 0) { </span></a>
+<a name="661"><span class="lineNum">     661 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Cannot use -n with %% in filename\n&quot;);</span></a>
+<a name="662"><span class="lineNum">     662 </span><span class="lineNoCov">          0 :         exit(1);</span></a>
+<a name="663"><span class="lineNum">     663 </span>            :     }</a>
+<a name="664"><span class="lineNum">     664 </span>            : </a>
+<a name="665"><span class="lineNum">     665 </span><span class="lineNoCov">          0 :     if (status.fileNum == -1 &amp;&amp; config.num_files &lt; 1) { </span></a>
+<a name="666"><span class="lineNum">     666 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Invalid -n argument\n&quot;);</span></a>
+<a name="667"><span class="lineNum">     667 </span><span class="lineNoCov">          0 :         exit(1);</span></a>
+<a name="668"><span class="lineNum">     668 </span>            :     }</a>
+<a name="669"><span class="lineNum">     669 </span>            : </a>
+<a name="670"><span class="lineNum">     670 </span><span class="lineNoCov">          0 :     if (apr_file_open_stdin(&amp;f_stdin, status.pool) != APR_SUCCESS) {</span></a>
+<a name="671"><span class="lineNum">     671 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Unable to open stdin\n&quot;);</span></a>
+<a name="672"><span class="lineNum">     672 </span><span class="lineNoCov">          0 :         exit(1);</span></a>
+<a name="673"><span class="lineNum">     673 </span>            :     }</a>
+<a name="674"><span class="lineNum">     674 </span>            : </a>
+<a name="675"><span class="lineNum">     675 </span><span class="lineNoCov">          0 :     if (apr_file_open_stdout(&amp;f_stdout, status.pool) != APR_SUCCESS) {</span></a>
+<a name="676"><span class="lineNum">     676 </span><span class="lineNoCov">          0 :         fprintf(stderr, &quot;Unable to open stdout\n&quot;);</span></a>
+<a name="677"><span class="lineNum">     677 </span><span class="lineNoCov">          0 :         exit(1);</span></a>
+<a name="678"><span class="lineNum">     678 </span>            :     }</a>
+<a name="679"><span class="lineNum">     679 </span>            : </a>
+<a name="680"><span class="lineNum">     680 </span>            :     /*</a>
+<a name="681"><span class="lineNum">     681 </span>            :      * Write out result of config parsing if verbose is set.</a>
+<a name="682"><span class="lineNum">     682 </span>            :      */</a>
+<a name="683"><span class="lineNum">     683 </span><span class="lineNoCov">          0 :     if (config.verbose) {</span></a>
+<a name="684"><span class="lineNum">     684 </span><span class="lineNoCov">          0 :         dumpConfig(&amp;config);</span></a>
+<a name="685"><span class="lineNum">     685 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="686"><span class="lineNum">     686 </span>            : </a>
+<a name="687"><span class="lineNum">     687 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="688"><span class="lineNum">     688 </span><span class="lineNoCov">          0 :     if (config.create_empty &amp;&amp; config.tRotation) {</span></a>
+<a name="689"><span class="lineNum">     689 </span><span class="lineNoCov">          0 :         pollfd.p = status.pool;</span></a>
+<a name="690"><span class="lineNum">     690 </span><span class="lineNoCov">          0 :         pollfd.desc_type = APR_POLL_FILE;</span></a>
+<a name="691"><span class="lineNum">     691 </span><span class="lineNoCov">          0 :         pollfd.reqevents = APR_POLLIN;</span></a>
+<a name="692"><span class="lineNum">     692 </span><span class="lineNoCov">          0 :         pollfd.desc.f = f_stdin;</span></a>
+<a name="693"><span class="lineNum">     693 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="694"><span class="lineNum">     694 </span>            : #endif</a>
+<a name="695"><span class="lineNum">     695 </span>            : </a>
+<a name="696"><span class="lineNum">     696 </span>            :     /*</a>
+<a name="697"><span class="lineNum">     697 </span>            :      * Immediately open the logfile as we start, if we were forced</a>
+<a name="698"><span class="lineNum">     698 </span>            :      * to do so via '-f'.</a>
+<a name="699"><span class="lineNum">     699 </span>            :      */</a>
+<a name="700"><span class="lineNum">     700 </span><span class="lineNoCov">          0 :     if (config.force_open) {</span></a>
+<a name="701"><span class="lineNum">     701 </span><span class="lineNoCov">          0 :         doRotate(&amp;config, &amp;status);</span></a>
+<a name="702"><span class="lineNum">     702 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="703"><span class="lineNum">     703 </span>            : </a>
+<a name="704"><span class="lineNum">     704 </span><span class="lineNoCov">          0 :     for (;;) {</span></a>
+<a name="705"><span class="lineNum">     705 </span><span class="lineNoCov">          0 :         nRead = sizeof(buf);</span></a>
+<a name="706"><span class="lineNum">     706 </span>            : #if APR_FILES_AS_SOCKETS</a>
+<a name="707"><span class="lineNum">     707 </span><span class="lineNoCov">          0 :         if (config.create_empty &amp;&amp; config.tRotation) {</span></a>
+<a name="708"><span class="lineNum">     708 </span><span class="lineNoCov">          0 :             polltimeout = status.tLogEnd ? status.tLogEnd - get_now(&amp;config, NULL) : config.tRotation;</span></a>
+<a name="709"><span class="lineNum">     709 </span><span class="lineNoCov">          0 :             if (polltimeout &lt;= 0) {</span></a>
+<a name="710"><span class="lineNum">     710 </span><span class="lineNoCov">          0 :                 pollret = APR_TIMEUP;</span></a>
+<a name="711"><span class="lineNum">     711 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="712"><span class="lineNum">     712 </span>            :             else {</a>
+<a name="713"><span class="lineNum">     713 </span><span class="lineNoCov">          0 :                 pollret = apr_poll(&amp;pollfd, 1, &amp;pollret, apr_time_from_sec(polltimeout));</span></a>
+<a name="714"><span class="lineNum">     714 </span>            :             }</a>
+<a name="715"><span class="lineNum">     715 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="716"><span class="lineNum">     716 </span><span class="lineNoCov">          0 :         if (pollret == APR_SUCCESS) {</span></a>
+<a name="717"><span class="lineNum">     717 </span><span class="lineNoCov">          0 :             rv = apr_file_read(f_stdin, buf, &amp;nRead);</span></a>
+<a name="718"><span class="lineNum">     718 </span><span class="lineNoCov">          0 :             if (APR_STATUS_IS_EOF(rv)) {</span></a>
+<a name="719"><span class="lineNum">     719 </span><span class="lineNoCov">          0 :                 break;</span></a>
+<a name="720"><span class="lineNum">     720 </span>            :             }</a>
+<a name="721"><span class="lineNum">     721 </span><span class="lineNoCov">          0 :             else if (rv != APR_SUCCESS) {</span></a>
+<a name="722"><span class="lineNum">     722 </span><span class="lineNoCov">          0 :                 exit(3);</span></a>
+<a name="723"><span class="lineNum">     723 </span>            :             }</a>
+<a name="724"><span class="lineNum">     724 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="725"><span class="lineNum">     725 </span><span class="lineNoCov">          0 :         else if (pollret == APR_TIMEUP) {</span></a>
+<a name="726"><span class="lineNum">     726 </span><span class="lineNoCov">          0 :             *buf = 0;</span></a>
+<a name="727"><span class="lineNum">     727 </span><span class="lineNoCov">          0 :             nRead = 0;</span></a>
+<a name="728"><span class="lineNum">     728 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="729"><span class="lineNum">     729 </span>            :         else {</a>
+<a name="730"><span class="lineNum">     730 </span><span class="lineNoCov">          0 :             fprintf(stderr, &quot;Unable to poll stdin\n&quot;);</span></a>
+<a name="731"><span class="lineNum">     731 </span><span class="lineNoCov">          0 :             exit(5);</span></a>
+<a name="732"><span class="lineNum">     732 </span>            :         }</a>
+<a name="733"><span class="lineNum">     733 </span>            : #else /* APR_FILES_AS_SOCKETS */</a>
+<a name="734"><span class="lineNum">     734 </span>            :         rv = apr_file_read(f_stdin, buf, &amp;nRead);</a>
+<a name="735"><span class="lineNum">     735 </span>            :         if (APR_STATUS_IS_EOF(rv)) {</a>
+<a name="736"><span class="lineNum">     736 </span>            :             break;</a>
+<a name="737"><span class="lineNum">     737 </span>            :         }</a>
+<a name="738"><span class="lineNum">     738 </span>            :         else if (rv != APR_SUCCESS) {</a>
+<a name="739"><span class="lineNum">     739 </span>            :             exit(3);</a>
+<a name="740"><span class="lineNum">     740 </span>            :         }</a>
+<a name="741"><span class="lineNum">     741 </span>            : #endif /* APR_FILES_AS_SOCKETS */</a>
+<a name="742"><span class="lineNum">     742 </span><span class="lineNoCov">          0 :         checkRotate(&amp;config, &amp;status);</span></a>
+<a name="743"><span class="lineNum">     743 </span><span class="lineNoCov">          0 :         if (status.rotateReason != ROTATE_NONE) {</span></a>
+<a name="744"><span class="lineNum">     744 </span><span class="lineNoCov">          0 :             doRotate(&amp;config, &amp;status);</span></a>
+<a name="745"><span class="lineNum">     745 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="746"><span class="lineNum">     746 </span>            : </a>
+<a name="747"><span class="lineNum">     747 </span><span class="lineNoCov">          0 :         nWrite = nRead;</span></a>
+<a name="748"><span class="lineNum">     748 </span><span class="lineNoCov">          0 :         rv = apr_file_write_full(status.current.fd, buf, nWrite, &amp;nWrite);</span></a>
+<a name="749"><span class="lineNum">     749 </span><span class="lineNoCov">          0 :         if (nWrite != nRead) {</span></a>
+<a name="750"><span class="lineNum">     750 </span>            :             apr_off_t cur_offset;</a>
+<a name="751"><span class="lineNum">     751 </span>            :             apr_pool_t *pool;</a>
+<a name="752"><span class="lineNum">     752 </span>            :             char *error;</a>
+<a name="753"><span class="lineNum">     753 </span>            : </a>
+<a name="754"><span class="lineNum">     754 </span><span class="lineNoCov">          0 :             cur_offset = 0;</span></a>
+<a name="755"><span class="lineNum">     755 </span><span class="lineNoCov">          0 :             if (apr_file_seek(status.current.fd, APR_CUR, &amp;cur_offset) != APR_SUCCESS) {</span></a>
+<a name="756"><span class="lineNum">     756 </span><span class="lineNoCov">          0 :                 cur_offset = -1;</span></a>
+<a name="757"><span class="lineNum">     757 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="758"><span class="lineNum">     758 </span><span class="lineNoCov">          0 :             status.nMessCount++;</span></a>
+<a name="759"><span class="lineNum">     759 </span><span class="lineNoCov">          0 :             apr_pool_create(&amp;pool, status.pool);</span></a>
+<a name="760"><span class="lineNum">     760 </span><span class="lineNoCov">          0 :             error = apr_psprintf(pool, &quot;Error %d writing to log file at offset %&quot;</span></a>
+<a name="761"><span class="lineNum">     761 </span>            :                                  APR_OFF_T_FMT &quot;. %10d messages lost (%pm)\n&quot;,</a>
+<a name="762"><span class="lineNum">     762 </span><span class="lineNoCov">          0 :                                  rv, cur_offset, status.nMessCount, &amp;rv);</span></a>
+<a name="763"><span class="lineNum">     763 </span>            : </a>
+<a name="764"><span class="lineNum">     764 </span><span class="lineNoCov">          0 :             truncate_and_write_error(&amp;status, error);</span></a>
+<a name="765"><span class="lineNum">     765 </span><span class="lineNoCov">          0 :             apr_pool_destroy(pool);</span></a>
+<a name="766"><span class="lineNum">     766 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="767"><span class="lineNum">     767 </span>            :         else {</a>
+<a name="768"><span class="lineNum">     768 </span><span class="lineNoCov">          0 :             status.nMessCount++;</span></a>
+<a name="769"><span class="lineNum">     769 </span>            :         }</a>
+<a name="770"><span class="lineNum">     770 </span><span class="lineNoCov">          0 :         if (config.echo) {</span></a>
+<a name="771"><span class="lineNum">     771 </span><span class="lineNoCov">          0 :             if (apr_file_write_full(f_stdout, buf, nRead, NULL)) {</span></a>
+<a name="772"><span class="lineNum">     772 </span><span class="lineNoCov">          0 :                 fprintf(stderr, &quot;Unable to write to stdout\n&quot;);</span></a>
+<a name="773"><span class="lineNum">     773 </span><span class="lineNoCov">          0 :                 exit(4);</span></a>
+<a name="774"><span class="lineNum">     774 </span>            :             }</a>
+<a name="775"><span class="lineNum">     775 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="776"><span class="lineNum">     776 </span>            :     }</a>
+<a name="777"><span class="lineNum">     777 </span>            : </a>
+<a name="778"><span class="lineNum">     778 </span><span class="lineNoCov">          0 :     return 0; /* reached only at stdin EOF. */</span></a>
+<a name="779"><span class="lineNum">     779 </span>            : }</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

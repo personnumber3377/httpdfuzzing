@@ -1,0 +1,1052 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - poor_coverage.lcov_info_final - srclib/apr/xml/apr_xml.c</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">srclib/apr/xml</a> - apr_xml.c<span style="font-size: 80%;"> (source / <a href="apr_xml.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">poor_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">438</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 17:33:32</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">20</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : #include &quot;apr.h&quot;</a>
+<a name="18"><span class="lineNum">      18 </span>            : #include &quot;apr_private.h&quot;</a>
+<a name="19"><span class="lineNum">      19 </span>            : #include &quot;apr_strings.h&quot;</a>
+<a name="20"><span class="lineNum">      20 </span>            : </a>
+<a name="21"><span class="lineNum">      21 </span>            : #define APR_WANT_STDIO          /* for sprintf() */</a>
+<a name="22"><span class="lineNum">      22 </span>            : #define APR_WANT_STRFUNC</a>
+<a name="23"><span class="lineNum">      23 </span>            : #include &quot;apr_want.h&quot;</a>
+<a name="24"><span class="lineNum">      24 </span>            : </a>
+<a name="25"><span class="lineNum">      25 </span>            : #include &quot;apr_xml.h&quot;</a>
+<a name="26"><span class="lineNum">      26 </span>            : typedef void* XML_Parser;</a>
+<a name="27"><span class="lineNum">      27 </span>            : typedef int XML_Error;</a>
+<a name="28"><span class="lineNum">      28 </span>            : typedef unsigned char XML_Char;</a>
+<a name="29"><span class="lineNum">      29 </span>            : #include &quot;apr_xml_internal.h&quot;</a>
+<a name="30"><span class="lineNum">      30 </span>            : </a>
+<a name="31"><span class="lineNum">      31 </span>            : #define DEBUG_CR &quot;\r\n&quot;</a>
+<a name="32"><span class="lineNum">      32 </span>            : </a>
+<a name="33"><span class="lineNum">      33 </span>            : static const char APR_KW_xmlns[] = { 0x78, 0x6D, 0x6C, 0x6E, 0x73, '\0' };</a>
+<a name="34"><span class="lineNum">      34 </span>            : static const char APR_KW_xmlns_lang[] = { 0x78, 0x6D, 0x6C, 0x3A, 0x6C, 0x61, 0x6E, 0x67, '\0' };</a>
+<a name="35"><span class="lineNum">      35 </span>            : </a>
+<a name="36"><span class="lineNum">      36 </span>            : /* errors related to namespace processing */</a>
+<a name="37"><span class="lineNum">      37 </span>            : #define APR_XML_NS_ERROR_UNKNOWN_PREFIX (-1000)</a>
+<a name="38"><span class="lineNum">      38 </span>            : #define APR_XML_NS_ERROR_INVALID_DECL (-1001)</a>
+<a name="39"><span class="lineNum">      39 </span>            : </a>
+<a name="40"><span class="lineNum">      40 </span>            : /* test for a namespace prefix that begins with [Xx][Mm][Ll] */</a>
+<a name="41"><span class="lineNum">      41 </span>            : #define APR_XML_NS_IS_RESERVED(name) \</a>
+<a name="42"><span class="lineNum">      42 </span>            :         ( (name[0] == 0x58 || name[0] == 0x78) &amp;&amp; \</a>
+<a name="43"><span class="lineNum">      43 </span>            :           (name[1] == 0x4D || name[1] == 0x6D) &amp;&amp; \</a>
+<a name="44"><span class="lineNum">      44 </span>            :           (name[2] == 0x4C || name[2] == 0x6C) )</a>
+<a name="45"><span class="lineNum">      45 </span>            : </a>
+<a name="46"><span class="lineNum">      46 </span>            : </a>
+<a name="47"><span class="lineNum">      47 </span>            : /* struct for scoping namespace declarations */</a>
+<a name="48"><span class="lineNum">      48 </span>            : typedef struct apr_xml_ns_scope {</a>
+<a name="49"><span class="lineNum">      49 </span>            :     const char *prefix;         /* prefix used for this ns */</a>
+<a name="50"><span class="lineNum">      50 </span>            :     int ns;                     /* index into namespace table */</a>
+<a name="51"><span class="lineNum">      51 </span>            :     int emptyURI;               /* the namespace URI is the empty string */</a>
+<a name="52"><span class="lineNum">      52 </span>            :     struct apr_xml_ns_scope *next;      /* next scoped namespace */</a>
+<a name="53"><span class="lineNum">      53 </span>            : } apr_xml_ns_scope;</a>
+<a name="54"><span class="lineNum">      54 </span>            : </a>
+<a name="55"><span class="lineNum">      55 </span>            : </a>
+<a name="56"><span class="lineNum">      56 </span>            : /* return namespace table index for a given prefix */</a>
+<a name="57"><span class="lineNum">      57 </span><span class="lineNoCov">          0 : static int find_prefix(apr_xml_parser *parser, const char *prefix)</span></a>
+<a name="58"><span class="lineNum">      58 </span>            : {</a>
+<a name="59"><span class="lineNum">      59 </span><span class="lineNoCov">          0 :     apr_xml_elem *elem = parser-&gt;cur_elem;</span></a>
+<a name="60"><span class="lineNum">      60 </span>            : </a>
+<a name="61"><span class="lineNum">      61 </span>            :     /*</a>
+<a name="62"><span class="lineNum">      62 </span>            :     ** Walk up the tree, looking for a namespace scope that defines this</a>
+<a name="63"><span class="lineNum">      63 </span>            :     ** prefix.</a>
+<a name="64"><span class="lineNum">      64 </span>            :     */</a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineNoCov">          0 :     for (; elem; elem = elem-&gt;parent) {</span></a>
+<a name="66"><span class="lineNum">      66 </span>            :         apr_xml_ns_scope *ns_scope;</a>
+<a name="67"><span class="lineNum">      67 </span>            : </a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineNoCov">          0 :         for (ns_scope = elem-&gt;ns_scope; ns_scope; ns_scope = ns_scope-&gt;next) {</span></a>
+<a name="69"><span class="lineNum">      69 </span><span class="lineNoCov">          0 :             if (strcmp(prefix, ns_scope-&gt;prefix) == 0) {</span></a>
+<a name="70"><span class="lineNum">      70 </span><span class="lineNoCov">          0 :                 if (ns_scope-&gt;emptyURI) {</span></a>
+<a name="71"><span class="lineNum">      71 </span>            :                     /*</a>
+<a name="72"><span class="lineNum">      72 </span>            :                     ** It is possible to set the default namespace to an</a>
+<a name="73"><span class="lineNum">      73 </span>            :                     ** empty URI string; this resets the default namespace</a>
+<a name="74"><span class="lineNum">      74 </span>            :                     ** to mean &quot;no namespace.&quot; We just found the prefix</a>
+<a name="75"><span class="lineNum">      75 </span>            :                     ** refers to an empty URI, so return &quot;no namespace.&quot;</a>
+<a name="76"><span class="lineNum">      76 </span>            :                     */</a>
+<a name="77"><span class="lineNum">      77 </span><span class="lineNoCov">          0 :                     return APR_XML_NS_NONE;</span></a>
+<a name="78"><span class="lineNum">      78 </span>            :                 }</a>
+<a name="79"><span class="lineNum">      79 </span>            : </a>
+<a name="80"><span class="lineNum">      80 </span><span class="lineNoCov">          0 :                 return ns_scope-&gt;ns;</span></a>
+<a name="81"><span class="lineNum">      81 </span>            :             }</a>
+<a name="82"><span class="lineNum">      82 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="83"><span class="lineNum">      83 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="84"><span class="lineNum">      84 </span>            : </a>
+<a name="85"><span class="lineNum">      85 </span>            :     /*</a>
+<a name="86"><span class="lineNum">      86 </span>            :      * If the prefix is empty (&quot;&quot;), this means that a prefix was not</a>
+<a name="87"><span class="lineNum">      87 </span>            :      * specified in the element/attribute. The search that was performed</a>
+<a name="88"><span class="lineNum">      88 </span>            :      * just above did not locate a default namespace URI (which is stored</a>
+<a name="89"><span class="lineNum">      89 </span>            :      * into ns_scope with an empty prefix). This means the element/attribute</a>
+<a name="90"><span class="lineNum">      90 </span>            :      * has &quot;no namespace&quot;. We have a reserved value for this.</a>
+<a name="91"><span class="lineNum">      91 </span>            :      */</a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineNoCov">          0 :     if (*prefix == '\0') {</span></a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineNoCov">          0 :         return APR_XML_NS_NONE;</span></a>
+<a name="94"><span class="lineNum">      94 </span>            :     }</a>
+<a name="95"><span class="lineNum">      95 </span>            : </a>
+<a name="96"><span class="lineNum">      96 </span>            :     /* not found */</a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :     return APR_XML_NS_ERROR_UNKNOWN_PREFIX;</span></a>
+<a name="98"><span class="lineNum">      98 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="99"><span class="lineNum">      99 </span>            : </a>
+<a name="100"><span class="lineNum">     100 </span>            : /* return original prefix given ns index */</a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineNoCov">          0 : static const char * find_prefix_name(const apr_xml_elem *elem, int ns, int parent)</span></a>
+<a name="102"><span class="lineNum">     102 </span>            : {</a>
+<a name="103"><span class="lineNum">     103 </span>            :     /*</a>
+<a name="104"><span class="lineNum">     104 </span>            :     ** Walk up the tree, looking for a namespace scope that defines this</a>
+<a name="105"><span class="lineNum">     105 </span>            :     ** prefix.</a>
+<a name="106"><span class="lineNum">     106 </span>            :     */</a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :     for (; elem; elem = parent ? elem-&gt;parent : NULL) {</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :        apr_xml_ns_scope *ns_scope = elem-&gt;ns_scope;</span></a>
+<a name="109"><span class="lineNum">     109 </span>            : </a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :        for (; ns_scope; ns_scope = ns_scope-&gt;next) {</span></a>
+<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 :            if (ns_scope-&gt;ns == ns)</span></a>
+<a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :                return ns_scope-&gt;prefix;</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :        }</span></a>
+<a name="114"><span class="lineNum">     114 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="115"><span class="lineNum">     115 </span>            :     /* not found */</a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 :     return &quot;&quot;;</span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="118"><span class="lineNum">     118 </span>            : </a>
+<a name="119"><span class="lineNum">     119 </span><span class="lineNoCov">          0 : static void start_handler(void *userdata, const char *name, const char **attrs)</span></a>
+<a name="120"><span class="lineNum">     120 </span>            : {</a>
+<a name="121"><span class="lineNum">     121 </span><span class="lineNoCov">          0 :     apr_xml_parser *parser = userdata;</span></a>
+<a name="122"><span class="lineNum">     122 </span>            :     apr_xml_elem *elem;</a>
+<a name="123"><span class="lineNum">     123 </span>            :     apr_xml_attr *attr;</a>
+<a name="124"><span class="lineNum">     124 </span>            :     apr_xml_attr *prev;</a>
+<a name="125"><span class="lineNum">     125 </span>            :     char *colon;</a>
+<a name="126"><span class="lineNum">     126 </span>            :     const char *quoted;</a>
+<a name="127"><span class="lineNum">     127 </span>            :     char *elem_name;</a>
+<a name="128"><span class="lineNum">     128 </span>            : </a>
+<a name="129"><span class="lineNum">     129 </span>            :     /* punt once we find an error */</a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :     if (parser-&gt;error)</span></a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="132"><span class="lineNum">     132 </span>            : </a>
+<a name="133"><span class="lineNum">     133 </span><span class="lineNoCov">          0 :     elem = apr_pcalloc(parser-&gt;p, sizeof(*elem));</span></a>
+<a name="134"><span class="lineNum">     134 </span>            : </a>
+<a name="135"><span class="lineNum">     135 </span>            :     /* prep the element */</a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineNoCov">          0 :     elem-&gt;name = elem_name = apr_pstrdup(parser-&gt;p, name);</span></a>
+<a name="137"><span class="lineNum">     137 </span>            : </a>
+<a name="138"><span class="lineNum">     138 </span>            :     /* fill in the attributes (note: ends up in reverse order) */</a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 :     while (attrs &amp;&amp; *attrs) {</span></a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :         attr = apr_palloc(parser-&gt;p, sizeof(*attr));</span></a>
+<a name="141"><span class="lineNum">     141 </span><span class="lineNoCov">          0 :         attr-&gt;name = apr_pstrdup(parser-&gt;p, *attrs++);</span></a>
+<a name="142"><span class="lineNum">     142 </span><span class="lineNoCov">          0 :         attr-&gt;value = apr_pstrdup(parser-&gt;p, *attrs++);</span></a>
+<a name="143"><span class="lineNum">     143 </span><span class="lineNoCov">          0 :         attr-&gt;next = elem-&gt;attr;</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :         elem-&gt;attr = attr;</span></a>
+<a name="145"><span class="lineNum">     145 </span>            :     }</a>
+<a name="146"><span class="lineNum">     146 </span>            : </a>
+<a name="147"><span class="lineNum">     147 </span>            :     /* hook the element into the tree */</a>
+<a name="148"><span class="lineNum">     148 </span><span class="lineNoCov">          0 :     if (parser-&gt;cur_elem == NULL) {</span></a>
+<a name="149"><span class="lineNum">     149 </span>            :         /* no current element; this also becomes the root */</a>
+<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :         parser-&gt;cur_elem = parser-&gt;doc-&gt;root = elem;</span></a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="152"><span class="lineNum">     152 </span>            :     else {</a>
+<a name="153"><span class="lineNum">     153 </span>            :         /* this element appeared within the current elem */</a>
+<a name="154"><span class="lineNum">     154 </span><span class="lineNoCov">          0 :         elem-&gt;parent = parser-&gt;cur_elem;</span></a>
+<a name="155"><span class="lineNum">     155 </span>            : </a>
+<a name="156"><span class="lineNum">     156 </span>            :         /* set up the child/sibling links */</a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :         if (elem-&gt;parent-&gt;last_child == NULL) {</span></a>
+<a name="158"><span class="lineNum">     158 </span>            :             /* no first child either */</a>
+<a name="159"><span class="lineNum">     159 </span><span class="lineNoCov">          0 :             elem-&gt;parent-&gt;first_child = elem-&gt;parent-&gt;last_child = elem;</span></a>
+<a name="160"><span class="lineNum">     160 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="161"><span class="lineNum">     161 </span>            :         else {</a>
+<a name="162"><span class="lineNum">     162 </span>            :             /* hook onto the end of the parent's children */</a>
+<a name="163"><span class="lineNum">     163 </span><span class="lineNoCov">          0 :             elem-&gt;parent-&gt;last_child-&gt;next = elem;</span></a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 :             elem-&gt;parent-&gt;last_child = elem;</span></a>
+<a name="165"><span class="lineNum">     165 </span>            :         }</a>
+<a name="166"><span class="lineNum">     166 </span>            : </a>
+<a name="167"><span class="lineNum">     167 </span>            :         /* this element is now the current element */</a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :         parser-&gt;cur_elem = elem;</span></a>
+<a name="169"><span class="lineNum">     169 </span>            :     }</a>
+<a name="170"><span class="lineNum">     170 </span>            : </a>
+<a name="171"><span class="lineNum">     171 </span>            :     /* scan the attributes for namespace declarations */</a>
+<a name="172"><span class="lineNum">     172 </span><span class="lineNoCov">          0 :     for (prev = NULL, attr = elem-&gt;attr;</span></a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 :          attr;</span></a>
+<a name="174"><span class="lineNum">     174 </span><span class="lineNoCov">          0 :          attr = attr-&gt;next) {</span></a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :         if (strncmp(attr-&gt;name, APR_KW_xmlns, 5) == 0) {</span></a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :             const char *prefix = &amp;attr-&gt;name[5];</span></a>
+<a name="177"><span class="lineNum">     177 </span>            :             apr_xml_ns_scope *ns_scope;</a>
+<a name="178"><span class="lineNum">     178 </span>            : </a>
+<a name="179"><span class="lineNum">     179 </span>            :             /* test for xmlns:foo= form and xmlns= form */</a>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :             if (*prefix == 0x3A) {</span></a>
+<a name="181"><span class="lineNum">     181 </span>            :                 /* a namespace prefix declaration must have a</a>
+<a name="182"><span class="lineNum">     182 </span>            :                    non-empty value. */</a>
+<a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 :                 if (attr-&gt;value[0] == '\0') {</span></a>
+<a name="184"><span class="lineNum">     184 </span><span class="lineNoCov">          0 :                     parser-&gt;error = APR_XML_NS_ERROR_INVALID_DECL;</span></a>
+<a name="185"><span class="lineNum">     185 </span><span class="lineNoCov">          0 :                     return;</span></a>
+<a name="186"><span class="lineNum">     186 </span>            :                 }</a>
+<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :                 ++prefix;</span></a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :             else if (*prefix != '\0') {</span></a>
+<a name="190"><span class="lineNum">     190 </span>            :                 /* advance &quot;prev&quot; since &quot;attr&quot; is still present */</a>
+<a name="191"><span class="lineNum">     191 </span><span class="lineNoCov">          0 :                 prev = attr;</span></a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :                 continue;</span></a>
+<a name="193"><span class="lineNum">     193 </span>            :             }</a>
+<a name="194"><span class="lineNum">     194 </span>            : </a>
+<a name="195"><span class="lineNum">     195 </span>            :             /* quote the URI before we ever start working with it */</a>
+<a name="196"><span class="lineNum">     196 </span><span class="lineNoCov">          0 :             quoted = apr_xml_quote_string(parser-&gt;p, attr-&gt;value, 1);</span></a>
+<a name="197"><span class="lineNum">     197 </span>            : </a>
+<a name="198"><span class="lineNum">     198 </span>            :             /* build and insert the new scope */</a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineNoCov">          0 :             ns_scope = apr_pcalloc(parser-&gt;p, sizeof(*ns_scope));</span></a>
+<a name="200"><span class="lineNum">     200 </span><span class="lineNoCov">          0 :             ns_scope-&gt;prefix = prefix;</span></a>
+<a name="201"><span class="lineNum">     201 </span><span class="lineNoCov">          0 :             ns_scope-&gt;ns = apr_xml_insert_uri(parser-&gt;doc-&gt;namespaces, quoted);</span></a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineNoCov">          0 :             ns_scope-&gt;emptyURI = *quoted == '\0';</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :             ns_scope-&gt;next = elem-&gt;ns_scope;</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineNoCov">          0 :             elem-&gt;ns_scope = ns_scope;</span></a>
+<a name="205"><span class="lineNum">     205 </span>            : </a>
+<a name="206"><span class="lineNum">     206 </span>            :             /* remove this attribute from the element */</a>
+<a name="207"><span class="lineNum">     207 </span><span class="lineNoCov">          0 :             if (prev == NULL)</span></a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :                 elem-&gt;attr = attr-&gt;next;</span></a>
+<a name="209"><span class="lineNum">     209 </span>            :             else</a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :                 prev-&gt;next = attr-&gt;next;</span></a>
+<a name="211"><span class="lineNum">     211 </span>            : </a>
+<a name="212"><span class="lineNum">     212 </span>            :             /* Note: prev will not be advanced since we just removed &quot;attr&quot; */</a>
+<a name="213"><span class="lineNum">     213 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :         else if (strcmp(attr-&gt;name, APR_KW_xmlns_lang) == 0) {</span></a>
+<a name="215"><span class="lineNum">     215 </span>            :             /* save away the language (in quoted form) */</a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineNoCov">          0 :             elem-&gt;lang = apr_xml_quote_string(parser-&gt;p, attr-&gt;value, 1);</span></a>
+<a name="217"><span class="lineNum">     217 </span>            : </a>
+<a name="218"><span class="lineNum">     218 </span>            :             /* remove this attribute from the element */</a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineNoCov">          0 :             if (prev == NULL)</span></a>
+<a name="220"><span class="lineNum">     220 </span><span class="lineNoCov">          0 :                 elem-&gt;attr = attr-&gt;next;</span></a>
+<a name="221"><span class="lineNum">     221 </span>            :             else</a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 :                 prev-&gt;next = attr-&gt;next;</span></a>
+<a name="223"><span class="lineNum">     223 </span>            : </a>
+<a name="224"><span class="lineNum">     224 </span>            :             /* Note: prev will not be advanced since we just removed &quot;attr&quot; */</a>
+<a name="225"><span class="lineNum">     225 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="226"><span class="lineNum">     226 </span>            :         else {</a>
+<a name="227"><span class="lineNum">     227 </span>            :             /* advance &quot;prev&quot; since &quot;attr&quot; is still present */</a>
+<a name="228"><span class="lineNum">     228 </span><span class="lineNoCov">          0 :             prev = attr;</span></a>
+<a name="229"><span class="lineNum">     229 </span>            :         }</a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="231"><span class="lineNum">     231 </span>            : </a>
+<a name="232"><span class="lineNum">     232 </span>            :     /*</a>
+<a name="233"><span class="lineNum">     233 </span>            :     ** If an xml:lang attribute didn't exist (lang==NULL), then copy the</a>
+<a name="234"><span class="lineNum">     234 </span>            :     ** language from the parent element (if present).</a>
+<a name="235"><span class="lineNum">     235 </span>            :     **</a>
+<a name="236"><span class="lineNum">     236 </span>            :     ** NOTE: elem_size() *depends* upon this pointer equality.</a>
+<a name="237"><span class="lineNum">     237 </span>            :     */</a>
+<a name="238"><span class="lineNum">     238 </span><span class="lineNoCov">          0 :     if (elem-&gt;lang == NULL &amp;&amp; elem-&gt;parent != NULL)</span></a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineNoCov">          0 :         elem-&gt;lang = elem-&gt;parent-&gt;lang;</span></a>
+<a name="240"><span class="lineNum">     240 </span>            : </a>
+<a name="241"><span class="lineNum">     241 </span>            :     /* adjust the element's namespace */</a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineNoCov">          0 :     colon = strchr(elem_name, 0x3A);</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineNoCov">          0 :     if (colon == NULL) {</span></a>
+<a name="244"><span class="lineNum">     244 </span>            :         /*</a>
+<a name="245"><span class="lineNum">     245 </span>            :          * The element is using the default namespace, which will always</a>
+<a name="246"><span class="lineNum">     246 </span>            :          * be found. Either it will be &quot;no namespace&quot;, or a default</a>
+<a name="247"><span class="lineNum">     247 </span>            :          * namespace URI has been specified at some point.</a>
+<a name="248"><span class="lineNum">     248 </span>            :          */</a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineNoCov">          0 :         elem-&gt;ns = find_prefix(parser, &quot;&quot;);</span></a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :     else if (APR_XML_NS_IS_RESERVED(elem-&gt;name)) {</span></a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :         elem-&gt;ns = APR_XML_NS_NONE;</span></a>
+<a name="253"><span class="lineNum">     253 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="254"><span class="lineNum">     254 </span>            :     else {</a>
+<a name="255"><span class="lineNum">     255 </span><span class="lineNoCov">          0 :         *colon = '\0';</span></a>
+<a name="256"><span class="lineNum">     256 </span><span class="lineNoCov">          0 :         elem-&gt;ns = find_prefix(parser, elem-&gt;name);</span></a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineNoCov">          0 :         elem-&gt;name = colon + 1;</span></a>
+<a name="258"><span class="lineNum">     258 </span>            : </a>
+<a name="259"><span class="lineNum">     259 </span><span class="lineNoCov">          0 :         if (APR_XML_NS_IS_ERROR(elem-&gt;ns)) {</span></a>
+<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :             parser-&gt;error = elem-&gt;ns;</span></a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineNoCov">          0 :             return;</span></a>
+<a name="262"><span class="lineNum">     262 </span>            :         }</a>
+<a name="263"><span class="lineNum">     263 </span>            :     }</a>
+<a name="264"><span class="lineNum">     264 </span>            : </a>
+<a name="265"><span class="lineNum">     265 </span>            :     /* adjust all remaining attributes' namespaces */</a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :     for (attr = elem-&gt;attr; attr; attr = attr-&gt;next) {</span></a>
+<a name="267"><span class="lineNum">     267 </span>            :         /*</a>
+<a name="268"><span class="lineNum">     268 </span>            :          * apr_xml_attr defines this as &quot;const&quot; but we dup'd it, so we</a>
+<a name="269"><span class="lineNum">     269 </span>            :          * know that we can change it. a bit hacky, but the existing</a>
+<a name="270"><span class="lineNum">     270 </span>            :          * structure def is best.</a>
+<a name="271"><span class="lineNum">     271 </span>            :          */</a>
+<a name="272"><span class="lineNum">     272 </span><span class="lineNoCov">          0 :         char *attr_name = (char *)attr-&gt;name;</span></a>
+<a name="273"><span class="lineNum">     273 </span>            : </a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineNoCov">          0 :         colon = strchr(attr_name, 0x3A);</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :         if (colon == NULL) {</span></a>
+<a name="276"><span class="lineNum">     276 </span>            :             /*</a>
+<a name="277"><span class="lineNum">     277 </span>            :              * Attributes do NOT use the default namespace. Therefore,</a>
+<a name="278"><span class="lineNum">     278 </span>            :              * we place them into the &quot;no namespace&quot; category.</a>
+<a name="279"><span class="lineNum">     279 </span>            :              */</a>
+<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :             attr-&gt;ns = APR_XML_NS_NONE;</span></a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineNoCov">          0 :         else if (APR_XML_NS_IS_RESERVED(attr-&gt;name)) {</span></a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 :             attr-&gt;ns = APR_XML_NS_NONE;</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="285"><span class="lineNum">     285 </span>            :         else {</a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :             *colon = '\0';</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :             attr-&gt;ns = find_prefix(parser, attr-&gt;name);</span></a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :             attr-&gt;name = colon + 1;</span></a>
+<a name="289"><span class="lineNum">     289 </span>            : </a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :             if (APR_XML_NS_IS_ERROR(attr-&gt;ns)) {</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 parser-&gt;error = attr-&gt;ns;</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :                 return;</span></a>
+<a name="293"><span class="lineNum">     293 </span>            :             }</a>
+<a name="294"><span class="lineNum">     294 </span>            :         }</a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="297"><span class="lineNum">     297 </span>            : </a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineNoCov">          0 : static void end_handler(void *userdata, const char *name)</span></a>
+<a name="299"><span class="lineNum">     299 </span>            : {</a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :     apr_xml_parser *parser = userdata;</span></a>
+<a name="301"><span class="lineNum">     301 </span>            : </a>
+<a name="302"><span class="lineNum">     302 </span>            :     /* punt once we find an error */</a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :     if (parser-&gt;error)</span></a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="305"><span class="lineNum">     305 </span>            : </a>
+<a name="306"><span class="lineNum">     306 </span>            :     /* pop up one level */</a>
+<a name="307"><span class="lineNum">     307 </span><span class="lineNoCov">          0 :     parser-&gt;cur_elem = parser-&gt;cur_elem-&gt;parent;</span></a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="309"><span class="lineNum">     309 </span>            : </a>
+<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 : static void cdata_handler(void *userdata, const char *data, int len)</span></a>
+<a name="311"><span class="lineNum">     311 </span>            : {</a>
+<a name="312"><span class="lineNum">     312 </span><span class="lineNoCov">          0 :     apr_xml_parser *parser = userdata;</span></a>
+<a name="313"><span class="lineNum">     313 </span>            :     apr_xml_elem *elem;</a>
+<a name="314"><span class="lineNum">     314 </span>            :     apr_text_header *hdr;</a>
+<a name="315"><span class="lineNum">     315 </span>            :     const char *s;</a>
+<a name="316"><span class="lineNum">     316 </span>            : </a>
+<a name="317"><span class="lineNum">     317 </span>            :     /* punt once we find an error */</a>
+<a name="318"><span class="lineNum">     318 </span><span class="lineNoCov">          0 :     if (parser-&gt;error)</span></a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :         return;</span></a>
+<a name="320"><span class="lineNum">     320 </span>            : </a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :     elem = parser-&gt;cur_elem;</span></a>
+<a name="322"><span class="lineNum">     322 </span><span class="lineNoCov">          0 :     s = apr_pstrndup(parser-&gt;p, data, len);</span></a>
+<a name="323"><span class="lineNum">     323 </span>            : </a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineNoCov">          0 :     if (elem-&gt;last_child == NULL) {</span></a>
+<a name="325"><span class="lineNum">     325 </span>            :         /* no children yet. this cdata follows the start tag */</a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineNoCov">          0 :         hdr = &amp;elem-&gt;first_cdata;</span></a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="328"><span class="lineNum">     328 </span>            :     else {</a>
+<a name="329"><span class="lineNum">     329 </span>            :         /* child elements exist. this cdata follows the last child. */</a>
+<a name="330"><span class="lineNum">     330 </span><span class="lineNoCov">          0 :         hdr = &amp;elem-&gt;last_child-&gt;following_cdata;</span></a>
+<a name="331"><span class="lineNum">     331 </span>            :     }</a>
+<a name="332"><span class="lineNum">     332 </span>            : </a>
+<a name="333"><span class="lineNum">     333 </span><span class="lineNoCov">          0 :     apr_text_append(parser-&gt;p, hdr, s);</span></a>
+<a name="334"><span class="lineNum">     334 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="335"><span class="lineNum">     335 </span>            : </a>
+<a name="336"><span class="lineNum">     336 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_xml_parser *) apr_xml_parser_create(apr_pool_t *pool)</span></a>
+<a name="337"><span class="lineNum">     337 </span>            : {</a>
+<a name="338"><span class="lineNum">     338 </span><span class="lineNoCov">          0 :     return apr_xml_parser_create_internal(pool, &amp;start_handler, &amp;end_handler, &amp;cdata_handler);</span></a>
+<a name="339"><span class="lineNum">     339 </span>            : }</a>
+<a name="340"><span class="lineNum">     340 </span>            : </a>
+<a name="341"><span class="lineNum">     341 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_xml_parser_feed(apr_xml_parser *parser,</span></a>
+<a name="342"><span class="lineNum">     342 </span>            :                                               const char *data,</a>
+<a name="343"><span class="lineNum">     343 </span>            :                                               apr_size_t len)</a>
+<a name="344"><span class="lineNum">     344 </span>            : {</a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :     return parser-&gt;impl-&gt;Parse(parser, data, len, 0 /* is_final */);</span></a>
+<a name="346"><span class="lineNum">     346 </span>            : }</a>
+<a name="347"><span class="lineNum">     347 </span>            : </a>
+<a name="348"><span class="lineNum">     348 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_xml_parser_done(apr_xml_parser *parser,</span></a>
+<a name="349"><span class="lineNum">     349 </span>            :                                               apr_xml_doc **pdoc)</a>
+<a name="350"><span class="lineNum">     350 </span>            : {</a>
+<a name="351"><span class="lineNum">     351 </span><span class="lineNoCov">          0 :     apr_status_t status = parser-&gt;impl-&gt;Parse(parser, &quot;&quot;, 0, 1 /* is_final */);</span></a>
+<a name="352"><span class="lineNum">     352 </span>            : </a>
+<a name="353"><span class="lineNum">     353 </span>            :     /* get rid of the parser */</a>
+<a name="354"><span class="lineNum">     354 </span><span class="lineNoCov">          0 :     (void) apr_pool_cleanup_run(parser-&gt;p, parser, parser-&gt;impl-&gt;cleanup);</span></a>
+<a name="355"><span class="lineNum">     355 </span>            : </a>
+<a name="356"><span class="lineNum">     356 </span><span class="lineNoCov">          0 :     if (status)</span></a>
+<a name="357"><span class="lineNum">     357 </span><span class="lineNoCov">          0 :         return status;</span></a>
+<a name="358"><span class="lineNum">     358 </span>            : </a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineNoCov">          0 :     if (pdoc != NULL)</span></a>
+<a name="360"><span class="lineNum">     360 </span><span class="lineNoCov">          0 :         *pdoc = parser-&gt;doc;</span></a>
+<a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="362"><span class="lineNum">     362 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="363"><span class="lineNum">     363 </span>            : </a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineNoCov">          0 : APR_DECLARE(char *) apr_xml_parser_geterror(apr_xml_parser *parser,</span></a>
+<a name="365"><span class="lineNum">     365 </span>            :                                             char *errbuf,</a>
+<a name="366"><span class="lineNum">     366 </span>            :                                             apr_size_t errbufsize)</a>
+<a name="367"><span class="lineNum">     367 </span>            : {</a>
+<a name="368"><span class="lineNum">     368 </span><span class="lineNoCov">          0 :     int error = parser-&gt;error;</span></a>
+<a name="369"><span class="lineNum">     369 </span>            :     const char *msg;</a>
+<a name="370"><span class="lineNum">     370 </span>            : </a>
+<a name="371"><span class="lineNum">     371 </span>            :     /* clear our record of an error */</a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineNoCov">          0 :     parser-&gt;error = 0;</span></a>
+<a name="373"><span class="lineNum">     373 </span>            : </a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :     switch (error) {</span></a>
+<a name="375"><span class="lineNum">     375 </span>            :     case 0:</a>
+<a name="376"><span class="lineNum">     376 </span><span class="lineNoCov">          0 :         msg = &quot;No error.&quot;;</span></a>
+<a name="377"><span class="lineNum">     377 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="378"><span class="lineNum">     378 </span>            : </a>
+<a name="379"><span class="lineNum">     379 </span>            :     case APR_XML_NS_ERROR_UNKNOWN_PREFIX:</a>
+<a name="380"><span class="lineNum">     380 </span><span class="lineNoCov">          0 :         msg = &quot;An undefined namespace prefix was used.&quot;;</span></a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="382"><span class="lineNum">     382 </span>            : </a>
+<a name="383"><span class="lineNum">     383 </span>            :     case APR_XML_NS_ERROR_INVALID_DECL:</a>
+<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :         msg = &quot;A namespace prefix was defined with an empty URI.&quot;;</span></a>
+<a name="385"><span class="lineNum">     385 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="386"><span class="lineNum">     386 </span>            : </a>
+<a name="387"><span class="lineNum">     387 </span>            :     case APR_XML_ERROR_EXPAT:</a>
+<a name="388"><span class="lineNum">     388 </span><span class="lineNoCov">          0 :         (void) apr_snprintf(errbuf, errbufsize,</span></a>
+<a name="389"><span class="lineNum">     389 </span>            :                             &quot;XML parser error code: %s (%d)&quot;,</a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineNoCov">          0 :                             parser-&gt;xp_msg, parser-&gt;xp_err);</span></a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineNoCov">          0 :         return errbuf;</span></a>
+<a name="392"><span class="lineNum">     392 </span>            : </a>
+<a name="393"><span class="lineNum">     393 </span>            :     case APR_XML_ERROR_PARSE_DONE:</a>
+<a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :         msg = &quot;The parser is not active.&quot;;</span></a>
+<a name="395"><span class="lineNum">     395 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="396"><span class="lineNum">     396 </span>            : </a>
+<a name="397"><span class="lineNum">     397 </span>            :     default:</a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :         msg = &quot;There was an unknown error within the XML body.&quot;;</span></a>
+<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="400"><span class="lineNum">     400 </span>            :     }</a>
+<a name="401"><span class="lineNum">     401 </span>            : </a>
+<a name="402"><span class="lineNum">     402 </span><span class="lineNoCov">          0 :     (void) apr_cpystrn(errbuf, msg, errbufsize);</span></a>
+<a name="403"><span class="lineNum">     403 </span><span class="lineNoCov">          0 :     return errbuf;</span></a>
+<a name="404"><span class="lineNum">     404 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="405"><span class="lineNum">     405 </span>            : </a>
+<a name="406"><span class="lineNum">     406 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_xml_parse_file(apr_pool_t *p,</span></a>
+<a name="407"><span class="lineNum">     407 </span>            :                                              apr_xml_parser **parser,</a>
+<a name="408"><span class="lineNum">     408 </span>            :                                              apr_xml_doc **ppdoc,</a>
+<a name="409"><span class="lineNum">     409 </span>            :                                              apr_file_t *xmlfd,</a>
+<a name="410"><span class="lineNum">     410 </span>            :                                              apr_size_t buffer_length)</a>
+<a name="411"><span class="lineNum">     411 </span>            : {</a>
+<a name="412"><span class="lineNum">     412 </span>            :     apr_status_t rv;</a>
+<a name="413"><span class="lineNum">     413 </span>            :     char *buffer;</a>
+<a name="414"><span class="lineNum">     414 </span>            :     apr_size_t length;</a>
+<a name="415"><span class="lineNum">     415 </span>            : </a>
+<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 :     *parser = apr_xml_parser_create(p);</span></a>
+<a name="417"><span class="lineNum">     417 </span><span class="lineNoCov">          0 :     if (*parser == NULL) {</span></a>
+<a name="418"><span class="lineNum">     418 </span>            :         /* FIXME: returning an error code would be nice,</a>
+<a name="419"><span class="lineNum">     419 </span>            :          * but we dont get one ;( */</a>
+<a name="420"><span class="lineNum">     420 </span><span class="lineNoCov">          0 :         return APR_EGENERAL;</span></a>
+<a name="421"><span class="lineNum">     421 </span>            :     }</a>
+<a name="422"><span class="lineNum">     422 </span><span class="lineNoCov">          0 :     buffer = apr_palloc(p, buffer_length);</span></a>
+<a name="423"><span class="lineNum">     423 </span><span class="lineNoCov">          0 :     length = buffer_length;</span></a>
+<a name="424"><span class="lineNum">     424 </span>            : </a>
+<a name="425"><span class="lineNum">     425 </span><span class="lineNoCov">          0 :     rv = apr_file_read(xmlfd, buffer, &amp;length);</span></a>
+<a name="426"><span class="lineNum">     426 </span>            : </a>
+<a name="427"><span class="lineNum">     427 </span><span class="lineNoCov">          0 :     while (rv == APR_SUCCESS) {</span></a>
+<a name="428"><span class="lineNum">     428 </span><span class="lineNoCov">          0 :         rv = apr_xml_parser_feed(*parser, buffer, length);</span></a>
+<a name="429"><span class="lineNum">     429 </span><span class="lineNoCov">          0 :         if (rv != APR_SUCCESS) {</span></a>
+<a name="430"><span class="lineNum">     430 </span><span class="lineNoCov">          0 :             return rv;</span></a>
+<a name="431"><span class="lineNum">     431 </span>            :         }</a>
+<a name="432"><span class="lineNum">     432 </span>            : </a>
+<a name="433"><span class="lineNum">     433 </span><span class="lineNoCov">          0 :         length = buffer_length;</span></a>
+<a name="434"><span class="lineNum">     434 </span><span class="lineNoCov">          0 :         rv = apr_file_read(xmlfd, buffer, &amp;length);</span></a>
+<a name="435"><span class="lineNum">     435 </span>            :     }</a>
+<a name="436"><span class="lineNum">     436 </span><span class="lineNoCov">          0 :     if (rv != APR_EOF) {</span></a>
+<a name="437"><span class="lineNum">     437 </span><span class="lineNoCov">          0 :         return rv;</span></a>
+<a name="438"><span class="lineNum">     438 </span>            :     }</a>
+<a name="439"><span class="lineNum">     439 </span><span class="lineNoCov">          0 :     rv = apr_xml_parser_done(*parser, ppdoc);</span></a>
+<a name="440"><span class="lineNum">     440 </span><span class="lineNoCov">          0 :     *parser = NULL;</span></a>
+<a name="441"><span class="lineNum">     441 </span><span class="lineNoCov">          0 :     return rv;</span></a>
+<a name="442"><span class="lineNum">     442 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="443"><span class="lineNum">     443 </span>            : </a>
+<a name="444"><span class="lineNum">     444 </span><span class="lineNoCov">          0 : APR_DECLARE(void) apr_text_append(apr_pool_t * p, apr_text_header *hdr,</span></a>
+<a name="445"><span class="lineNum">     445 </span>            :                                   const char *text)</a>
+<a name="446"><span class="lineNum">     446 </span>            : {</a>
+<a name="447"><span class="lineNum">     447 </span><span class="lineNoCov">          0 :     apr_text *t = apr_palloc(p, sizeof(*t));</span></a>
+<a name="448"><span class="lineNum">     448 </span>            : </a>
+<a name="449"><span class="lineNum">     449 </span><span class="lineNoCov">          0 :     t-&gt;text = text;</span></a>
+<a name="450"><span class="lineNum">     450 </span><span class="lineNoCov">          0 :     t-&gt;next = NULL;</span></a>
+<a name="451"><span class="lineNum">     451 </span>            : </a>
+<a name="452"><span class="lineNum">     452 </span><span class="lineNoCov">          0 :     if (hdr-&gt;first == NULL) {</span></a>
+<a name="453"><span class="lineNum">     453 </span>            :         /* no text elements yet */</a>
+<a name="454"><span class="lineNum">     454 </span><span class="lineNoCov">          0 :         hdr-&gt;first = hdr-&gt;last = t;</span></a>
+<a name="455"><span class="lineNum">     455 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="456"><span class="lineNum">     456 </span>            :     else {</a>
+<a name="457"><span class="lineNum">     457 </span>            :         /* append to the last text element */</a>
+<a name="458"><span class="lineNum">     458 </span><span class="lineNoCov">          0 :         hdr-&gt;last-&gt;next = t;</span></a>
+<a name="459"><span class="lineNum">     459 </span><span class="lineNoCov">          0 :         hdr-&gt;last = t;</span></a>
+<a name="460"><span class="lineNum">     460 </span>            :     }</a>
+<a name="461"><span class="lineNum">     461 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="462"><span class="lineNum">     462 </span>            : </a>
+<a name="463"><span class="lineNum">     463 </span>            : </a>
+<a name="464"><span class="lineNum">     464 </span>            : /* ---------------------------------------------------------------</a>
+<a name="465"><span class="lineNum">     465 </span>            : **</a>
+<a name="466"><span class="lineNum">     466 </span>            : ** XML UTILITY FUNCTIONS</a>
+<a name="467"><span class="lineNum">     467 </span>            : */</a>
+<a name="468"><span class="lineNum">     468 </span>            : </a>
+<a name="469"><span class="lineNum">     469 </span>            : /*</a>
+<a name="470"><span class="lineNum">     470 </span>            : ** apr_xml_quote_string: quote an XML string</a>
+<a name="471"><span class="lineNum">     471 </span>            : **</a>
+<a name="472"><span class="lineNum">     472 </span>            : ** Replace '&lt;', '&gt;', and '&amp;' with '&amp;lt;', '&amp;gt;', and '&amp;amp;'.</a>
+<a name="473"><span class="lineNum">     473 </span>            : ** If quotes is true, then replace '&quot;' with '&amp;quot;'.</a>
+<a name="474"><span class="lineNum">     474 </span>            : **</a>
+<a name="475"><span class="lineNum">     475 </span>            : ** quotes is typically set to true for XML strings that will occur within</a>
+<a name="476"><span class="lineNum">     476 </span>            : ** double quotes -- attribute values.</a>
+<a name="477"><span class="lineNum">     477 </span>            : */</a>
+<a name="478"><span class="lineNum">     478 </span><span class="lineNoCov">          0 : APR_DECLARE(const char *) apr_xml_quote_string(apr_pool_t *p, const char *s,</span></a>
+<a name="479"><span class="lineNum">     479 </span>            :                                                int quotes)</a>
+<a name="480"><span class="lineNum">     480 </span>            : {</a>
+<a name="481"><span class="lineNum">     481 </span>            :     const char *scan;</a>
+<a name="482"><span class="lineNum">     482 </span><span class="lineNoCov">          0 :     apr_size_t len = 0;</span></a>
+<a name="483"><span class="lineNum">     483 </span><span class="lineNoCov">          0 :     apr_size_t extra = 0;</span></a>
+<a name="484"><span class="lineNum">     484 </span>            :     char *qstr;</a>
+<a name="485"><span class="lineNum">     485 </span>            :     char *qscan;</a>
+<a name="486"><span class="lineNum">     486 </span>            :     char c;</a>
+<a name="487"><span class="lineNum">     487 </span>            : </a>
+<a name="488"><span class="lineNum">     488 </span><span class="lineNoCov">          0 :     for (scan = s; (c = *scan) != '\0'; ++scan, ++len) {</span></a>
+<a name="489"><span class="lineNum">     489 </span><span class="lineNoCov">          0 :         if (c == '&lt;' || c == '&gt;')</span></a>
+<a name="490"><span class="lineNum">     490 </span><span class="lineNoCov">          0 :             extra += 3;         /* &amp;lt; or &amp;gt; */</span></a>
+<a name="491"><span class="lineNum">     491 </span><span class="lineNoCov">          0 :         else if (c == '&amp;')</span></a>
+<a name="492"><span class="lineNum">     492 </span><span class="lineNoCov">          0 :             extra += 4;         /* &amp;amp; */</span></a>
+<a name="493"><span class="lineNum">     493 </span><span class="lineNoCov">          0 :         else if (quotes &amp;&amp; c == '&quot;')</span></a>
+<a name="494"><span class="lineNum">     494 </span><span class="lineNoCov">          0 :             extra += 5;         /* &amp;quot; */</span></a>
+<a name="495"><span class="lineNum">     495 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="496"><span class="lineNum">     496 </span>            : </a>
+<a name="497"><span class="lineNum">     497 </span>            :     /* nothing to do? */</a>
+<a name="498"><span class="lineNum">     498 </span><span class="lineNoCov">          0 :     if (extra == 0)</span></a>
+<a name="499"><span class="lineNum">     499 </span><span class="lineNoCov">          0 :         return s;</span></a>
+<a name="500"><span class="lineNum">     500 </span>            : </a>
+<a name="501"><span class="lineNum">     501 </span><span class="lineNoCov">          0 :     qstr = apr_palloc(p, len + extra + 1);</span></a>
+<a name="502"><span class="lineNum">     502 </span><span class="lineNoCov">          0 :     for (scan = s, qscan = qstr; (c = *scan) != '\0'; ++scan) {</span></a>
+<a name="503"><span class="lineNum">     503 </span><span class="lineNoCov">          0 :         if (c == '&lt;') {</span></a>
+<a name="504"><span class="lineNum">     504 </span><span class="lineNoCov">          0 :             *qscan++ = '&amp;';</span></a>
+<a name="505"><span class="lineNum">     505 </span><span class="lineNoCov">          0 :             *qscan++ = 'l';</span></a>
+<a name="506"><span class="lineNum">     506 </span><span class="lineNoCov">          0 :             *qscan++ = 't';</span></a>
+<a name="507"><span class="lineNum">     507 </span><span class="lineNoCov">          0 :             *qscan++ = ';';</span></a>
+<a name="508"><span class="lineNum">     508 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="509"><span class="lineNum">     509 </span><span class="lineNoCov">          0 :         else if (c == '&gt;') {</span></a>
+<a name="510"><span class="lineNum">     510 </span><span class="lineNoCov">          0 :             *qscan++ = '&amp;';</span></a>
+<a name="511"><span class="lineNum">     511 </span><span class="lineNoCov">          0 :             *qscan++ = 'g';</span></a>
+<a name="512"><span class="lineNum">     512 </span><span class="lineNoCov">          0 :             *qscan++ = 't';</span></a>
+<a name="513"><span class="lineNum">     513 </span><span class="lineNoCov">          0 :             *qscan++ = ';';</span></a>
+<a name="514"><span class="lineNum">     514 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="515"><span class="lineNum">     515 </span><span class="lineNoCov">          0 :         else if (c == '&amp;') {</span></a>
+<a name="516"><span class="lineNum">     516 </span><span class="lineNoCov">          0 :             *qscan++ = '&amp;';</span></a>
+<a name="517"><span class="lineNum">     517 </span><span class="lineNoCov">          0 :             *qscan++ = 'a';</span></a>
+<a name="518"><span class="lineNum">     518 </span><span class="lineNoCov">          0 :             *qscan++ = 'm';</span></a>
+<a name="519"><span class="lineNum">     519 </span><span class="lineNoCov">          0 :             *qscan++ = 'p';</span></a>
+<a name="520"><span class="lineNum">     520 </span><span class="lineNoCov">          0 :             *qscan++ = ';';</span></a>
+<a name="521"><span class="lineNum">     521 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="522"><span class="lineNum">     522 </span><span class="lineNoCov">          0 :         else if (quotes &amp;&amp; c == '&quot;') {</span></a>
+<a name="523"><span class="lineNum">     523 </span><span class="lineNoCov">          0 :             *qscan++ = '&amp;';</span></a>
+<a name="524"><span class="lineNum">     524 </span><span class="lineNoCov">          0 :             *qscan++ = 'q';</span></a>
+<a name="525"><span class="lineNum">     525 </span><span class="lineNoCov">          0 :             *qscan++ = 'u';</span></a>
+<a name="526"><span class="lineNum">     526 </span><span class="lineNoCov">          0 :             *qscan++ = 'o';</span></a>
+<a name="527"><span class="lineNum">     527 </span><span class="lineNoCov">          0 :             *qscan++ = 't';</span></a>
+<a name="528"><span class="lineNum">     528 </span><span class="lineNoCov">          0 :             *qscan++ = ';';</span></a>
+<a name="529"><span class="lineNum">     529 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="530"><span class="lineNum">     530 </span>            :         else {</a>
+<a name="531"><span class="lineNum">     531 </span><span class="lineNoCov">          0 :             *qscan++ = c;</span></a>
+<a name="532"><span class="lineNum">     532 </span>            :         }</a>
+<a name="533"><span class="lineNum">     533 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="534"><span class="lineNum">     534 </span>            : </a>
+<a name="535"><span class="lineNum">     535 </span><span class="lineNoCov">          0 :     *qscan = '\0';</span></a>
+<a name="536"><span class="lineNum">     536 </span><span class="lineNoCov">          0 :     return qstr;</span></a>
+<a name="537"><span class="lineNum">     537 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="538"><span class="lineNum">     538 </span>            : </a>
+<a name="539"><span class="lineNum">     539 </span>            : /* how many characters for the given integer? */</a>
+<a name="540"><span class="lineNum">     540 </span>            : #define APR_XML_NS_LEN(ns) ((ns) &lt; 10 ? 1 : (ns) &lt; 100 ? 2 : (ns) &lt; 1000 ? 3 : \</a>
+<a name="541"><span class="lineNum">     541 </span>            :                             (ns) &lt; 10000 ? 4 : (ns) &lt; 100000 ? 5 : \</a>
+<a name="542"><span class="lineNum">     542 </span>            :                             (ns) &lt; 1000000 ? 6 : (ns) &lt; 10000000 ? 7 : \</a>
+<a name="543"><span class="lineNum">     543 </span>            :                             (ns) &lt; 100000000 ? 8 : (ns) &lt; 1000000000 ? 9 : 10)</a>
+<a name="544"><span class="lineNum">     544 </span>            : </a>
+<a name="545"><span class="lineNum">     545 </span><span class="lineNoCov">          0 : static apr_size_t text_size(const apr_text *t)</span></a>
+<a name="546"><span class="lineNum">     546 </span>            : {</a>
+<a name="547"><span class="lineNum">     547 </span><span class="lineNoCov">          0 :     apr_size_t size = 0;</span></a>
+<a name="548"><span class="lineNum">     548 </span>            : </a>
+<a name="549"><span class="lineNum">     549 </span><span class="lineNoCov">          0 :     for (; t; t = t-&gt;next)</span></a>
+<a name="550"><span class="lineNum">     550 </span><span class="lineNoCov">          0 :         size += strlen(t-&gt;text);</span></a>
+<a name="551"><span class="lineNum">     551 </span><span class="lineNoCov">          0 :     return size;</span></a>
+<a name="552"><span class="lineNum">     552 </span>            : }</a>
+<a name="553"><span class="lineNum">     553 </span>            : </a>
+<a name="554"><span class="lineNum">     554 </span><span class="lineNoCov">          0 : static apr_size_t elem_size(const apr_xml_elem *elem, int style,</span></a>
+<a name="555"><span class="lineNum">     555 </span>            :                             apr_array_header_t *namespaces, int *ns_map)</a>
+<a name="556"><span class="lineNum">     556 </span>            : {</a>
+<a name="557"><span class="lineNum">     557 </span>            :     apr_size_t size;</a>
+<a name="558"><span class="lineNum">     558 </span>            : </a>
+<a name="559"><span class="lineNum">     559 </span><span class="lineNoCov">          0 :     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG ||</span></a>
+<a name="560"><span class="lineNum">     560 </span><span class="lineNoCov">          0 :         style == APR_XML_X2T_PARSED) {</span></a>
+<a name="561"><span class="lineNum">     561 </span>            :         const apr_xml_attr *attr;</a>
+<a name="562"><span class="lineNum">     562 </span>            : </a>
+<a name="563"><span class="lineNum">     563 </span><span class="lineNoCov">          0 :         size = 0;</span></a>
+<a name="564"><span class="lineNum">     564 </span>            : </a>
+<a name="565"><span class="lineNum">     565 </span><span class="lineNoCov">          0 :         if (style == APR_XML_X2T_FULL_NS_LANG) {</span></a>
+<a name="566"><span class="lineNum">     566 </span>            :             int i;</a>
+<a name="567"><span class="lineNum">     567 </span>            : </a>
+<a name="568"><span class="lineNum">     568 </span>            :             /*</a>
+<a name="569"><span class="lineNum">     569 </span>            :             ** The outer element will contain xmlns:ns%d=&quot;%s&quot; attributes</a>
+<a name="570"><span class="lineNum">     570 </span>            :             ** and an xml:lang attribute, if applicable.</a>
+<a name="571"><span class="lineNum">     571 </span>            :             */</a>
+<a name="572"><span class="lineNum">     572 </span>            : </a>
+<a name="573"><span class="lineNum">     573 </span><span class="lineNoCov">          0 :             for (i = namespaces-&gt;nelts; i--;) {</span></a>
+<a name="574"><span class="lineNum">     574 </span>            :                 /* compute size of: ' xmlns:ns%d=&quot;%s&quot;' */</a>
+<a name="575"><span class="lineNum">     575 </span><span class="lineNoCov">          0 :                 size += (9 + APR_XML_NS_LEN(i) + 2 +</span></a>
+<a name="576"><span class="lineNum">     576 </span><span class="lineNoCov">          0 :                          strlen(APR_XML_GET_URI_ITEM(namespaces, i)) + 1);</span></a>
+<a name="577"><span class="lineNum">     577 </span>            :             }</a>
+<a name="578"><span class="lineNum">     578 </span>            : </a>
+<a name="579"><span class="lineNum">     579 </span><span class="lineNoCov">          0 :             if (elem-&gt;lang != NULL) {</span></a>
+<a name="580"><span class="lineNum">     580 </span>            :                 /* compute size of: ' xml:lang=&quot;%s&quot;' */</a>
+<a name="581"><span class="lineNum">     581 </span><span class="lineNoCov">          0 :                 size += 11 + strlen(elem-&gt;lang) + 1;</span></a>
+<a name="582"><span class="lineNum">     582 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="583"><span class="lineNum">     583 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="584"><span class="lineNum">     584 </span><span class="lineNoCov">          0 :         else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="585"><span class="lineNum">     585 </span><span class="lineNoCov">          0 :             apr_xml_ns_scope *ns_scope = elem-&gt;ns_scope;</span></a>
+<a name="586"><span class="lineNum">     586 </span>            : </a>
+<a name="587"><span class="lineNum">     587 </span>            :             /* compute size of: ' xmlns:%s=&quot;%s&quot;' */</a>
+<a name="588"><span class="lineNum">     588 </span><span class="lineNoCov">          0 :             for (; ns_scope; ns_scope = ns_scope-&gt;next) {</span></a>
+<a name="589"><span class="lineNum">     589 </span><span class="lineNoCov">          0 :                 size += 10 + strlen(find_prefix_name(elem, ns_scope-&gt;ns, 0)) +</span></a>
+<a name="590"><span class="lineNum">     590 </span><span class="lineNoCov">          0 :                              strlen(APR_XML_GET_URI_ITEM(namespaces, ns_scope-&gt;ns));</span></a>
+<a name="591"><span class="lineNum">     591 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="592"><span class="lineNum">     592 </span>            : </a>
+<a name="593"><span class="lineNum">     593 </span><span class="lineNoCov">          0 :             if (elem-&gt;lang != NULL) {</span></a>
+<a name="594"><span class="lineNum">     594 </span>            :                 /* compute size of: ' xml:lang=&quot;%s&quot;' */</a>
+<a name="595"><span class="lineNum">     595 </span><span class="lineNoCov">          0 :                 size += 11 + strlen(elem-&gt;lang) + 1;</span></a>
+<a name="596"><span class="lineNum">     596 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="597"><span class="lineNum">     597 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="598"><span class="lineNum">     598 </span>            : </a>
+<a name="599"><span class="lineNum">     599 </span><span class="lineNoCov">          0 :         if (elem-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="600"><span class="lineNum">     600 </span>            :             /* compute size of: &lt;%s&gt; */</a>
+<a name="601"><span class="lineNum">     601 </span><span class="lineNoCov">          0 :             size += 1 + strlen(elem-&gt;name) + 1;</span></a>
+<a name="602"><span class="lineNum">     602 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="603"><span class="lineNum">     603 </span><span class="lineNoCov">          0 :         else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="604"><span class="lineNum">     604 </span>            :             /* compute size of: &lt;%s:%s&gt; */</a>
+<a name="605"><span class="lineNum">     605 </span><span class="lineNoCov">          0 :             size += 3 + strlen(find_prefix_name(elem, elem-&gt;ns, 1)) + strlen(elem-&gt;name);</span></a>
+<a name="606"><span class="lineNum">     606 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="607"><span class="lineNum">     607 </span>            :         else {</a>
+<a name="608"><span class="lineNum">     608 </span><span class="lineNoCov">          0 :             int ns = ns_map ? ns_map[elem-&gt;ns] : elem-&gt;ns;</span></a>
+<a name="609"><span class="lineNum">     609 </span>            : </a>
+<a name="610"><span class="lineNum">     610 </span>            :             /* compute size of: &lt;ns%d:%s&gt; */</a>
+<a name="611"><span class="lineNum">     611 </span><span class="lineNoCov">          0 :             size += 3 + APR_XML_NS_LEN(ns) + 1 + strlen(elem-&gt;name) + 1;</span></a>
+<a name="612"><span class="lineNum">     612 </span>            :         }</a>
+<a name="613"><span class="lineNum">     613 </span>            : </a>
+<a name="614"><span class="lineNum">     614 </span><span class="lineNoCov">          0 :         if (APR_XML_ELEM_IS_EMPTY(elem)) {</span></a>
+<a name="615"><span class="lineNum">     615 </span>            :             /* insert a closing &quot;/&quot; */</a>
+<a name="616"><span class="lineNum">     616 </span><span class="lineNoCov">          0 :             size += 1;</span></a>
+<a name="617"><span class="lineNum">     617 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="618"><span class="lineNum">     618 </span>            :         else {</a>
+<a name="619"><span class="lineNum">     619 </span>            :             /*</a>
+<a name="620"><span class="lineNum">     620 </span>            :              * two of above plus &quot;/&quot;:</a>
+<a name="621"><span class="lineNum">     621 </span>            :              *     &lt;ns%d:%s&gt; ... &lt;/ns%d:%s&gt;</a>
+<a name="622"><span class="lineNum">     622 </span>            :              * OR  &lt;%s&gt; ... &lt;/%s&gt;</a>
+<a name="623"><span class="lineNum">     623 </span>            :              */</a>
+<a name="624"><span class="lineNum">     624 </span><span class="lineNoCov">          0 :             size = 2 * size + 1;</span></a>
+<a name="625"><span class="lineNum">     625 </span>            :         }</a>
+<a name="626"><span class="lineNum">     626 </span>            : </a>
+<a name="627"><span class="lineNum">     627 </span><span class="lineNoCov">          0 :         for (attr = elem-&gt;attr; attr; attr = attr-&gt;next) {</span></a>
+<a name="628"><span class="lineNum">     628 </span><span class="lineNoCov">          0 :             if (attr-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="629"><span class="lineNum">     629 </span>            :                 /* compute size of: ' %s=&quot;%s&quot;' */</a>
+<a name="630"><span class="lineNum">     630 </span><span class="lineNoCov">          0 :                 size += 1 + strlen(attr-&gt;name) + 2 + strlen(attr-&gt;value) + 1;</span></a>
+<a name="631"><span class="lineNum">     631 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="632"><span class="lineNum">     632 </span><span class="lineNoCov">          0 :             else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="633"><span class="lineNum">     633 </span>            :                 /* compute size of: ' %s:%s=&quot;%s&quot;' */</a>
+<a name="634"><span class="lineNum">     634 </span><span class="lineNoCov">          0 :                 size += 5 + strlen(find_prefix_name(elem, attr-&gt;ns, 1)) + strlen(attr-&gt;name) + strlen(attr-&gt;value);</span></a>
+<a name="635"><span class="lineNum">     635 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="636"><span class="lineNum">     636 </span>            :             else {</a>
+<a name="637"><span class="lineNum">     637 </span>            :                 /* compute size of: ' ns%d:%s=&quot;%s&quot;' */</a>
+<a name="638"><span class="lineNum">     638 </span><span class="lineNoCov">          0 :                 int ns = ns_map ? ns_map[attr-&gt;ns] : attr-&gt;ns;</span></a>
+<a name="639"><span class="lineNum">     639 </span><span class="lineNoCov">          0 :                 size += 3 + APR_XML_NS_LEN(ns) + 1 + strlen(attr-&gt;name) + 2 + strlen(attr-&gt;value) + 1;</span></a>
+<a name="640"><span class="lineNum">     640 </span>            :             }</a>
+<a name="641"><span class="lineNum">     641 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="642"><span class="lineNum">     642 </span>            : </a>
+<a name="643"><span class="lineNum">     643 </span>            :         /*</a>
+<a name="644"><span class="lineNum">     644 </span>            :         ** If the element has an xml:lang value that is *different* from</a>
+<a name="645"><span class="lineNum">     645 </span>            :         ** its parent, then add the thing in: ' xml:lang=&quot;%s&quot;'.</a>
+<a name="646"><span class="lineNum">     646 </span>            :         **</a>
+<a name="647"><span class="lineNum">     647 </span>            :         ** NOTE: we take advantage of the pointer equality established by</a>
+<a name="648"><span class="lineNum">     648 </span>            :         ** the parsing for &quot;inheriting&quot; the xml:lang values from parents.</a>
+<a name="649"><span class="lineNum">     649 </span>            :         */</a>
+<a name="650"><span class="lineNum">     650 </span><span class="lineNoCov">          0 :         if (elem-&gt;lang != NULL &amp;&amp;</span></a>
+<a name="651"><span class="lineNum">     651 </span><span class="lineNoCov">          0 :             (elem-&gt;parent == NULL || elem-&gt;lang != elem-&gt;parent-&gt;lang)) {</span></a>
+<a name="652"><span class="lineNum">     652 </span><span class="lineNoCov">          0 :             size += 11 + strlen(elem-&gt;lang) + 1;</span></a>
+<a name="653"><span class="lineNum">     653 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="654"><span class="lineNum">     654 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="655"><span class="lineNum">     655 </span><span class="lineNoCov">          0 :     else if (style == APR_XML_X2T_LANG_INNER) {</span></a>
+<a name="656"><span class="lineNum">     656 </span>            :         /*</a>
+<a name="657"><span class="lineNum">     657 </span>            :          * This style prepends the xml:lang value plus a null terminator.</a>
+<a name="658"><span class="lineNum">     658 </span>            :          * If a lang value is not present, then we insert a null term.</a>
+<a name="659"><span class="lineNum">     659 </span>            :          */</a>
+<a name="660"><span class="lineNum">     660 </span><span class="lineNoCov">          0 :         size = elem-&gt;lang ? strlen(elem-&gt;lang) + 1 : 1;</span></a>
+<a name="661"><span class="lineNum">     661 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="662"><span class="lineNum">     662 </span>            :     else</a>
+<a name="663"><span class="lineNum">     663 </span><span class="lineNoCov">          0 :         size = 0;</span></a>
+<a name="664"><span class="lineNum">     664 </span>            : </a>
+<a name="665"><span class="lineNum">     665 </span><span class="lineNoCov">          0 :     size += text_size(elem-&gt;first_cdata.first);</span></a>
+<a name="666"><span class="lineNum">     666 </span>            : </a>
+<a name="667"><span class="lineNum">     667 </span><span class="lineNoCov">          0 :     for (elem = elem-&gt;first_child; elem; elem = elem-&gt;next) {</span></a>
+<a name="668"><span class="lineNum">     668 </span>            :         /* the size of the child element plus the CDATA that follows it */</a>
+<a name="669"><span class="lineNum">     669 </span><span class="lineNoCov">          0 :         size += (elem_size(elem, style == APR_XML_X2T_PARSED ? APR_XML_X2T_PARSED : APR_XML_X2T_FULL, NULL, ns_map) +</span></a>
+<a name="670"><span class="lineNum">     670 </span><span class="lineNoCov">          0 :                  text_size(elem-&gt;following_cdata.first));</span></a>
+<a name="671"><span class="lineNum">     671 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="672"><span class="lineNum">     672 </span>            : </a>
+<a name="673"><span class="lineNum">     673 </span><span class="lineNoCov">          0 :     return size;</span></a>
+<a name="674"><span class="lineNum">     674 </span>            : }</a>
+<a name="675"><span class="lineNum">     675 </span>            : </a>
+<a name="676"><span class="lineNum">     676 </span><span class="lineNoCov">          0 : static char *write_text(char *s, const apr_text *t)</span></a>
+<a name="677"><span class="lineNum">     677 </span>            : {</a>
+<a name="678"><span class="lineNum">     678 </span><span class="lineNoCov">          0 :     for (; t; t = t-&gt;next) {</span></a>
+<a name="679"><span class="lineNum">     679 </span><span class="lineNoCov">          0 :         apr_size_t len = strlen(t-&gt;text);</span></a>
+<a name="680"><span class="lineNum">     680 </span><span class="lineNoCov">          0 :         memcpy(s, t-&gt;text, len);</span></a>
+<a name="681"><span class="lineNum">     681 </span><span class="lineNoCov">          0 :         s += len;</span></a>
+<a name="682"><span class="lineNum">     682 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="683"><span class="lineNum">     683 </span><span class="lineNoCov">          0 :     return s;</span></a>
+<a name="684"><span class="lineNum">     684 </span>            : }</a>
+<a name="685"><span class="lineNum">     685 </span>            : </a>
+<a name="686"><span class="lineNum">     686 </span><span class="lineNoCov">          0 : static char *write_elem(char *s, const apr_xml_elem *elem, int style,</span></a>
+<a name="687"><span class="lineNum">     687 </span>            :                         apr_array_header_t *namespaces, int *ns_map)</a>
+<a name="688"><span class="lineNum">     688 </span>            : {</a>
+<a name="689"><span class="lineNum">     689 </span>            :     const apr_xml_elem *child;</a>
+<a name="690"><span class="lineNum">     690 </span>            :     apr_size_t len;</a>
+<a name="691"><span class="lineNum">     691 </span>            :     int ns;</a>
+<a name="692"><span class="lineNum">     692 </span>            : </a>
+<a name="693"><span class="lineNum">     693 </span><span class="lineNoCov">          0 :     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG ||</span></a>
+<a name="694"><span class="lineNum">     694 </span><span class="lineNoCov">          0 :         style == APR_XML_X2T_PARSED) {</span></a>
+<a name="695"><span class="lineNum">     695 </span><span class="lineNoCov">          0 :         int empty = APR_XML_ELEM_IS_EMPTY(elem);</span></a>
+<a name="696"><span class="lineNum">     696 </span>            :         const apr_xml_attr *attr;</a>
+<a name="697"><span class="lineNum">     697 </span>            : </a>
+<a name="698"><span class="lineNum">     698 </span><span class="lineNoCov">          0 :         if (elem-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="699"><span class="lineNum">     699 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;%s&quot;, elem-&gt;name);</span></a>
+<a name="700"><span class="lineNum">     700 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="701"><span class="lineNum">     701 </span><span class="lineNoCov">          0 :         else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="702"><span class="lineNum">     702 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;%s:%s&quot;, find_prefix_name(elem, elem-&gt;ns, 1), elem-&gt;name);</span></a>
+<a name="703"><span class="lineNum">     703 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="704"><span class="lineNum">     704 </span>            :         else {</a>
+<a name="705"><span class="lineNum">     705 </span><span class="lineNoCov">          0 :             ns = ns_map ? ns_map[elem-&gt;ns] : elem-&gt;ns;</span></a>
+<a name="706"><span class="lineNum">     706 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;ns%d:%s&quot;, ns, elem-&gt;name);</span></a>
+<a name="707"><span class="lineNum">     707 </span>            :         }</a>
+<a name="708"><span class="lineNum">     708 </span><span class="lineNoCov">          0 :         s += len;</span></a>
+<a name="709"><span class="lineNum">     709 </span>            : </a>
+<a name="710"><span class="lineNum">     710 </span><span class="lineNoCov">          0 :         for (attr = elem-&gt;attr; attr; attr = attr-&gt;next) {</span></a>
+<a name="711"><span class="lineNum">     711 </span><span class="lineNoCov">          0 :             if (attr-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="712"><span class="lineNum">     712 </span><span class="lineNoCov">          0 :                 len = sprintf(s, &quot; %s=\&quot;%s\&quot;&quot;, attr-&gt;name, attr-&gt;value);</span></a>
+<a name="713"><span class="lineNum">     713 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="714"><span class="lineNum">     714 </span><span class="lineNoCov">          0 :             else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="715"><span class="lineNum">     715 </span><span class="lineNoCov">          0 :                 len = sprintf(s, &quot; %s:%s=\&quot;%s\&quot;&quot;,</span></a>
+<a name="716"><span class="lineNum">     716 </span><span class="lineNoCov">          0 :                               find_prefix_name(elem, attr-&gt;ns, 1), attr-&gt;name, attr-&gt;value);</span></a>
+<a name="717"><span class="lineNum">     717 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="718"><span class="lineNum">     718 </span>            :             else {</a>
+<a name="719"><span class="lineNum">     719 </span><span class="lineNoCov">          0 :                 ns = ns_map ? ns_map[attr-&gt;ns] : attr-&gt;ns;</span></a>
+<a name="720"><span class="lineNum">     720 </span><span class="lineNoCov">          0 :                 len = sprintf(s, &quot; ns%d:%s=\&quot;%s\&quot;&quot;, ns, attr-&gt;name, attr-&gt;value);</span></a>
+<a name="721"><span class="lineNum">     721 </span>            :             }</a>
+<a name="722"><span class="lineNum">     722 </span><span class="lineNoCov">          0 :             s += len;</span></a>
+<a name="723"><span class="lineNum">     723 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="724"><span class="lineNum">     724 </span>            : </a>
+<a name="725"><span class="lineNum">     725 </span>            :         /* add the xml:lang value if necessary */</a>
+<a name="726"><span class="lineNum">     726 </span><span class="lineNoCov">          0 :         if (elem-&gt;lang != NULL &amp;&amp;</span></a>
+<a name="727"><span class="lineNum">     727 </span><span class="lineNoCov">          0 :             (style == APR_XML_X2T_FULL_NS_LANG ||</span></a>
+<a name="728"><span class="lineNum">     728 </span><span class="lineNoCov">          0 :              elem-&gt;parent == NULL ||</span></a>
+<a name="729"><span class="lineNum">     729 </span><span class="lineNoCov">          0 :              elem-&gt;lang != elem-&gt;parent-&gt;lang)) {</span></a>
+<a name="730"><span class="lineNum">     730 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot; xml:lang=\&quot;%s\&quot;&quot;, elem-&gt;lang);</span></a>
+<a name="731"><span class="lineNum">     731 </span><span class="lineNoCov">          0 :             s += len;</span></a>
+<a name="732"><span class="lineNum">     732 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="733"><span class="lineNum">     733 </span>            : </a>
+<a name="734"><span class="lineNum">     734 </span>            :         /* add namespace definitions, if required */</a>
+<a name="735"><span class="lineNum">     735 </span><span class="lineNoCov">          0 :         if (style == APR_XML_X2T_FULL_NS_LANG) {</span></a>
+<a name="736"><span class="lineNum">     736 </span>            :             int i;</a>
+<a name="737"><span class="lineNum">     737 </span>            : </a>
+<a name="738"><span class="lineNum">     738 </span><span class="lineNoCov">          0 :             for (i = namespaces-&gt;nelts; i--;) {</span></a>
+<a name="739"><span class="lineNum">     739 </span><span class="lineNoCov">          0 :                 len = sprintf(s, &quot; xmlns:ns%d=\&quot;%s\&quot;&quot;, i,</span></a>
+<a name="740"><span class="lineNum">     740 </span><span class="lineNoCov">          0 :                               APR_XML_GET_URI_ITEM(namespaces, i));</span></a>
+<a name="741"><span class="lineNum">     741 </span><span class="lineNoCov">          0 :                 s += len;</span></a>
+<a name="742"><span class="lineNum">     742 </span>            :             }</a>
+<a name="743"><span class="lineNum">     743 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="744"><span class="lineNum">     744 </span>            : </a>
+<a name="745"><span class="lineNum">     745 </span><span class="lineNoCov">          0 :         else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="746"><span class="lineNum">     746 </span><span class="lineNoCov">          0 :             apr_xml_ns_scope *ns_scope = elem-&gt;ns_scope;</span></a>
+<a name="747"><span class="lineNum">     747 </span>            : </a>
+<a name="748"><span class="lineNum">     748 </span><span class="lineNoCov">          0 :             for (; ns_scope; ns_scope = ns_scope-&gt;next) {</span></a>
+<a name="749"><span class="lineNum">     749 </span><span class="lineNoCov">          0 :                 const char *prefix = find_prefix_name(elem, ns_scope-&gt;ns, 0);</span></a>
+<a name="750"><span class="lineNum">     750 </span>            : </a>
+<a name="751"><span class="lineNum">     751 </span><span class="lineNoCov">          0 :                 len = sprintf(s, &quot; xmlns%s%s=\&quot;%s\&quot;&quot;,</span></a>
+<a name="752"><span class="lineNum">     752 </span><span class="lineNoCov">          0 :                               *prefix ? &quot;:&quot; : &quot;&quot;, *prefix ? prefix : &quot;&quot;,</span></a>
+<a name="753"><span class="lineNum">     753 </span><span class="lineNoCov">          0 :                               APR_XML_GET_URI_ITEM(namespaces, ns_scope-&gt;ns));</span></a>
+<a name="754"><span class="lineNum">     754 </span><span class="lineNoCov">          0 :                 s += len;</span></a>
+<a name="755"><span class="lineNum">     755 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="756"><span class="lineNum">     756 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="757"><span class="lineNum">     757 </span>            : </a>
+<a name="758"><span class="lineNum">     758 </span>            :         /* no more to do. close it up and go. */</a>
+<a name="759"><span class="lineNum">     759 </span><span class="lineNoCov">          0 :         if (empty) {</span></a>
+<a name="760"><span class="lineNum">     760 </span><span class="lineNoCov">          0 :             *s++ = '/';</span></a>
+<a name="761"><span class="lineNum">     761 </span><span class="lineNoCov">          0 :             *s++ = '&gt;';</span></a>
+<a name="762"><span class="lineNum">     762 </span><span class="lineNoCov">          0 :             return s;</span></a>
+<a name="763"><span class="lineNum">     763 </span>            :         }</a>
+<a name="764"><span class="lineNum">     764 </span>            : </a>
+<a name="765"><span class="lineNum">     765 </span>            :         /* just close it */</a>
+<a name="766"><span class="lineNum">     766 </span><span class="lineNoCov">          0 :         *s++ = '&gt;';</span></a>
+<a name="767"><span class="lineNum">     767 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="768"><span class="lineNum">     768 </span><span class="lineNoCov">          0 :     else if (style == APR_XML_X2T_LANG_INNER) {</span></a>
+<a name="769"><span class="lineNum">     769 </span>            :         /* prepend the xml:lang value */</a>
+<a name="770"><span class="lineNum">     770 </span><span class="lineNoCov">          0 :         if (elem-&gt;lang != NULL) {</span></a>
+<a name="771"><span class="lineNum">     771 </span><span class="lineNoCov">          0 :             len = strlen(elem-&gt;lang);</span></a>
+<a name="772"><span class="lineNum">     772 </span><span class="lineNoCov">          0 :             memcpy(s, elem-&gt;lang, len);</span></a>
+<a name="773"><span class="lineNum">     773 </span><span class="lineNoCov">          0 :             s += len;</span></a>
+<a name="774"><span class="lineNum">     774 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="775"><span class="lineNum">     775 </span><span class="lineNoCov">          0 :         *s++ = '\0';</span></a>
+<a name="776"><span class="lineNum">     776 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="777"><span class="lineNum">     777 </span>            : </a>
+<a name="778"><span class="lineNum">     778 </span><span class="lineNoCov">          0 :     s = write_text(s, elem-&gt;first_cdata.first);</span></a>
+<a name="779"><span class="lineNum">     779 </span>            : </a>
+<a name="780"><span class="lineNum">     780 </span><span class="lineNoCov">          0 :     for (child = elem-&gt;first_child; child; child = child-&gt;next) {</span></a>
+<a name="781"><span class="lineNum">     781 </span><span class="lineNoCov">          0 :         s = write_elem(s, child,</span></a>
+<a name="782"><span class="lineNum">     782 </span><span class="lineNoCov">          0 :                        style == APR_XML_X2T_PARSED ? APR_XML_X2T_PARSED : APR_XML_X2T_FULL,</span></a>
+<a name="783"><span class="lineNum">     783 </span><span class="lineNoCov">          0 :                        NULL, ns_map);</span></a>
+<a name="784"><span class="lineNum">     784 </span><span class="lineNoCov">          0 :         s = write_text(s, child-&gt;following_cdata.first);</span></a>
+<a name="785"><span class="lineNum">     785 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="786"><span class="lineNum">     786 </span>            : </a>
+<a name="787"><span class="lineNum">     787 </span><span class="lineNoCov">          0 :     if (style == APR_XML_X2T_FULL || style == APR_XML_X2T_FULL_NS_LANG ||</span></a>
+<a name="788"><span class="lineNum">     788 </span><span class="lineNoCov">          0 :         style == APR_XML_X2T_PARSED) {</span></a>
+<a name="789"><span class="lineNum">     789 </span><span class="lineNoCov">          0 :         if (elem-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="790"><span class="lineNum">     790 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;/%s&gt;&quot;, elem-&gt;name);</span></a>
+<a name="791"><span class="lineNum">     791 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="792"><span class="lineNum">     792 </span><span class="lineNoCov">          0 :         else if (style == APR_XML_X2T_PARSED) {</span></a>
+<a name="793"><span class="lineNum">     793 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;/%s:%s&gt;&quot;, find_prefix_name(elem, elem-&gt;ns, 1), elem-&gt;name);</span></a>
+<a name="794"><span class="lineNum">     794 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="795"><span class="lineNum">     795 </span>            :         else {</a>
+<a name="796"><span class="lineNum">     796 </span><span class="lineNoCov">          0 :             ns = ns_map ? ns_map[elem-&gt;ns] : elem-&gt;ns;</span></a>
+<a name="797"><span class="lineNum">     797 </span><span class="lineNoCov">          0 :             len = sprintf(s, &quot;&lt;/ns%d:%s&gt;&quot;, ns, elem-&gt;name);</span></a>
+<a name="798"><span class="lineNum">     798 </span>            :         }</a>
+<a name="799"><span class="lineNum">     799 </span><span class="lineNoCov">          0 :         s += len;</span></a>
+<a name="800"><span class="lineNum">     800 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="801"><span class="lineNum">     801 </span>            : </a>
+<a name="802"><span class="lineNum">     802 </span><span class="lineNoCov">          0 :     return s;</span></a>
+<a name="803"><span class="lineNum">     803 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="804"><span class="lineNum">     804 </span>            : </a>
+<a name="805"><span class="lineNum">     805 </span><span class="lineNoCov">          0 : APR_DECLARE(void) apr_xml_quote_elem(apr_pool_t *p, apr_xml_elem *elem)</span></a>
+<a name="806"><span class="lineNum">     806 </span>            : {</a>
+<a name="807"><span class="lineNum">     807 </span>            :     apr_text *scan_txt;</a>
+<a name="808"><span class="lineNum">     808 </span>            :     apr_xml_attr *scan_attr;</a>
+<a name="809"><span class="lineNum">     809 </span>            :     apr_xml_elem *scan_elem;</a>
+<a name="810"><span class="lineNum">     810 </span>            : </a>
+<a name="811"><span class="lineNum">     811 </span>            :     /* convert the element's text */</a>
+<a name="812"><span class="lineNum">     812 </span><span class="lineNoCov">          0 :     for (scan_txt = elem-&gt;first_cdata.first;</span></a>
+<a name="813"><span class="lineNum">     813 </span><span class="lineNoCov">          0 :          scan_txt != NULL;</span></a>
+<a name="814"><span class="lineNum">     814 </span><span class="lineNoCov">          0 :          scan_txt = scan_txt-&gt;next) {</span></a>
+<a name="815"><span class="lineNum">     815 </span><span class="lineNoCov">          0 :         scan_txt-&gt;text = apr_xml_quote_string(p, scan_txt-&gt;text, 0);</span></a>
+<a name="816"><span class="lineNum">     816 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="817"><span class="lineNum">     817 </span><span class="lineNoCov">          0 :     for (scan_txt = elem-&gt;following_cdata.first;</span></a>
+<a name="818"><span class="lineNum">     818 </span><span class="lineNoCov">          0 :          scan_txt != NULL;</span></a>
+<a name="819"><span class="lineNum">     819 </span><span class="lineNoCov">          0 :          scan_txt = scan_txt-&gt;next) {</span></a>
+<a name="820"><span class="lineNum">     820 </span><span class="lineNoCov">          0 :         scan_txt-&gt;text = apr_xml_quote_string(p, scan_txt-&gt;text, 0);</span></a>
+<a name="821"><span class="lineNum">     821 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="822"><span class="lineNum">     822 </span>            : </a>
+<a name="823"><span class="lineNum">     823 </span>            :     /* convert the attribute values */</a>
+<a name="824"><span class="lineNum">     824 </span><span class="lineNoCov">          0 :     for (scan_attr = elem-&gt;attr;</span></a>
+<a name="825"><span class="lineNum">     825 </span><span class="lineNoCov">          0 :          scan_attr != NULL;</span></a>
+<a name="826"><span class="lineNum">     826 </span><span class="lineNoCov">          0 :          scan_attr = scan_attr-&gt;next) {</span></a>
+<a name="827"><span class="lineNum">     827 </span><span class="lineNoCov">          0 :         scan_attr-&gt;value = apr_xml_quote_string(p, scan_attr-&gt;value, 1);</span></a>
+<a name="828"><span class="lineNum">     828 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="829"><span class="lineNum">     829 </span>            : </a>
+<a name="830"><span class="lineNum">     830 </span>            :     /* convert the child elements */</a>
+<a name="831"><span class="lineNum">     831 </span><span class="lineNoCov">          0 :     for (scan_elem = elem-&gt;first_child;</span></a>
+<a name="832"><span class="lineNum">     832 </span><span class="lineNoCov">          0 :          scan_elem != NULL;</span></a>
+<a name="833"><span class="lineNum">     833 </span><span class="lineNoCov">          0 :          scan_elem = scan_elem-&gt;next) {</span></a>
+<a name="834"><span class="lineNum">     834 </span><span class="lineNoCov">          0 :         apr_xml_quote_elem(p, scan_elem);</span></a>
+<a name="835"><span class="lineNum">     835 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="836"><span class="lineNum">     836 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="837"><span class="lineNum">     837 </span>            : </a>
+<a name="838"><span class="lineNum">     838 </span>            : /* convert an element to a text string */</a>
+<a name="839"><span class="lineNum">     839 </span><span class="lineNoCov">          0 : APR_DECLARE(void) apr_xml_to_text(apr_pool_t * p, const apr_xml_elem *elem,</span></a>
+<a name="840"><span class="lineNum">     840 </span>            :                                   int style, apr_array_header_t *namespaces,</a>
+<a name="841"><span class="lineNum">     841 </span>            :                                   int *ns_map, const char **pbuf,</a>
+<a name="842"><span class="lineNum">     842 </span>            :                                   apr_size_t *psize)</a>
+<a name="843"><span class="lineNum">     843 </span>            : {</a>
+<a name="844"><span class="lineNum">     844 </span>            :     /* get the exact size, plus a null terminator */</a>
+<a name="845"><span class="lineNum">     845 </span><span class="lineNoCov">          0 :     apr_size_t size = elem_size(elem, style, namespaces, ns_map) + 1;</span></a>
+<a name="846"><span class="lineNum">     846 </span><span class="lineNoCov">          0 :     char *s = apr_palloc(p, size);</span></a>
+<a name="847"><span class="lineNum">     847 </span>            : </a>
+<a name="848"><span class="lineNum">     848 </span><span class="lineNoCov">          0 :     (void) write_elem(s, elem, style, namespaces, ns_map);</span></a>
+<a name="849"><span class="lineNum">     849 </span><span class="lineNoCov">          0 :     s[size - 1] = '\0';</span></a>
+<a name="850"><span class="lineNum">     850 </span>            : </a>
+<a name="851"><span class="lineNum">     851 </span><span class="lineNoCov">          0 :     *pbuf = s;</span></a>
+<a name="852"><span class="lineNum">     852 </span><span class="lineNoCov">          0 :     if (psize)</span></a>
+<a name="853"><span class="lineNum">     853 </span><span class="lineNoCov">          0 :         *psize = size;</span></a>
+<a name="854"><span class="lineNum">     854 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="855"><span class="lineNum">     855 </span>            : </a>
+<a name="856"><span class="lineNum">     856 </span><span class="lineNoCov">          0 : APR_DECLARE(const char *) apr_xml_empty_elem(apr_pool_t * p,</span></a>
+<a name="857"><span class="lineNum">     857 </span>            :                                              const apr_xml_elem *elem)</a>
+<a name="858"><span class="lineNum">     858 </span>            : {</a>
+<a name="859"><span class="lineNum">     859 </span><span class="lineNoCov">          0 :     if (elem-&gt;ns == APR_XML_NS_NONE) {</span></a>
+<a name="860"><span class="lineNum">     860 </span>            :         /*</a>
+<a name="861"><span class="lineNum">     861 </span>            :          * The prefix (xml...) is already within the prop name, or</a>
+<a name="862"><span class="lineNum">     862 </span>            :          * the element simply has no prefix.</a>
+<a name="863"><span class="lineNum">     863 </span>            :          */</a>
+<a name="864"><span class="lineNum">     864 </span><span class="lineNoCov">          0 :         return apr_psprintf(p, &quot;&lt;%s/&gt;&quot; DEBUG_CR, elem-&gt;name);</span></a>
+<a name="865"><span class="lineNum">     865 </span>            :     }</a>
+<a name="866"><span class="lineNum">     866 </span>            : </a>
+<a name="867"><span class="lineNum">     867 </span><span class="lineNoCov">          0 :     return apr_psprintf(p, &quot;&lt;ns%d:%s/&gt;&quot; DEBUG_CR, elem-&gt;ns, elem-&gt;name);</span></a>
+<a name="868"><span class="lineNum">     868 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="869"><span class="lineNum">     869 </span>            : </a>
+<a name="870"><span class="lineNum">     870 </span>            : /* return the URI's (existing) index, or insert it and return a new index */</a>
+<a name="871"><span class="lineNum">     871 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_xml_insert_uri(apr_array_header_t *uri_array,</span></a>
+<a name="872"><span class="lineNum">     872 </span>            :                                     const char *uri)</a>
+<a name="873"><span class="lineNum">     873 </span>            : {</a>
+<a name="874"><span class="lineNum">     874 </span>            :     int i;</a>
+<a name="875"><span class="lineNum">     875 </span>            :     const char **pelt;</a>
+<a name="876"><span class="lineNum">     876 </span>            : </a>
+<a name="877"><span class="lineNum">     877 </span>            :     /* never insert an empty URI; this index is always APR_XML_NS_NONE */</a>
+<a name="878"><span class="lineNum">     878 </span><span class="lineNoCov">          0 :     if (*uri == '\0')</span></a>
+<a name="879"><span class="lineNum">     879 </span><span class="lineNoCov">          0 :         return APR_XML_NS_NONE;</span></a>
+<a name="880"><span class="lineNum">     880 </span>            : </a>
+<a name="881"><span class="lineNum">     881 </span><span class="lineNoCov">          0 :     for (i = uri_array-&gt;nelts; i--;) {</span></a>
+<a name="882"><span class="lineNum">     882 </span><span class="lineNoCov">          0 :         if (strcmp(uri, APR_XML_GET_URI_ITEM(uri_array, i)) == 0)</span></a>
+<a name="883"><span class="lineNum">     883 </span><span class="lineNoCov">          0 :             return i;</span></a>
+<a name="884"><span class="lineNum">     884 </span>            :     }</a>
+<a name="885"><span class="lineNum">     885 </span>            : </a>
+<a name="886"><span class="lineNum">     886 </span><span class="lineNoCov">          0 :     pelt = apr_array_push(uri_array);</span></a>
+<a name="887"><span class="lineNum">     887 </span><span class="lineNoCov">          0 :     *pelt = uri;                /* assume uri is const or in a pool */</span></a>
+<a name="888"><span class="lineNum">     888 </span><span class="lineNoCov">          0 :     return uri_array-&gt;nelts - 1;</span></a>
+<a name="889"><span class="lineNum">     889 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="890"><span class="lineNum">     890 </span>            : </a>
+<a name="891"><span class="lineNum">     891 </span>            : /* convert the element to EBCDIC */</a>
+<a name="892"><span class="lineNum">     892 </span>            : #if APR_CHARSET_EBCDIC</a>
+<a name="893"><span class="lineNum">     893 </span>            : static apr_status_t apr_xml_parser_convert_elem(apr_xml_elem *e,</a>
+<a name="894"><span class="lineNum">     894 </span>            :                                                 apr_xlate_t *convset)</a>
+<a name="895"><span class="lineNum">     895 </span>            : {</a>
+<a name="896"><span class="lineNum">     896 </span>            :     apr_xml_attr *a;</a>
+<a name="897"><span class="lineNum">     897 </span>            :     apr_xml_elem *ec;</a>
+<a name="898"><span class="lineNum">     898 </span>            :     apr_text *t;</a>
+<a name="899"><span class="lineNum">     899 </span>            :     apr_size_t inbytes_left, outbytes_left;</a>
+<a name="900"><span class="lineNum">     900 </span>            :     apr_status_t status;</a>
+<a name="901"><span class="lineNum">     901 </span>            : </a>
+<a name="902"><span class="lineNum">     902 </span>            :     inbytes_left = outbytes_left = strlen(e-&gt;name);</a>
+<a name="903"><span class="lineNum">     903 </span>            :     status = apr_xlate_conv_buffer(convset, e-&gt;name,  &amp;inbytes_left, (char *) e-&gt;name, &amp;outbytes_left);</a>
+<a name="904"><span class="lineNum">     904 </span>            :     if (status) {</a>
+<a name="905"><span class="lineNum">     905 </span>            :         return status;</a>
+<a name="906"><span class="lineNum">     906 </span>            :     }</a>
+<a name="907"><span class="lineNum">     907 </span>            : </a>
+<a name="908"><span class="lineNum">     908 </span>            :     for (t = e-&gt;first_cdata.first; t != NULL; t = t-&gt;next) {</a>
+<a name="909"><span class="lineNum">     909 </span>            :         inbytes_left = outbytes_left = strlen(t-&gt;text);</a>
+<a name="910"><span class="lineNum">     910 </span>            :         status = apr_xlate_conv_buffer(convset, t-&gt;text, &amp;inbytes_left, (char *) t-&gt;text, &amp;outbytes_left);</a>
+<a name="911"><span class="lineNum">     911 </span>            :         if (status) {</a>
+<a name="912"><span class="lineNum">     912 </span>            :             return status;</a>
+<a name="913"><span class="lineNum">     913 </span>            :         }</a>
+<a name="914"><span class="lineNum">     914 </span>            :     }</a>
+<a name="915"><span class="lineNum">     915 </span>            : </a>
+<a name="916"><span class="lineNum">     916 </span>            :     for (t = e-&gt;following_cdata.first;  t != NULL; t = t-&gt;next) {</a>
+<a name="917"><span class="lineNum">     917 </span>            :         inbytes_left = outbytes_left = strlen(t-&gt;text);</a>
+<a name="918"><span class="lineNum">     918 </span>            :         status = apr_xlate_conv_buffer(convset, t-&gt;text, &amp;inbytes_left, (char *) t-&gt;text, &amp;outbytes_left);</a>
+<a name="919"><span class="lineNum">     919 </span>            :         if (status) {</a>
+<a name="920"><span class="lineNum">     920 </span>            :             return status;</a>
+<a name="921"><span class="lineNum">     921 </span>            :         }</a>
+<a name="922"><span class="lineNum">     922 </span>            :     }</a>
+<a name="923"><span class="lineNum">     923 </span>            : </a>
+<a name="924"><span class="lineNum">     924 </span>            :     for (a = e-&gt;attr; a != NULL; a = a-&gt;next) {</a>
+<a name="925"><span class="lineNum">     925 </span>            :         inbytes_left = outbytes_left = strlen(a-&gt;name);</a>
+<a name="926"><span class="lineNum">     926 </span>            :         status = apr_xlate_conv_buffer(convset, a-&gt;name, &amp;inbytes_left, (char *) a-&gt;name, &amp;outbytes_left);</a>
+<a name="927"><span class="lineNum">     927 </span>            :         if (status) {</a>
+<a name="928"><span class="lineNum">     928 </span>            :             return status;</a>
+<a name="929"><span class="lineNum">     929 </span>            :         }</a>
+<a name="930"><span class="lineNum">     930 </span>            :         inbytes_left = outbytes_left = strlen(a-&gt;value);</a>
+<a name="931"><span class="lineNum">     931 </span>            :         status = apr_xlate_conv_buffer(convset, a-&gt;value, &amp;inbytes_left, (char *) a-&gt;value, &amp;outbytes_left);</a>
+<a name="932"><span class="lineNum">     932 </span>            :         if (status) {</a>
+<a name="933"><span class="lineNum">     933 </span>            :             return status;</a>
+<a name="934"><span class="lineNum">     934 </span>            :         }</a>
+<a name="935"><span class="lineNum">     935 </span>            :     }</a>
+<a name="936"><span class="lineNum">     936 </span>            : </a>
+<a name="937"><span class="lineNum">     937 </span>            :     for (ec = e-&gt;first_child; ec != NULL; ec = ec-&gt;next) {</a>
+<a name="938"><span class="lineNum">     938 </span>            :         status = apr_xml_parser_convert_elem(ec, convset);</a>
+<a name="939"><span class="lineNum">     939 </span>            :         if (status) {</a>
+<a name="940"><span class="lineNum">     940 </span>            :             return status;</a>
+<a name="941"><span class="lineNum">     941 </span>            :         }</a>
+<a name="942"><span class="lineNum">     942 </span>            :     }</a>
+<a name="943"><span class="lineNum">     943 </span>            :     return APR_SUCCESS;</a>
+<a name="944"><span class="lineNum">     944 </span>            : }</a>
+<a name="945"><span class="lineNum">     945 </span>            : </a>
+<a name="946"><span class="lineNum">     946 </span>            : /* convert the whole document to EBCDIC */</a>
+<a name="947"><span class="lineNum">     947 </span>            : APR_DECLARE(apr_status_t) apr_xml_parser_convert_doc(apr_pool_t *pool,</a>
+<a name="948"><span class="lineNum">     948 </span>            :                                                      apr_xml_doc *pdoc,</a>
+<a name="949"><span class="lineNum">     949 </span>            :                                                      apr_xlate_t *convset)</a>
+<a name="950"><span class="lineNum">     950 </span>            : {</a>
+<a name="951"><span class="lineNum">     951 </span>            :     apr_status_t status;</a>
+<a name="952"><span class="lineNum">     952 </span>            :     /* Don't convert the namespaces: they are constant! */</a>
+<a name="953"><span class="lineNum">     953 </span>            :     if (pdoc-&gt;namespaces != NULL) {</a>
+<a name="954"><span class="lineNum">     954 </span>            :         int i;</a>
+<a name="955"><span class="lineNum">     955 </span>            :         apr_array_header_t *namespaces;</a>
+<a name="956"><span class="lineNum">     956 </span>            :         namespaces = apr_array_make(pool, pdoc-&gt;namespaces-&gt;nelts, sizeof(const char *));</a>
+<a name="957"><span class="lineNum">     957 </span>            :         if (namespaces == NULL)</a>
+<a name="958"><span class="lineNum">     958 </span>            :             return APR_ENOMEM;</a>
+<a name="959"><span class="lineNum">     959 </span>            :         for (i = 0; i &lt; pdoc-&gt;namespaces-&gt;nelts; i++) {</a>
+<a name="960"><span class="lineNum">     960 </span>            :             apr_size_t inbytes_left, outbytes_left;</a>
+<a name="961"><span class="lineNum">     961 </span>            :             char *ptr = (char *) APR_XML_GET_URI_ITEM(pdoc-&gt;namespaces, i);</a>
+<a name="962"><span class="lineNum">     962 </span>            :             ptr = apr_pstrdup(pool, ptr);</a>
+<a name="963"><span class="lineNum">     963 </span>            :             if ( ptr == NULL)</a>
+<a name="964"><span class="lineNum">     964 </span>            :                 return APR_ENOMEM;</a>
+<a name="965"><span class="lineNum">     965 </span>            :             inbytes_left = outbytes_left = strlen(ptr);</a>
+<a name="966"><span class="lineNum">     966 </span>            :             status = apr_xlate_conv_buffer(convset, ptr, &amp;inbytes_left, ptr, &amp;outbytes_left);</a>
+<a name="967"><span class="lineNum">     967 </span>            :             if (status) {</a>
+<a name="968"><span class="lineNum">     968 </span>            :                 return status;</a>
+<a name="969"><span class="lineNum">     969 </span>            :             }</a>
+<a name="970"><span class="lineNum">     970 </span>            :             apr_xml_insert_uri(namespaces, ptr);</a>
+<a name="971"><span class="lineNum">     971 </span>            :         }</a>
+<a name="972"><span class="lineNum">     972 </span>            :         pdoc-&gt;namespaces = namespaces;</a>
+<a name="973"><span class="lineNum">     973 </span>            :     }</a>
+<a name="974"><span class="lineNum">     974 </span>            :     return apr_xml_parser_convert_elem(pdoc-&gt;root, convset);</a>
+<a name="975"><span class="lineNum">     975 </span>            : }</a>
+<a name="976"><span class="lineNum">     976 </span>            : #endif</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

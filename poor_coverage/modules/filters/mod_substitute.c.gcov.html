@@ -1,0 +1,903 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - poor_coverage.lcov_info_final - modules/filters/mod_substitute.c</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">modules/filters</a> - mod_substitute.c<span style="font-size: 80%;"> (source / <a href="mod_substitute.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">poor_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">93</td>
+            <td class="headerCovTableEntry">402</td>
+            <td class="headerCovTableEntryLo">23.1 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 17:33:32</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryLo">57.1 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : /*</a>
+<a name="18"><span class="lineNum">      18 </span>            :  * mod_substitute.c: Perform content rewriting on the fly</a>
+<a name="19"><span class="lineNum">      19 </span>            :  */</a>
+<a name="20"><span class="lineNum">      20 </span>            : </a>
+<a name="21"><span class="lineNum">      21 </span>            : #include &quot;httpd.h&quot;</a>
+<a name="22"><span class="lineNum">      22 </span>            : #include &quot;http_config.h&quot;</a>
+<a name="23"><span class="lineNum">      23 </span>            : #include &quot;http_core.h&quot;</a>
+<a name="24"><span class="lineNum">      24 </span>            : #include &quot;http_log.h&quot;</a>
+<a name="25"><span class="lineNum">      25 </span>            : #include &quot;apr_general.h&quot;</a>
+<a name="26"><span class="lineNum">      26 </span>            : #include &quot;apr_strings.h&quot;</a>
+<a name="27"><span class="lineNum">      27 </span>            : #include &quot;apr_strmatch.h&quot;</a>
+<a name="28"><span class="lineNum">      28 </span>            : #include &quot;apr_lib.h&quot;</a>
+<a name="29"><span class="lineNum">      29 </span>            : #include &quot;util_filter.h&quot;</a>
+<a name="30"><span class="lineNum">      30 </span>            : #include &quot;util_varbuf.h&quot;</a>
+<a name="31"><span class="lineNum">      31 </span>            : #include &quot;apr_buckets.h&quot;</a>
+<a name="32"><span class="lineNum">      32 </span>            : #include &quot;http_request.h&quot;</a>
+<a name="33"><span class="lineNum">      33 </span>            : #include &quot;ap_expr.h&quot;</a>
+<a name="34"><span class="lineNum">      34 </span>            : #define APR_WANT_STRFUNC</a>
+<a name="35"><span class="lineNum">      35 </span>            : #include &quot;apr_want.h&quot;</a>
+<a name="36"><span class="lineNum">      36 </span>            : </a>
+<a name="37"><span class="lineNum">      37 </span>            : /*</a>
+<a name="38"><span class="lineNum">      38 </span>            :  * We want to limit the memory usage in a way that is predictable.</a>
+<a name="39"><span class="lineNum">      39 </span>            :  * Therefore we limit the resulting length of the line.</a>
+<a name="40"><span class="lineNum">      40 </span>            :  * This is the default value.</a>
+<a name="41"><span class="lineNum">      41 </span>            :  */</a>
+<a name="42"><span class="lineNum">      42 </span>            : #define AP_SUBST_MAX_LINE_LENGTH (1024*1024)</a>
+<a name="43"><span class="lineNum">      43 </span>            : </a>
+<a name="44"><span class="lineNum">      44 </span>            : static const char substitute_filter_name[] = &quot;SUBSTITUTE&quot;;</a>
+<a name="45"><span class="lineNum">      45 </span>            : </a>
+<a name="46"><span class="lineNum">      46 </span>            : module AP_MODULE_DECLARE_DATA substitute_module;</a>
+<a name="47"><span class="lineNum">      47 </span>            : </a>
+<a name="48"><span class="lineNum">      48 </span>            : typedef struct subst_pattern_t {</a>
+<a name="49"><span class="lineNum">      49 </span>            :     const apr_strmatch_pattern *pattern;</a>
+<a name="50"><span class="lineNum">      50 </span>            :     const ap_regex_t *regexp;</a>
+<a name="51"><span class="lineNum">      51 </span>            :     const char *replacement;</a>
+<a name="52"><span class="lineNum">      52 </span>            :     apr_size_t replen;</a>
+<a name="53"><span class="lineNum">      53 </span>            :     apr_size_t patlen;</a>
+<a name="54"><span class="lineNum">      54 </span>            :     int flatten;</a>
+<a name="55"><span class="lineNum">      55 </span>            :     const char *from;</a>
+<a name="56"><span class="lineNum">      56 </span>            :     ap_expr_info_t* expr_replacement;</a>
+<a name="57"><span class="lineNum">      57 </span>            : } subst_pattern_t;</a>
+<a name="58"><span class="lineNum">      58 </span>            : </a>
+<a name="59"><span class="lineNum">      59 </span>            : typedef struct {</a>
+<a name="60"><span class="lineNum">      60 </span>            :     apr_array_header_t *patterns;</a>
+<a name="61"><span class="lineNum">      61 </span>            :     apr_size_t max_line_length;</a>
+<a name="62"><span class="lineNum">      62 </span>            :     int max_line_length_set;</a>
+<a name="63"><span class="lineNum">      63 </span>            :     int inherit_before;</a>
+<a name="64"><span class="lineNum">      64 </span>            : } subst_dir_conf;</a>
+<a name="65"><span class="lineNum">      65 </span>            : </a>
+<a name="66"><span class="lineNum">      66 </span>            : typedef struct {</a>
+<a name="67"><span class="lineNum">      67 </span>            :     apr_bucket_brigade *linebb;</a>
+<a name="68"><span class="lineNum">      68 </span>            :     apr_bucket_brigade *linesbb;</a>
+<a name="69"><span class="lineNum">      69 </span>            :     apr_bucket_brigade *passbb;</a>
+<a name="70"><span class="lineNum">      70 </span>            :     apr_bucket_brigade *pattbb;</a>
+<a name="71"><span class="lineNum">      71 </span>            :     apr_pool_t *tpool;</a>
+<a name="72"><span class="lineNum">      72 </span>            : } substitute_module_ctx;</a>
+<a name="73"><span class="lineNum">      73 </span>            : </a>
+<a name="74"><span class="lineNum">      74 </span>            : typedef struct { </a>
+<a name="75"><span class="lineNum">      75 </span>            :     const char **expcache;</a>
+<a name="76"><span class="lineNum">      76 </span>            :     int *expcache_len;</a>
+<a name="77"><span class="lineNum">      77 </span>            : } subst_req_t;</a>
+<a name="78"><span class="lineNum">      78 </span>            : </a>
+<a name="79"><span class="lineNum">      79 </span><span class="lineCov">       5640 : static void *create_substitute_dcfg(apr_pool_t *p, char *d)</span></a>
+<a name="80"><span class="lineNum">      80 </span>            : {</a>
+<a name="81"><span class="lineNum">      81 </span><span class="lineCov">       5640 :     subst_dir_conf *dcfg =</span></a>
+<a name="82"><span class="lineNum">      82 </span><span class="lineCov">       5640 :         (subst_dir_conf *) apr_palloc(p, sizeof(subst_dir_conf));</span></a>
+<a name="83"><span class="lineNum">      83 </span>            : </a>
+<a name="84"><span class="lineNum">      84 </span><span class="lineCov">       5640 :     dcfg-&gt;patterns = apr_array_make(p, 10, sizeof(subst_pattern_t));</span></a>
+<a name="85"><span class="lineNum">      85 </span><span class="lineCov">       5640 :     dcfg-&gt;max_line_length = AP_SUBST_MAX_LINE_LENGTH;</span></a>
+<a name="86"><span class="lineNum">      86 </span><span class="lineCov">       5640 :     dcfg-&gt;max_line_length_set = 0;</span></a>
+<a name="87"><span class="lineNum">      87 </span><span class="lineCov">       5640 :     dcfg-&gt;inherit_before = -1;</span></a>
+<a name="88"><span class="lineNum">      88 </span><span class="lineCov">       5640 :     return dcfg;</span></a>
+<a name="89"><span class="lineNum">      89 </span>            : }</a>
+<a name="90"><span class="lineNum">      90 </span>            : </a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineCov">         32 : static void *merge_substitute_dcfg(apr_pool_t *p, void *basev, void *overv)</span></a>
+<a name="92"><span class="lineNum">      92 </span>            : {</a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineCov">         32 :     subst_dir_conf *a =</span></a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineCov">         32 :         (subst_dir_conf *) apr_palloc(p, sizeof(subst_dir_conf));</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineCov">         32 :     subst_dir_conf *base = (subst_dir_conf *) basev;</span></a>
+<a name="96"><span class="lineNum">      96 </span><span class="lineCov">         32 :     subst_dir_conf *over = (subst_dir_conf *) overv;</span></a>
+<a name="97"><span class="lineNum">      97 </span>            : </a>
+<a name="98"><span class="lineNum">      98 </span><span class="lineCov">         32 :     a-&gt;inherit_before = (over-&gt;inherit_before != -1)</span></a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineNoCov">          0 :                             ? over-&gt;inherit_before</span></a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineCov">         32 :                             : base-&gt;inherit_before;</span></a>
+<a name="101"><span class="lineNum">     101 </span>            :     /* SubstituteInheritBefore wasn't the default behavior until 2.5.x,</a>
+<a name="102"><span class="lineNum">     102 </span>            :      * and may be re-disabled as desired; the original default behavior</a>
+<a name="103"><span class="lineNum">     103 </span>            :      * was to apply inherited subst patterns after locally scoped patterns.</a>
+<a name="104"><span class="lineNum">     104 </span>            :      * In later 2.2 and 2.4 versions, SubstituteInheritBefore may be toggled</a>
+<a name="105"><span class="lineNum">     105 </span>            :      * 'on' to follow the corrected/expected behavior, without violating POLS.</a>
+<a name="106"><span class="lineNum">     106 </span>            :      */</a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineCov">         32 :     if (a-&gt;inherit_before) {</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineCov">         64 :         a-&gt;patterns = apr_array_append(p, base-&gt;patterns,</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineCov">         32 :                                           over-&gt;patterns);</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineCov">         32 :     }</span></a>
+<a name="111"><span class="lineNum">     111 </span>            :     else {</a>
+<a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :         a-&gt;patterns = apr_array_append(p, over-&gt;patterns,</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :                                           base-&gt;patterns);</span></a>
+<a name="114"><span class="lineNum">     114 </span>            :     }</a>
+<a name="115"><span class="lineNum">     115 </span><span class="lineCov">         32 :     a-&gt;max_line_length = over-&gt;max_line_length_set ?</span></a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineCov">         32 :                              over-&gt;max_line_length : base-&gt;max_line_length;</span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineCov">         64 :     a-&gt;max_line_length_set = over-&gt;max_line_length_set</span></a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineCov">         32 :                            | base-&gt;max_line_length_set;</span></a>
+<a name="119"><span class="lineNum">     119 </span><span class="lineCov">         32 :     return a;</span></a>
+<a name="120"><span class="lineNum">     120 </span>            : }</a>
+<a name="121"><span class="lineNum">     121 </span>            : </a>
+<a name="122"><span class="lineNum">     122 </span>            : #define AP_MAX_BUCKETS 1000</a>
+<a name="123"><span class="lineNum">     123 </span>            : </a>
+<a name="124"><span class="lineNum">     124 </span>            : #define SEDRMPATBCKT(b, offset, tmp_b, patlen) do {  \</a>
+<a name="125"><span class="lineNum">     125 </span>            :     apr_bucket_split(b, offset);                     \</a>
+<a name="126"><span class="lineNum">     126 </span>            :     tmp_b = APR_BUCKET_NEXT(b);                      \</a>
+<a name="127"><span class="lineNum">     127 </span>            :     apr_bucket_split(tmp_b, patlen);                 \</a>
+<a name="128"><span class="lineNum">     128 </span>            :     b = APR_BUCKET_NEXT(tmp_b);                      \</a>
+<a name="129"><span class="lineNum">     129 </span>            :     apr_bucket_delete(tmp_b);                        \</a>
+<a name="130"><span class="lineNum">     130 </span>            : } while (0)</a>
+<a name="131"><span class="lineNum">     131 </span>            : </a>
+<a name="132"><span class="lineNum">     132 </span>            : #define CAP2LINEMAX(n) ((n) &lt; (apr_size_t)200 ? (int)(n) : 200)</a>
+<a name="133"><span class="lineNum">     133 </span>            : </a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 : static apr_status_t do_pattmatch(ap_filter_t *f, apr_bucket *inb,</span></a>
+<a name="135"><span class="lineNum">     135 </span>            :                                  apr_bucket_brigade *mybb,</a>
+<a name="136"><span class="lineNum">     136 </span>            :                                  apr_pool_t *pool)</a>
+<a name="137"><span class="lineNum">     137 </span>            : {</a>
+<a name="138"><span class="lineNum">     138 </span>            :     int i;</a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 :     int force_quick = 0;</span></a>
+<a name="140"><span class="lineNum">     140 </span>            :     ap_regmatch_t regm[AP_MAX_REG_MATCH];</a>
+<a name="141"><span class="lineNum">     141 </span>            :     apr_size_t bytes;</a>
+<a name="142"><span class="lineNum">     142 </span>            :     apr_size_t len;</a>
+<a name="143"><span class="lineNum">     143 </span>            :     const char *buff;</a>
+<a name="144"><span class="lineNum">     144 </span>            :     struct ap_varbuf vb;</a>
+<a name="145"><span class="lineNum">     145 </span>            :     apr_bucket *b;</a>
+<a name="146"><span class="lineNum">     146 </span>            :     apr_bucket *tmp_b;</a>
+<a name="147"><span class="lineNum">     147 </span>            :     subst_pattern_t *script;</a>
+<a name="148"><span class="lineNum">     148 </span>            : </a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :     subst_dir_conf *cfg =</span></a>
+<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 :     (subst_dir_conf *) ap_get_module_config(f-&gt;r-&gt;per_dir_config,</span></a>
+<a name="151"><span class="lineNum">     151 </span>            :                                              &amp;substitute_module);</a>
+<a name="152"><span class="lineNum">     152 </span><span class="lineNoCov">          0 :     subst_req_t *rconf = </span></a>
+<a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :     (subst_req_t*) ap_get_module_config(f-&gt;r-&gt;request_config, </span></a>
+<a name="154"><span class="lineNum">     154 </span>            :                                         &amp;substitute_module);</a>
+<a name="155"><span class="lineNum">     155 </span>            : </a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 :     APR_BRIGADE_INSERT_TAIL(mybb, inb);</span></a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :     ap_varbuf_init(pool, &amp;vb, 0);</span></a>
+<a name="158"><span class="lineNum">     158 </span>            : </a>
+<a name="159"><span class="lineNum">     159 </span><span class="lineNoCov">          0 :     script = (subst_pattern_t *) cfg-&gt;patterns-&gt;elts;</span></a>
+<a name="160"><span class="lineNum">     160 </span>            :     /*</a>
+<a name="161"><span class="lineNum">     161 </span>            :      * Simple optimization. If we only have one pattern, then</a>
+<a name="162"><span class="lineNum">     162 </span>            :      * we can safely avoid the overhead of flattening</a>
+<a name="163"><span class="lineNum">     163 </span>            :      */</a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 :     if (cfg-&gt;patterns-&gt;nelts == 1) {</span></a>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :        force_quick = 1;</span></a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="167"><span class="lineNum">     167 </span><span class="lineNoCov">          0 :     for (i = 0; i &lt; cfg-&gt;patterns-&gt;nelts; i++) {</span></a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :         const char *replacement = script-&gt;replacement;</span></a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :         apr_size_t replen = script-&gt;replen;</span></a>
+<a name="170"><span class="lineNum">     170 </span><span class="lineNoCov">          0 :         if (script-&gt;expr_replacement) { </span></a>
+<a name="171"><span class="lineNum">     171 </span><span class="lineNoCov">          0 :             if (!rconf) { </span></a>
+<a name="172"><span class="lineNum">     172 </span><span class="lineNoCov">          0 :                 rconf = apr_pcalloc(f-&gt;r-&gt;pool, sizeof(*rconf));</span></a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 :                 rconf-&gt;expcache     = apr_pcalloc(f-&gt;r-&gt;pool, sizeof(const char*) * cfg-&gt;patterns-&gt;nelts);</span></a>
+<a name="174"><span class="lineNum">     174 </span><span class="lineNoCov">          0 :                 rconf-&gt;expcache_len = apr_pcalloc(f-&gt;r-&gt;pool, sizeof(int) * cfg-&gt;patterns-&gt;nelts);</span></a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :                 ap_set_module_config(f-&gt;r-&gt;request_config, &amp;substitute_module, rconf);</span></a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="177"><span class="lineNum">     177 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="178"><span class="lineNum">     178 </span><span class="lineNoCov">          0 :         for (b = APR_BRIGADE_FIRST(mybb);</span></a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineNoCov">          0 :              b != APR_BRIGADE_SENTINEL(mybb);</span></a>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :              b = APR_BUCKET_NEXT(b)) {</span></a>
+<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 :             if (APR_BUCKET_IS_METADATA(b)) {</span></a>
+<a name="182"><span class="lineNum">     182 </span>            :                 /*</a>
+<a name="183"><span class="lineNum">     183 </span>            :                  * we should NEVER see this, because we should never</a>
+<a name="184"><span class="lineNum">     184 </span>            :                  * be passed any, but &quot;handle&quot; it just in case.</a>
+<a name="185"><span class="lineNum">     185 </span>            :                  */</a>
+<a name="186"><span class="lineNum">     186 </span><span class="lineNoCov">          0 :                 continue;</span></a>
+<a name="187"><span class="lineNum">     187 </span>            :             }</a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :             if (apr_bucket_read(b, &amp;buff, &amp;bytes, APR_BLOCK_READ)</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :                     == APR_SUCCESS) {</span></a>
+<a name="190"><span class="lineNum">     190 </span><span class="lineNoCov">          0 :                 int have_match = 0;</span></a>
+<a name="191"><span class="lineNum">     191 </span>            : </a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :                 ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="193"><span class="lineNum">     193 </span>            :                               &quot;Line read (%&quot; APR_SIZE_T_FMT &quot; bytes): %.*s&quot;,</a>
+<a name="194"><span class="lineNum">     194 </span>            :                               bytes, CAP2LINEMAX(bytes), buff);</a>
+<a name="195"><span class="lineNum">     195 </span><span class="lineNoCov">          0 :                 ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="196"><span class="lineNum">     196 </span>            :                               &quot;Replacing %s:'%s' by '%s'&quot;,</a>
+<a name="197"><span class="lineNum">     197 </span>            :                               script-&gt;pattern ? &quot;string&quot; :</a>
+<a name="198"><span class="lineNum">     198 </span>            :                               script-&gt;regexp  ? &quot;regex&quot;  :</a>
+<a name="199"><span class="lineNum">     199 </span>            :                                                 &quot;unknown&quot;,</a>
+<a name="200"><span class="lineNum">     200 </span>            :                               script-&gt;from, script-&gt;replacement);</a>
+<a name="201"><span class="lineNum">     201 </span>            : </a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineNoCov">          0 :                 vb.strlen = 0;</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :                 if (script-&gt;pattern) {</span></a>
+<a name="204"><span class="lineNum">     204 </span>            :                     const char *repl;</a>
+<a name="205"><span class="lineNum">     205 </span>            :                     /*</a>
+<a name="206"><span class="lineNum">     206 </span>            :                      * space_left counts how many bytes we have left until the</a>
+<a name="207"><span class="lineNum">     207 </span>            :                      * line length reaches max_line_length.</a>
+<a name="208"><span class="lineNum">     208 </span>            :                      */</a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineNoCov">          0 :                     apr_size_t space_left = cfg-&gt;max_line_length;</span></a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :                     while ((repl = apr_strmatch(script-&gt;pattern, buff, bytes)))</span></a>
+<a name="211"><span class="lineNum">     211 </span>            :                     {</a>
+<a name="212"><span class="lineNum">     212 </span>            :                         </a>
+<a name="213"><span class="lineNum">     213 </span><span class="lineNoCov">          0 :                         if (!have_match &amp;&amp; script-&gt;expr_replacement) { </span></a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :                             if (!rconf-&gt;expcache[i]) {</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineNoCov">          0 :                                 const char *err = NULL;</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineNoCov">          0 :                                 rconf-&gt;expcache[i] = ap_expr_str_exec(f-&gt;r, script-&gt;expr_replacement, &amp;err);</span></a>
+<a name="217"><span class="lineNum">     217 </span><span class="lineNoCov">          0 :                                 if (err) { </span></a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineNoCov">          0 :                                     ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, f-&gt;r, &quot;error evaluating expression: %s&quot;, err);</span></a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineNoCov">          0 :                                     return APR_EINVAL;</span></a>
+<a name="220"><span class="lineNum">     220 </span>            :                                 }</a>
+<a name="221"><span class="lineNum">     221 </span><span class="lineNoCov">          0 :                                 rconf-&gt;expcache_len[i] = strlen(rconf-&gt;expcache[i]);</span></a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 :                             }</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 :                             replacement = rconf-&gt;expcache[i];</span></a>
+<a name="224"><span class="lineNum">     224 </span><span class="lineNoCov">          0 :                             replen      = rconf-&gt;expcache_len[i];</span></a>
+<a name="225"><span class="lineNum">     225 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="226"><span class="lineNum">     226 </span>            : </a>
+<a name="227"><span class="lineNum">     227 </span><span class="lineNoCov">          0 :                         ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="228"><span class="lineNum">     228 </span>            :                                       &quot;Matching found, result: '%s'&quot;,</a>
+<a name="229"><span class="lineNum">     229 </span>            :                                       replacement);</a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineNoCov">          0 :                         have_match = 1;</span></a>
+<a name="231"><span class="lineNum">     231 </span>            :                         /* get offset into buff for pattern */</a>
+<a name="232"><span class="lineNum">     232 </span><span class="lineNoCov">          0 :                         len = (apr_size_t) (repl - buff);</span></a>
+<a name="233"><span class="lineNum">     233 </span><span class="lineNoCov">          0 :                         if (script-&gt;flatten &amp;&amp; !force_quick) {</span></a>
+<a name="234"><span class="lineNum">     234 </span>            :                             /*</a>
+<a name="235"><span class="lineNum">     235 </span>            :                              * We are flattening the buckets here, meaning</a>
+<a name="236"><span class="lineNum">     236 </span>            :                              * that we don't do the fast bucket splits.</a>
+<a name="237"><span class="lineNum">     237 </span>            :                              * Instead we copy over what the buckets would</a>
+<a name="238"><span class="lineNum">     238 </span>            :                              * contain and use them. This is slow, since we</a>
+<a name="239"><span class="lineNum">     239 </span>            :                              * are constanting allocing space and copying</a>
+<a name="240"><span class="lineNum">     240 </span>            :                              * strings.</a>
+<a name="241"><span class="lineNum">     241 </span>            :                              */</a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineNoCov">          0 :                             if (vb.strlen + len + replen &gt; cfg-&gt;max_line_length)</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineNoCov">          0 :                                 return APR_ENOMEM;</span></a>
+<a name="244"><span class="lineNum">     244 </span><span class="lineNoCov">          0 :                             ap_varbuf_strmemcat(&amp;vb, buff, len);</span></a>
+<a name="245"><span class="lineNum">     245 </span><span class="lineNoCov">          0 :                             ap_varbuf_strmemcat(&amp;vb, replacement, replen);</span></a>
+<a name="246"><span class="lineNum">     246 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="247"><span class="lineNum">     247 </span>            :                         else {</a>
+<a name="248"><span class="lineNum">     248 </span>            :                             /*</a>
+<a name="249"><span class="lineNum">     249 </span>            :                              * The string before the match but after the</a>
+<a name="250"><span class="lineNum">     250 </span>            :                              * previous match (if any) has length 'len'.</a>
+<a name="251"><span class="lineNum">     251 </span>            :                              * Check if we still have space for this string and</a>
+<a name="252"><span class="lineNum">     252 </span>            :                              * the replacement string.</a>
+<a name="253"><span class="lineNum">     253 </span>            :                              */</a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineNoCov">          0 :                             if (space_left &lt; len + replen)</span></a>
+<a name="255"><span class="lineNum">     255 </span><span class="lineNoCov">          0 :                                 return APR_ENOMEM;</span></a>
+<a name="256"><span class="lineNum">     256 </span><span class="lineNoCov">          0 :                             space_left -= len + replen;</span></a>
+<a name="257"><span class="lineNum">     257 </span>            :                             /*</a>
+<a name="258"><span class="lineNum">     258 </span>            :                              * We now split off the string before the match</a>
+<a name="259"><span class="lineNum">     259 </span>            :                              * as its own bucket, then isolate the matched</a>
+<a name="260"><span class="lineNum">     260 </span>            :                              * string and delete it.</a>
+<a name="261"><span class="lineNum">     261 </span>            :                              */</a>
+<a name="262"><span class="lineNum">     262 </span><span class="lineNoCov">          0 :                             SEDRMPATBCKT(b, len, tmp_b, script-&gt;patlen);</span></a>
+<a name="263"><span class="lineNum">     263 </span>            :                             /*</a>
+<a name="264"><span class="lineNum">     264 </span>            :                              * Finally, we create a bucket that contains the</a>
+<a name="265"><span class="lineNum">     265 </span>            :                              * replacement...</a>
+<a name="266"><span class="lineNum">     266 </span>            :                              */</a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineNoCov">          0 :                             tmp_b = apr_bucket_transient_create(replacement,</span></a>
+<a name="268"><span class="lineNum">     268 </span><span class="lineNoCov">          0 :                                       replen,</span></a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineNoCov">          0 :                                       f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="270"><span class="lineNum">     270 </span>            :                             /* ... and insert it */</a>
+<a name="271"><span class="lineNum">     271 </span><span class="lineNoCov">          0 :                             APR_BUCKET_INSERT_BEFORE(b, tmp_b);</span></a>
+<a name="272"><span class="lineNum">     272 </span>            :                         }</a>
+<a name="273"><span class="lineNum">     273 </span>            :                         /* now we need to adjust buff for all these changes */</a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineNoCov">          0 :                         len += script-&gt;patlen;</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :                         bytes -= len;</span></a>
+<a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :                         buff += len;</span></a>
+<a name="277"><span class="lineNum">     277 </span>            :                     }</a>
+<a name="278"><span class="lineNum">     278 </span><span class="lineNoCov">          0 :                     if (have_match) {</span></a>
+<a name="279"><span class="lineNum">     279 </span><span class="lineNoCov">          0 :                         if (script-&gt;flatten &amp;&amp; !force_quick) {</span></a>
+<a name="280"><span class="lineNum">     280 </span>            :                             /* XXX: we should check for AP_MAX_BUCKETS here and</a>
+<a name="281"><span class="lineNum">     281 </span>            :                              * XXX: call ap_pass_brigade accordingly</a>
+<a name="282"><span class="lineNum">     282 </span>            :                              */</a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 :                             char *copy = ap_varbuf_pdup(pool, &amp;vb, NULL, 0,</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineNoCov">          0 :                                                         buff, bytes, &amp;len);</span></a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineNoCov">          0 :                             ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="286"><span class="lineNum">     286 </span>            :                                           &quot;New line (%&quot; APR_SIZE_T_FMT &quot; bytes): %.*s&quot;,</a>
+<a name="287"><span class="lineNum">     287 </span>            :                                           len, CAP2LINEMAX(len), copy);</a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :                             tmp_b = apr_bucket_pool_create(copy, len, pool,</span></a>
+<a name="289"><span class="lineNum">     289 </span><span class="lineNoCov">          0 :                                                            f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :                             APR_BUCKET_INSERT_BEFORE(b, tmp_b);</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                             apr_bucket_delete(b);</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :                             b = tmp_b;</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="294"><span class="lineNum">     294 </span>            :                         else {</a>
+<a name="295"><span class="lineNum">     295 </span>            :                             /*</a>
+<a name="296"><span class="lineNum">     296 </span>            :                              * We want the behaviour to be predictable.</a>
+<a name="297"><span class="lineNum">     297 </span>            :                              * Therefore we try to always error out if the</a>
+<a name="298"><span class="lineNum">     298 </span>            :                              * line length is larger than the limit,</a>
+<a name="299"><span class="lineNum">     299 </span>            :                              * regardless of the content of the line. So,</a>
+<a name="300"><span class="lineNum">     300 </span>            :                              * let's check if the remaining non-matching</a>
+<a name="301"><span class="lineNum">     301 </span>            :                              * string does not exceed the limit.</a>
+<a name="302"><span class="lineNum">     302 </span>            :                              */</a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :                             if (space_left &lt; b-&gt;length)</span></a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :                                 return APR_ENOMEM;</span></a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineNoCov">          0 :                             ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="306"><span class="lineNum">     306 </span>            :                                           &quot;New line (%&quot; APR_SIZE_T_FMT &quot; bytes): %.*s&quot;,</a>
+<a name="307"><span class="lineNum">     307 </span>            :                                           bytes, CAP2LINEMAX(bytes), buff);</a>
+<a name="308"><span class="lineNum">     308 </span>            :                         }</a>
+<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 :                     }</span></a>
+<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 :                 else if (script-&gt;regexp) {</span></a>
+<a name="312"><span class="lineNum">     312 </span><span class="lineNoCov">          0 :                     int left = bytes;</span></a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineNoCov">          0 :                     const char *pos = buff;</span></a>
+<a name="314"><span class="lineNum">     314 </span>            :                     char *repl;</a>
+<a name="315"><span class="lineNum">     315 </span><span class="lineNoCov">          0 :                     apr_size_t space_left = cfg-&gt;max_line_length;</span></a>
+<a name="316"><span class="lineNum">     316 </span><span class="lineNoCov">          0 :                     while (!ap_regexec_len(script-&gt;regexp, pos, left,</span></a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :                                        AP_MAX_REG_MATCH, regm, 0)) {</span></a>
+<a name="318"><span class="lineNum">     318 </span>            :                         apr_status_t rv;</a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :                         if (!have_match &amp;&amp; script-&gt;expr_replacement) {</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 :                             if (!rconf-&gt;expcache[i]) {</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :                                 const char *err = NULL;</span></a>
+<a name="322"><span class="lineNum">     322 </span><span class="lineNoCov">          0 :                                 rconf-&gt;expcache[i] = ap_expr_str_exec(f-&gt;r, script-&gt;expr_replacement, &amp;err);</span></a>
+<a name="323"><span class="lineNum">     323 </span><span class="lineNoCov">          0 :                                 if (err) {</span></a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineNoCov">          0 :                                     ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, f-&gt;r, &quot;error evaluating expression: %s&quot;, err);</span></a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineNoCov">          0 :                                     return APR_EGENERAL;</span></a>
+<a name="326"><span class="lineNum">     326 </span>            :                                 }</a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineNoCov">          0 :                                 rconf-&gt;expcache_len[i] = strlen(rconf-&gt;expcache[i]);</span></a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineNoCov">          0 :                             }</span></a>
+<a name="329"><span class="lineNum">     329 </span><span class="lineNoCov">          0 :                             replacement = rconf-&gt;expcache[i];</span></a>
+<a name="330"><span class="lineNum">     330 </span><span class="lineNoCov">          0 :                             replen      = rconf-&gt;expcache_len[i];</span></a>
+<a name="331"><span class="lineNum">     331 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="332"><span class="lineNum">     332 </span>            : </a>
+<a name="333"><span class="lineNum">     333 </span><span class="lineNoCov">          0 :                         ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="334"><span class="lineNum">     334 </span>            :                                       &quot;Matching found&quot;);</a>
+<a name="335"><span class="lineNum">     335 </span><span class="lineNoCov">          0 :                         have_match = 1;</span></a>
+<a name="336"><span class="lineNum">     336 </span><span class="lineNoCov">          0 :                         if (script-&gt;flatten &amp;&amp; !force_quick) {</span></a>
+<a name="337"><span class="lineNum">     337 </span>            :                             /* check remaining buffer size */</a>
+<a name="338"><span class="lineNum">     338 </span>            :                             /* Note that the last param in ap_varbuf_regsub below</a>
+<a name="339"><span class="lineNum">     339 </span>            :                              * must stay positive. If it gets 0, it would mean</a>
+<a name="340"><span class="lineNum">     340 </span>            :                              * unlimited space available. */</a>
+<a name="341"><span class="lineNum">     341 </span><span class="lineNoCov">          0 :                             if (vb.strlen + regm[0].rm_so &gt;= cfg-&gt;max_line_length)</span></a>
+<a name="342"><span class="lineNum">     342 </span><span class="lineNoCov">          0 :                                 return APR_ENOMEM;</span></a>
+<a name="343"><span class="lineNum">     343 </span>            :                             /* copy bytes before the match */</a>
+<a name="344"><span class="lineNum">     344 </span><span class="lineNoCov">          0 :                             if (regm[0].rm_so &gt; 0)</span></a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :                                 ap_varbuf_strmemcat(&amp;vb, pos, regm[0].rm_so);</span></a>
+<a name="346"><span class="lineNum">     346 </span>            :                             /* add replacement string, last argument is unsigned! */</a>
+<a name="347"><span class="lineNum">     347 </span><span class="lineNoCov">          0 :                             rv = ap_varbuf_regsub(&amp;vb, replacement, pos,</span></a>
+<a name="348"><span class="lineNum">     348 </span><span class="lineNoCov">          0 :                                                   AP_MAX_REG_MATCH, regm,</span></a>
+<a name="349"><span class="lineNum">     349 </span><span class="lineNoCov">          0 :                                                   cfg-&gt;max_line_length - vb.strlen);</span></a>
+<a name="350"><span class="lineNum">     350 </span><span class="lineNoCov">          0 :                             if (rv != APR_SUCCESS)</span></a>
+<a name="351"><span class="lineNum">     351 </span><span class="lineNoCov">          0 :                                 return rv;</span></a>
+<a name="352"><span class="lineNum">     352 </span><span class="lineNoCov">          0 :                             ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="353"><span class="lineNum">     353 </span>            :                                           &quot;Result: '%s'&quot;, vb.buf);</a>
+<a name="354"><span class="lineNum">     354 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="355"><span class="lineNum">     355 </span>            :                         else {</a>
+<a name="356"><span class="lineNum">     356 </span>            :                             apr_size_t repl_len;</a>
+<a name="357"><span class="lineNum">     357 </span>            :                             /* account for string before the match */</a>
+<a name="358"><span class="lineNum">     358 </span><span class="lineNoCov">          0 :                             if (space_left &lt;= regm[0].rm_so)</span></a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineNoCov">          0 :                                 return APR_ENOMEM;</span></a>
+<a name="360"><span class="lineNum">     360 </span><span class="lineNoCov">          0 :                             space_left -= regm[0].rm_so;</span></a>
+<a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 :                             rv = ap_pregsub_ex(pool, &amp;repl,</span></a>
+<a name="362"><span class="lineNum">     362 </span><span class="lineNoCov">          0 :                                                replacement, pos,</span></a>
+<a name="363"><span class="lineNum">     363 </span><span class="lineNoCov">          0 :                                                AP_MAX_REG_MATCH, regm,</span></a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineNoCov">          0 :                                                space_left);</span></a>
+<a name="365"><span class="lineNum">     365 </span><span class="lineNoCov">          0 :                             if (rv != APR_SUCCESS)</span></a>
+<a name="366"><span class="lineNum">     366 </span><span class="lineNoCov">          0 :                                 return rv;</span></a>
+<a name="367"><span class="lineNum">     367 </span><span class="lineNoCov">          0 :                             repl_len = strlen(repl);</span></a>
+<a name="368"><span class="lineNum">     368 </span><span class="lineNoCov">          0 :                             space_left -= repl_len;</span></a>
+<a name="369"><span class="lineNum">     369 </span><span class="lineNoCov">          0 :                             len = (apr_size_t) (regm[0].rm_eo - regm[0].rm_so);</span></a>
+<a name="370"><span class="lineNum">     370 </span><span class="lineNoCov">          0 :                             SEDRMPATBCKT(b, regm[0].rm_so, tmp_b, len);</span></a>
+<a name="371"><span class="lineNum">     371 </span><span class="lineNoCov">          0 :                             tmp_b = apr_bucket_transient_create(repl, repl_len,</span></a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineNoCov">          0 :                                                 f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="373"><span class="lineNum">     373 </span><span class="lineNoCov">          0 :                             APR_BUCKET_INSERT_BEFORE(b, tmp_b);</span></a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :                             ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="375"><span class="lineNum">     375 </span>            :                                           &quot;Result: '%s'&quot;, repl);</a>
+<a name="376"><span class="lineNum">     376 </span>            :                         }</a>
+<a name="377"><span class="lineNum">     377 </span>            :                         /*</a>
+<a name="378"><span class="lineNum">     378 </span>            :                          * reset to past what we just did. pos now maps to b</a>
+<a name="379"><span class="lineNum">     379 </span>            :                          * again</a>
+<a name="380"><span class="lineNum">     380 </span>            :                          */</a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :                         pos += regm[0].rm_eo;</span></a>
+<a name="382"><span class="lineNum">     382 </span><span class="lineNoCov">          0 :                         left -= regm[0].rm_eo;</span></a>
+<a name="383"><span class="lineNum">     383 </span>            :                     }</a>
+<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :                     if (have_match &amp;&amp; script-&gt;flatten &amp;&amp; !force_quick) {</span></a>
+<a name="385"><span class="lineNum">     385 </span>            :                         char *copy;</a>
+<a name="386"><span class="lineNum">     386 </span>            :                         /* Copy result plus the part after the last match into</a>
+<a name="387"><span class="lineNum">     387 </span>            :                          * a bucket.</a>
+<a name="388"><span class="lineNum">     388 </span>            :                          */</a>
+<a name="389"><span class="lineNum">     389 </span><span class="lineNoCov">          0 :                         copy = ap_varbuf_pdup(pool, &amp;vb, NULL, 0, pos, left,</span></a>
+<a name="390"><span class="lineNum">     390 </span>            :                                               &amp;len);</a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineNoCov">          0 :                         ap_log_rerror(APLOG_MARK, APLOG_TRACE8, 0, f-&gt;r,</span></a>
+<a name="392"><span class="lineNum">     392 </span>            :                                       &quot;New line (%&quot; APR_SIZE_T_FMT &quot; bytes): %.*s&quot;,</a>
+<a name="393"><span class="lineNum">     393 </span>            :                                       len, CAP2LINEMAX(len), copy);</a>
+<a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :                         tmp_b = apr_bucket_pool_create(copy, len, pool,</span></a>
+<a name="395"><span class="lineNum">     395 </span><span class="lineNoCov">          0 :                                            f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="396"><span class="lineNum">     396 </span><span class="lineNoCov">          0 :                         APR_BUCKET_INSERT_BEFORE(b, tmp_b);</span></a>
+<a name="397"><span class="lineNum">     397 </span><span class="lineNoCov">          0 :                         apr_bucket_delete(b);</span></a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :                         b = tmp_b;</span></a>
+<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :                     }</span></a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="401"><span class="lineNum">     401 </span>            :                 else {</a>
+<a name="402"><span class="lineNum">     402 </span><span class="lineNoCov">          0 :                     ap_assert(0);</span></a>
+<a name="403"><span class="lineNum">     403 </span>            :                     continue;</a>
+<a name="404"><span class="lineNum">     404 </span>            :                 }</a>
+<a name="405"><span class="lineNum">     405 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="406"><span class="lineNum">     406 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="407"><span class="lineNum">     407 </span><span class="lineNoCov">          0 :         script++;</span></a>
+<a name="408"><span class="lineNum">     408 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="409"><span class="lineNum">     409 </span><span class="lineNoCov">          0 :     ap_varbuf_free(&amp;vb);</span></a>
+<a name="410"><span class="lineNum">     410 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="411"><span class="lineNum">     411 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="412"><span class="lineNum">     412 </span>            : </a>
+<a name="413"><span class="lineNum">     413 </span><span class="lineNoCov">          0 : static apr_status_t substitute_filter(ap_filter_t *f, apr_bucket_brigade *bb)</span></a>
+<a name="414"><span class="lineNum">     414 </span>            : {</a>
+<a name="415"><span class="lineNum">     415 </span>            :     apr_size_t bytes;</a>
+<a name="416"><span class="lineNum">     416 </span>            :     apr_size_t len;</a>
+<a name="417"><span class="lineNum">     417 </span>            :     apr_size_t fbytes;</a>
+<a name="418"><span class="lineNum">     418 </span>            :     const char *buff;</a>
+<a name="419"><span class="lineNum">     419 </span><span class="lineNoCov">          0 :     const char *nl = NULL;</span></a>
+<a name="420"><span class="lineNum">     420 </span>            :     char *bflat;</a>
+<a name="421"><span class="lineNum">     421 </span>            :     apr_bucket *b;</a>
+<a name="422"><span class="lineNum">     422 </span>            :     apr_bucket *tmp_b;</a>
+<a name="423"><span class="lineNum">     423 </span><span class="lineNoCov">          0 :     apr_bucket_brigade *tmp_bb = NULL;</span></a>
+<a name="424"><span class="lineNum">     424 </span>            :     apr_status_t rv;</a>
+<a name="425"><span class="lineNum">     425 </span><span class="lineNoCov">          0 :     subst_dir_conf *cfg =</span></a>
+<a name="426"><span class="lineNum">     426 </span><span class="lineNoCov">          0 :     (subst_dir_conf *) ap_get_module_config(f-&gt;r-&gt;per_dir_config,</span></a>
+<a name="427"><span class="lineNum">     427 </span>            :                                              &amp;substitute_module);</a>
+<a name="428"><span class="lineNum">     428 </span>            : </a>
+<a name="429"><span class="lineNum">     429 </span><span class="lineNoCov">          0 :     substitute_module_ctx *ctx = f-&gt;ctx;</span></a>
+<a name="430"><span class="lineNum">     430 </span>            : </a>
+<a name="431"><span class="lineNum">     431 </span>            :     /*</a>
+<a name="432"><span class="lineNum">     432 </span>            :      * First time around? Create the saved bb that we used for each pass</a>
+<a name="433"><span class="lineNum">     433 </span>            :      * through. Note that we can also get here when we explicitly clear ctx,</a>
+<a name="434"><span class="lineNum">     434 </span>            :      * for error handling</a>
+<a name="435"><span class="lineNum">     435 </span>            :      */</a>
+<a name="436"><span class="lineNum">     436 </span><span class="lineNoCov">          0 :     if (!ctx) {</span></a>
+<a name="437"><span class="lineNum">     437 </span><span class="lineNoCov">          0 :         f-&gt;ctx = ctx = apr_pcalloc(f-&gt;r-&gt;pool, sizeof(*ctx));</span></a>
+<a name="438"><span class="lineNum">     438 </span>            :         /*</a>
+<a name="439"><span class="lineNum">     439 </span>            :          * Create all the temporary brigades we need and reuse them to avoid</a>
+<a name="440"><span class="lineNum">     440 </span>            :          * creating them over and over again from r-&gt;pool which would cost a</a>
+<a name="441"><span class="lineNum">     441 </span>            :          * lot of memory in some cases.</a>
+<a name="442"><span class="lineNum">     442 </span>            :          */</a>
+<a name="443"><span class="lineNum">     443 </span><span class="lineNoCov">          0 :         ctx-&gt;linebb = apr_brigade_create(f-&gt;r-&gt;pool, f-&gt;c-&gt;bucket_alloc);</span></a>
+<a name="444"><span class="lineNum">     444 </span><span class="lineNoCov">          0 :         ctx-&gt;linesbb = apr_brigade_create(f-&gt;r-&gt;pool, f-&gt;c-&gt;bucket_alloc);</span></a>
+<a name="445"><span class="lineNum">     445 </span><span class="lineNoCov">          0 :         ctx-&gt;pattbb = apr_brigade_create(f-&gt;r-&gt;pool, f-&gt;c-&gt;bucket_alloc);</span></a>
+<a name="446"><span class="lineNum">     446 </span>            :         /*</a>
+<a name="447"><span class="lineNum">     447 </span>            :          * Everything to be passed to the next filter goes in</a>
+<a name="448"><span class="lineNum">     448 </span>            :          * here, our pass brigade.</a>
+<a name="449"><span class="lineNum">     449 </span>            :          */</a>
+<a name="450"><span class="lineNum">     450 </span><span class="lineNoCov">          0 :         ctx-&gt;passbb = apr_brigade_create(f-&gt;r-&gt;pool, f-&gt;c-&gt;bucket_alloc);</span></a>
+<a name="451"><span class="lineNum">     451 </span>            :         /* Create our temporary pool only once */</a>
+<a name="452"><span class="lineNum">     452 </span><span class="lineNoCov">          0 :         apr_pool_create(&amp;(ctx-&gt;tpool), f-&gt;r-&gt;pool);</span></a>
+<a name="453"><span class="lineNum">     453 </span><span class="lineNoCov">          0 :         apr_pool_tag(ctx-&gt;tpool, &quot;substitute_tpool&quot;);</span></a>
+<a name="454"><span class="lineNum">     454 </span><span class="lineNoCov">          0 :         apr_table_unset(f-&gt;r-&gt;headers_out, &quot;Content-Length&quot;);</span></a>
+<a name="455"><span class="lineNum">     455 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="456"><span class="lineNum">     456 </span>            : </a>
+<a name="457"><span class="lineNum">     457 </span>            :     /*</a>
+<a name="458"><span class="lineNum">     458 </span>            :      * Shortcircuit processing</a>
+<a name="459"><span class="lineNum">     459 </span>            :      */</a>
+<a name="460"><span class="lineNum">     460 </span><span class="lineNoCov">          0 :     if (APR_BRIGADE_EMPTY(bb))</span></a>
+<a name="461"><span class="lineNum">     461 </span><span class="lineNoCov">          0 :         return APR_SUCCESS;</span></a>
+<a name="462"><span class="lineNum">     462 </span>            : </a>
+<a name="463"><span class="lineNum">     463 </span>            :     /*</a>
+<a name="464"><span class="lineNum">     464 </span>            :      * Here's the concept:</a>
+<a name="465"><span class="lineNum">     465 </span>            :      *  Read in the data and look for newlines. Once we</a>
+<a name="466"><span class="lineNum">     466 </span>            :      *  find a full &quot;line&quot;, add it to our working brigade.</a>
+<a name="467"><span class="lineNum">     467 </span>            :      *  If we've finished reading the brigade and we have</a>
+<a name="468"><span class="lineNum">     468 </span>            :      *  any left over data (not a &quot;full&quot; line), store that</a>
+<a name="469"><span class="lineNum">     469 </span>            :      *  for the next pass.</a>
+<a name="470"><span class="lineNum">     470 </span>            :      *</a>
+<a name="471"><span class="lineNum">     471 </span>            :      * Note: anything stored in ctx-&gt;linebb for sure does not have</a>
+<a name="472"><span class="lineNum">     472 </span>            :      * a newline char, so we don't concat that bb with the</a>
+<a name="473"><span class="lineNum">     473 </span>            :      * new bb, since we would spending time searching for the newline</a>
+<a name="474"><span class="lineNum">     474 </span>            :      * in data we know it doesn't exist. So instead, we simply scan</a>
+<a name="475"><span class="lineNum">     475 </span>            :      * our current bb and, if we see a newline, prepend ctx-&gt;linebb</a>
+<a name="476"><span class="lineNum">     476 </span>            :      * to the front of it. This makes the code much less straight-</a>
+<a name="477"><span class="lineNum">     477 </span>            :      * forward (otherwise we could APR_BRIGADE_CONCAT(ctx-&gt;linebb, bb)</a>
+<a name="478"><span class="lineNum">     478 </span>            :      * and just scan for newlines and not bother with needing to know</a>
+<a name="479"><span class="lineNum">     479 </span>            :      * when ctx-&gt;linebb needs to be reset) but also faster. We'll take</a>
+<a name="480"><span class="lineNum">     480 </span>            :      * the speed.</a>
+<a name="481"><span class="lineNum">     481 </span>            :      *</a>
+<a name="482"><span class="lineNum">     482 </span>            :      * Note: apr_brigade_split_line would be nice here, but we</a>
+<a name="483"><span class="lineNum">     483 </span>            :      * really can't use it since we need more control and we want</a>
+<a name="484"><span class="lineNum">     484 </span>            :      * to re-use already read bucket data.</a>
+<a name="485"><span class="lineNum">     485 </span>            :      *</a>
+<a name="486"><span class="lineNum">     486 </span>            :      * See mod_include if still confused :)</a>
+<a name="487"><span class="lineNum">     487 </span>            :      */</a>
+<a name="488"><span class="lineNum">     488 </span>            : </a>
+<a name="489"><span class="lineNum">     489 </span><span class="lineNoCov">          0 :     while ((b = APR_BRIGADE_FIRST(bb)) &amp;&amp; (b != APR_BRIGADE_SENTINEL(bb))) {</span></a>
+<a name="490"><span class="lineNum">     490 </span><span class="lineNoCov">          0 :         if (APR_BUCKET_IS_EOS(b)) {</span></a>
+<a name="491"><span class="lineNum">     491 </span>            :             /*</a>
+<a name="492"><span class="lineNum">     492 </span>            :              * if we see the EOS, then we need to pass along everything we</a>
+<a name="493"><span class="lineNum">     493 </span>            :              * have. But if the ctx-&gt;linebb isn't empty, then we need to add</a>
+<a name="494"><span class="lineNum">     494 </span>            :              * that to the end of what we'll be passing.</a>
+<a name="495"><span class="lineNum">     495 </span>            :              */</a>
+<a name="496"><span class="lineNum">     496 </span><span class="lineNoCov">          0 :             if (!APR_BRIGADE_EMPTY(ctx-&gt;linebb)) {</span></a>
+<a name="497"><span class="lineNum">     497 </span><span class="lineNoCov">          0 :                 rv = apr_brigade_pflatten(ctx-&gt;linebb, &amp;bflat,</span></a>
+<a name="498"><span class="lineNum">     498 </span><span class="lineNoCov">          0 :                                           &amp;fbytes, ctx-&gt;tpool);</span></a>
+<a name="499"><span class="lineNum">     499 </span><span class="lineNoCov">          0 :                 if (rv != APR_SUCCESS)</span></a>
+<a name="500"><span class="lineNum">     500 </span><span class="lineNoCov">          0 :                     goto err;</span></a>
+<a name="501"><span class="lineNum">     501 </span><span class="lineNoCov">          0 :                 if (fbytes &gt; cfg-&gt;max_line_length) {</span></a>
+<a name="502"><span class="lineNum">     502 </span><span class="lineNoCov">          0 :                     rv = APR_ENOMEM;</span></a>
+<a name="503"><span class="lineNum">     503 </span><span class="lineNoCov">          0 :                     goto err;</span></a>
+<a name="504"><span class="lineNum">     504 </span>            :                 }</a>
+<a name="505"><span class="lineNum">     505 </span><span class="lineNoCov">          0 :                 tmp_b = apr_bucket_transient_create(bflat, fbytes,</span></a>
+<a name="506"><span class="lineNum">     506 </span><span class="lineNoCov">          0 :                                                 f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="507"><span class="lineNum">     507 </span><span class="lineNoCov">          0 :                 rv = do_pattmatch(f, tmp_b, ctx-&gt;pattbb, ctx-&gt;tpool);</span></a>
+<a name="508"><span class="lineNum">     508 </span><span class="lineNoCov">          0 :                 if (rv != APR_SUCCESS)</span></a>
+<a name="509"><span class="lineNum">     509 </span><span class="lineNoCov">          0 :                     goto err;</span></a>
+<a name="510"><span class="lineNum">     510 </span><span class="lineNoCov">          0 :                 APR_BRIGADE_CONCAT(ctx-&gt;passbb, ctx-&gt;pattbb);</span></a>
+<a name="511"><span class="lineNum">     511 </span><span class="lineNoCov">          0 :                 apr_brigade_cleanup(ctx-&gt;linebb);</span></a>
+<a name="512"><span class="lineNum">     512 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="513"><span class="lineNum">     513 </span><span class="lineNoCov">          0 :             APR_BUCKET_REMOVE(b);</span></a>
+<a name="514"><span class="lineNum">     514 </span><span class="lineNoCov">          0 :             APR_BRIGADE_INSERT_TAIL(ctx-&gt;passbb, b);</span></a>
+<a name="515"><span class="lineNum">     515 </span><span class="lineNoCov">          0 :             ap_remove_output_filter(f);</span></a>
+<a name="516"><span class="lineNum">     516 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="517"><span class="lineNum">     517 </span>            :         /*</a>
+<a name="518"><span class="lineNum">     518 </span>            :          * No need to handle FLUSH buckets separately as we call</a>
+<a name="519"><span class="lineNum">     519 </span>            :          * ap_pass_brigade anyway at the end of the loop.</a>
+<a name="520"><span class="lineNum">     520 </span>            :          */</a>
+<a name="521"><span class="lineNum">     521 </span><span class="lineNoCov">          0 :         else if (APR_BUCKET_IS_METADATA(b)) {</span></a>
+<a name="522"><span class="lineNum">     522 </span><span class="lineNoCov">          0 :             APR_BUCKET_REMOVE(b);</span></a>
+<a name="523"><span class="lineNum">     523 </span><span class="lineNoCov">          0 :             APR_BRIGADE_INSERT_TAIL(ctx-&gt;passbb, b);</span></a>
+<a name="524"><span class="lineNum">     524 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="525"><span class="lineNum">     525 </span>            :         else {</a>
+<a name="526"><span class="lineNum">     526 </span>            :             /*</a>
+<a name="527"><span class="lineNum">     527 </span>            :              * We have actual &quot;data&quot; so read in as much as we can and start</a>
+<a name="528"><span class="lineNum">     528 </span>            :              * scanning and splitting from our read buffer</a>
+<a name="529"><span class="lineNum">     529 </span>            :              */</a>
+<a name="530"><span class="lineNum">     530 </span><span class="lineNoCov">          0 :             rv = apr_bucket_read(b, &amp;buff, &amp;bytes, APR_BLOCK_READ);</span></a>
+<a name="531"><span class="lineNum">     531 </span><span class="lineNoCov">          0 :             if (rv != APR_SUCCESS || bytes == 0) {</span></a>
+<a name="532"><span class="lineNum">     532 </span><span class="lineNoCov">          0 :                 apr_bucket_delete(b);</span></a>
+<a name="533"><span class="lineNum">     533 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="534"><span class="lineNum">     534 </span>            :             else {</a>
+<a name="535"><span class="lineNum">     535 </span><span class="lineNoCov">          0 :                 int num = 0;</span></a>
+<a name="536"><span class="lineNum">     536 </span><span class="lineNoCov">          0 :                 while (bytes &gt; 0) {</span></a>
+<a name="537"><span class="lineNum">     537 </span><span class="lineNoCov">          0 :                     nl = memchr(buff, '\n', bytes);</span></a>
+<a name="538"><span class="lineNum">     538 </span><span class="lineNoCov">          0 :                     if (nl) {</span></a>
+<a name="539"><span class="lineNum">     539 </span><span class="lineNoCov">          0 :                         len = (apr_size_t) (nl - buff) + 1;</span></a>
+<a name="540"><span class="lineNum">     540 </span>            :                         /* split *after* the newline */</a>
+<a name="541"><span class="lineNum">     541 </span><span class="lineNoCov">          0 :                         apr_bucket_split(b, len);</span></a>
+<a name="542"><span class="lineNum">     542 </span>            :                         /*</a>
+<a name="543"><span class="lineNum">     543 </span>            :                          * We've likely read more data, so bypass rereading</a>
+<a name="544"><span class="lineNum">     544 </span>            :                          * bucket data and continue scanning through this</a>
+<a name="545"><span class="lineNum">     545 </span>            :                          * buffer</a>
+<a name="546"><span class="lineNum">     546 </span>            :                          */</a>
+<a name="547"><span class="lineNum">     547 </span><span class="lineNoCov">          0 :                         bytes -= len;</span></a>
+<a name="548"><span class="lineNum">     548 </span><span class="lineNoCov">          0 :                         buff += len;</span></a>
+<a name="549"><span class="lineNum">     549 </span>            :                         /*</a>
+<a name="550"><span class="lineNum">     550 </span>            :                          * we need b to be updated for future potential</a>
+<a name="551"><span class="lineNum">     551 </span>            :                          * splitting</a>
+<a name="552"><span class="lineNum">     552 </span>            :                          */</a>
+<a name="553"><span class="lineNum">     553 </span><span class="lineNoCov">          0 :                         tmp_b = APR_BUCKET_NEXT(b);</span></a>
+<a name="554"><span class="lineNum">     554 </span><span class="lineNoCov">          0 :                         APR_BUCKET_REMOVE(b);</span></a>
+<a name="555"><span class="lineNum">     555 </span>            :                         /*</a>
+<a name="556"><span class="lineNum">     556 </span>            :                          * Hey, we found a newline! Don't forget the old</a>
+<a name="557"><span class="lineNum">     557 </span>            :                          * stuff that needs to be added to the front. So we</a>
+<a name="558"><span class="lineNum">     558 </span>            :                          * add the split bucket to the end, flatten the whole</a>
+<a name="559"><span class="lineNum">     559 </span>            :                          * bb, morph the whole shebang into a bucket which is</a>
+<a name="560"><span class="lineNum">     560 </span>            :                          * then added to the tail of the newline bb.</a>
+<a name="561"><span class="lineNum">     561 </span>            :                          */</a>
+<a name="562"><span class="lineNum">     562 </span><span class="lineNoCov">          0 :                         if (!APR_BRIGADE_EMPTY(ctx-&gt;linebb)) {</span></a>
+<a name="563"><span class="lineNum">     563 </span><span class="lineNoCov">          0 :                             APR_BRIGADE_INSERT_TAIL(ctx-&gt;linebb, b);</span></a>
+<a name="564"><span class="lineNum">     564 </span><span class="lineNoCov">          0 :                             rv = apr_brigade_pflatten(ctx-&gt;linebb, &amp;bflat,</span></a>
+<a name="565"><span class="lineNum">     565 </span><span class="lineNoCov">          0 :                                                       &amp;fbytes, ctx-&gt;tpool);</span></a>
+<a name="566"><span class="lineNum">     566 </span><span class="lineNoCov">          0 :                             if (rv != APR_SUCCESS)</span></a>
+<a name="567"><span class="lineNum">     567 </span><span class="lineNoCov">          0 :                                 goto err;</span></a>
+<a name="568"><span class="lineNum">     568 </span><span class="lineNoCov">          0 :                             if (fbytes &gt; cfg-&gt;max_line_length) {</span></a>
+<a name="569"><span class="lineNum">     569 </span>            :                                 /* Avoid pflattening further lines, we will</a>
+<a name="570"><span class="lineNum">     570 </span>            :                                  * abort later on anyway.</a>
+<a name="571"><span class="lineNum">     571 </span>            :                                  */</a>
+<a name="572"><span class="lineNum">     572 </span><span class="lineNoCov">          0 :                                 rv = APR_ENOMEM;</span></a>
+<a name="573"><span class="lineNum">     573 </span><span class="lineNoCov">          0 :                                 goto err;</span></a>
+<a name="574"><span class="lineNum">     574 </span>            :                             }</a>
+<a name="575"><span class="lineNum">     575 </span><span class="lineNoCov">          0 :                             b = apr_bucket_transient_create(bflat, fbytes,</span></a>
+<a name="576"><span class="lineNum">     576 </span><span class="lineNoCov">          0 :                                             f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="577"><span class="lineNum">     577 </span><span class="lineNoCov">          0 :                             apr_brigade_cleanup(ctx-&gt;linebb);</span></a>
+<a name="578"><span class="lineNum">     578 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="579"><span class="lineNum">     579 </span><span class="lineNoCov">          0 :                         rv = do_pattmatch(f, b, ctx-&gt;pattbb, ctx-&gt;tpool);</span></a>
+<a name="580"><span class="lineNum">     580 </span><span class="lineNoCov">          0 :                         if (rv != APR_SUCCESS)</span></a>
+<a name="581"><span class="lineNum">     581 </span><span class="lineNoCov">          0 :                             goto err;</span></a>
+<a name="582"><span class="lineNum">     582 </span>            :                         /*</a>
+<a name="583"><span class="lineNum">     583 </span>            :                          * Count how many buckets we have in ctx-&gt;passbb</a>
+<a name="584"><span class="lineNum">     584 </span>            :                          * so far. Yes, this is correct we count ctx-&gt;passbb</a>
+<a name="585"><span class="lineNum">     585 </span>            :                          * and not ctx-&gt;pattbb as we do not reset num on every</a>
+<a name="586"><span class="lineNum">     586 </span>            :                          * iteration.</a>
+<a name="587"><span class="lineNum">     587 </span>            :                          */</a>
+<a name="588"><span class="lineNum">     588 </span><span class="lineNoCov">          0 :                         for (b = APR_BRIGADE_FIRST(ctx-&gt;pattbb);</span></a>
+<a name="589"><span class="lineNum">     589 </span><span class="lineNoCov">          0 :                              b != APR_BRIGADE_SENTINEL(ctx-&gt;pattbb);</span></a>
+<a name="590"><span class="lineNum">     590 </span><span class="lineNoCov">          0 :                              b = APR_BUCKET_NEXT(b)) {</span></a>
+<a name="591"><span class="lineNum">     591 </span><span class="lineNoCov">          0 :                             num++;</span></a>
+<a name="592"><span class="lineNum">     592 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="593"><span class="lineNum">     593 </span><span class="lineNoCov">          0 :                         APR_BRIGADE_CONCAT(ctx-&gt;passbb, ctx-&gt;pattbb);</span></a>
+<a name="594"><span class="lineNum">     594 </span>            :                         /*</a>
+<a name="595"><span class="lineNum">     595 </span>            :                          * If the number of buckets in ctx-&gt;passbb reaches an</a>
+<a name="596"><span class="lineNum">     596 </span>            :                          * &quot;insane&quot; level, we consume much memory for all the</a>
+<a name="597"><span class="lineNum">     597 </span>            :                          * buckets as such. So lets flush them down the chain</a>
+<a name="598"><span class="lineNum">     598 </span>            :                          * in this case and thus clear ctx-&gt;passbb. This frees</a>
+<a name="599"><span class="lineNum">     599 </span>            :                          * the buckets memory for further processing.</a>
+<a name="600"><span class="lineNum">     600 </span>            :                          * Usually this condition should not become true, but</a>
+<a name="601"><span class="lineNum">     601 </span>            :                          * it is a safety measure for edge cases.</a>
+<a name="602"><span class="lineNum">     602 </span>            :                          */</a>
+<a name="603"><span class="lineNum">     603 </span><span class="lineNoCov">          0 :                         if (num &gt; AP_MAX_BUCKETS) {</span></a>
+<a name="604"><span class="lineNum">     604 </span><span class="lineNoCov">          0 :                             b = apr_bucket_flush_create(</span></a>
+<a name="605"><span class="lineNum">     605 </span><span class="lineNoCov">          0 :                                                 f-&gt;r-&gt;connection-&gt;bucket_alloc);</span></a>
+<a name="606"><span class="lineNum">     606 </span><span class="lineNoCov">          0 :                             APR_BRIGADE_INSERT_TAIL(ctx-&gt;passbb, b);</span></a>
+<a name="607"><span class="lineNum">     607 </span><span class="lineNoCov">          0 :                             rv = ap_pass_brigade(f-&gt;next, ctx-&gt;passbb);</span></a>
+<a name="608"><span class="lineNum">     608 </span><span class="lineNoCov">          0 :                             apr_brigade_cleanup(ctx-&gt;passbb);</span></a>
+<a name="609"><span class="lineNum">     609 </span><span class="lineNoCov">          0 :                             num = 0;</span></a>
+<a name="610"><span class="lineNum">     610 </span><span class="lineNoCov">          0 :                             apr_pool_clear(ctx-&gt;tpool);</span></a>
+<a name="611"><span class="lineNum">     611 </span><span class="lineNoCov">          0 :                             if (rv != APR_SUCCESS)</span></a>
+<a name="612"><span class="lineNum">     612 </span><span class="lineNoCov">          0 :                                 goto err;</span></a>
+<a name="613"><span class="lineNum">     613 </span><span class="lineNoCov">          0 :                         }</span></a>
+<a name="614"><span class="lineNum">     614 </span><span class="lineNoCov">          0 :                         b = tmp_b;</span></a>
+<a name="615"><span class="lineNum">     615 </span><span class="lineNoCov">          0 :                     }</span></a>
+<a name="616"><span class="lineNum">     616 </span>            :                     else {</a>
+<a name="617"><span class="lineNum">     617 </span>            :                         /*</a>
+<a name="618"><span class="lineNum">     618 </span>            :                          * no newline in whatever is left of this buffer so</a>
+<a name="619"><span class="lineNum">     619 </span>            :                          * tuck data away and get next bucket</a>
+<a name="620"><span class="lineNum">     620 </span>            :                          */</a>
+<a name="621"><span class="lineNum">     621 </span><span class="lineNoCov">          0 :                         APR_BUCKET_REMOVE(b);</span></a>
+<a name="622"><span class="lineNum">     622 </span><span class="lineNoCov">          0 :                         APR_BRIGADE_INSERT_TAIL(ctx-&gt;linebb, b);</span></a>
+<a name="623"><span class="lineNum">     623 </span><span class="lineNoCov">          0 :                         bytes = 0;</span></a>
+<a name="624"><span class="lineNum">     624 </span>            :                     }</a>
+<a name="625"><span class="lineNum">     625 </span>            :                 }</a>
+<a name="626"><span class="lineNum">     626 </span>            :             }</a>
+<a name="627"><span class="lineNum">     627 </span>            :         }</a>
+<a name="628"><span class="lineNum">     628 </span><span class="lineNoCov">          0 :         if (!APR_BRIGADE_EMPTY(ctx-&gt;passbb)) {</span></a>
+<a name="629"><span class="lineNum">     629 </span><span class="lineNoCov">          0 :             rv = ap_pass_brigade(f-&gt;next, ctx-&gt;passbb);</span></a>
+<a name="630"><span class="lineNum">     630 </span><span class="lineNoCov">          0 :             apr_brigade_cleanup(ctx-&gt;passbb);</span></a>
+<a name="631"><span class="lineNum">     631 </span><span class="lineNoCov">          0 :             if (rv != APR_SUCCESS)</span></a>
+<a name="632"><span class="lineNum">     632 </span><span class="lineNoCov">          0 :                 goto err;</span></a>
+<a name="633"><span class="lineNum">     633 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="634"><span class="lineNum">     634 </span><span class="lineNoCov">          0 :         apr_pool_clear(ctx-&gt;tpool);</span></a>
+<a name="635"><span class="lineNum">     635 </span>            :     }</a>
+<a name="636"><span class="lineNum">     636 </span>            : </a>
+<a name="637"><span class="lineNum">     637 </span>            :     /* Anything left we want to save/setaside for the next go-around */</a>
+<a name="638"><span class="lineNum">     638 </span><span class="lineNoCov">          0 :     if (!APR_BRIGADE_EMPTY(ctx-&gt;linebb)) {</span></a>
+<a name="639"><span class="lineNum">     639 </span>            :         /*</a>
+<a name="640"><span class="lineNum">     640 </span>            :          * Provide ap_save_brigade with an existing empty brigade</a>
+<a name="641"><span class="lineNum">     641 </span>            :          * (ctx-&gt;linesbb) to avoid creating a new one.</a>
+<a name="642"><span class="lineNum">     642 </span>            :          */</a>
+<a name="643"><span class="lineNum">     643 </span><span class="lineNoCov">          0 :         ap_save_brigade(f, &amp;(ctx-&gt;linesbb), &amp;(ctx-&gt;linebb), f-&gt;r-&gt;pool);</span></a>
+<a name="644"><span class="lineNum">     644 </span><span class="lineNoCov">          0 :         tmp_bb = ctx-&gt;linebb;</span></a>
+<a name="645"><span class="lineNum">     645 </span><span class="lineNoCov">          0 :         ctx-&gt;linebb = ctx-&gt;linesbb;</span></a>
+<a name="646"><span class="lineNum">     646 </span><span class="lineNoCov">          0 :         ctx-&gt;linesbb = tmp_bb;</span></a>
+<a name="647"><span class="lineNum">     647 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="648"><span class="lineNum">     648 </span>            : </a>
+<a name="649"><span class="lineNum">     649 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="650"><span class="lineNum">     650 </span>            : err:</a>
+<a name="651"><span class="lineNum">     651 </span><span class="lineNoCov">          0 :     if (rv == APR_ENOMEM)</span></a>
+<a name="652"><span class="lineNum">     652 </span><span class="lineNoCov">          0 :         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, f-&gt;r, APLOGNO(01328) &quot;Line too long, URI %s&quot;,</span></a>
+<a name="653"><span class="lineNum">     653 </span>            :                       f-&gt;r-&gt;uri);</a>
+<a name="654"><span class="lineNum">     654 </span><span class="lineNoCov">          0 :     apr_pool_clear(ctx-&gt;tpool);</span></a>
+<a name="655"><span class="lineNum">     655 </span><span class="lineNoCov">          0 :     return rv;</span></a>
+<a name="656"><span class="lineNum">     656 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="657"><span class="lineNum">     657 </span>            : </a>
+<a name="658"><span class="lineNum">     658 </span><span class="lineCov">       5640 : static const char *set_pattern(cmd_parms *cmd, void *cfg, const char *line)</span></a>
+<a name="659"><span class="lineNum">     659 </span>            : {</a>
+<a name="660"><span class="lineNum">     660 </span><span class="lineCov">       5640 :     char *from = NULL;</span></a>
+<a name="661"><span class="lineNum">     661 </span><span class="lineCov">       5640 :     char *to = NULL;</span></a>
+<a name="662"><span class="lineNum">     662 </span><span class="lineCov">       5640 :     char *flags = NULL;</span></a>
+<a name="663"><span class="lineNum">     663 </span>            :     char *ourline;</a>
+<a name="664"><span class="lineNum">     664 </span>            :     char delim;</a>
+<a name="665"><span class="lineNum">     665 </span>            :     subst_pattern_t *nscript;</a>
+<a name="666"><span class="lineNum">     666 </span><span class="lineCov">       5640 :     int is_pattern = 0;</span></a>
+<a name="667"><span class="lineNum">     667 </span><span class="lineCov">       5640 :     int ignore_case = 0;</span></a>
+<a name="668"><span class="lineNum">     668 </span><span class="lineCov">       5640 :     int flatten = 1;</span></a>
+<a name="669"><span class="lineNum">     669 </span><span class="lineCov">       5640 :     ap_regex_t *r = NULL;</span></a>
+<a name="670"><span class="lineNum">     670 </span>            : </a>
+<a name="671"><span class="lineNum">     671 </span><span class="lineCov">       5640 :     if (apr_tolower(*line) != 's') {</span></a>
+<a name="672"><span class="lineNum">     672 </span><span class="lineNoCov">          0 :         return &quot;Bad Substitute format, must be an s/// pattern&quot;;</span></a>
+<a name="673"><span class="lineNum">     673 </span>            :     }</a>
+<a name="674"><span class="lineNum">     674 </span><span class="lineCov">       5640 :     ourline = apr_pstrdup(cmd-&gt;pool, line);</span></a>
+<a name="675"><span class="lineNum">     675 </span><span class="lineCov">       5640 :     delim = *++ourline;</span></a>
+<a name="676"><span class="lineNum">     676 </span><span class="lineCov">       5640 :     if (delim)</span></a>
+<a name="677"><span class="lineNum">     677 </span><span class="lineCov">       5640 :         from = ++ourline;</span></a>
+<a name="678"><span class="lineNum">     678 </span><span class="lineCov">       5640 :     if (from) {</span></a>
+<a name="679"><span class="lineNum">     679 </span><span class="lineCov">       5640 :         if (*ourline != delim) {</span></a>
+<a name="680"><span class="lineNum">     680 </span><span class="lineCov">      31020 :             while (*++ourline &amp;&amp; *ourline != delim);</span></a>
+<a name="681"><span class="lineNum">     681 </span><span class="lineCov">       5640 :         }</span></a>
+<a name="682"><span class="lineNum">     682 </span><span class="lineCov">       5640 :         if (*ourline) {</span></a>
+<a name="683"><span class="lineNum">     683 </span><span class="lineCov">       5640 :             *ourline = '\0';</span></a>
+<a name="684"><span class="lineNum">     684 </span><span class="lineCov">       5640 :             to = ++ourline;</span></a>
+<a name="685"><span class="lineNum">     685 </span><span class="lineCov">       5640 :         }</span></a>
+<a name="686"><span class="lineNum">     686 </span><span class="lineCov">       5640 :     }</span></a>
+<a name="687"><span class="lineNum">     687 </span><span class="lineCov">       5640 :     if (to) {</span></a>
+<a name="688"><span class="lineNum">     688 </span><span class="lineCov">       5640 :         if (*ourline != delim) {</span></a>
+<a name="689"><span class="lineNum">     689 </span><span class="lineCov">      25380 :             while (*++ourline &amp;&amp; *ourline != delim);</span></a>
+<a name="690"><span class="lineNum">     690 </span><span class="lineCov">       5640 :         }</span></a>
+<a name="691"><span class="lineNum">     691 </span><span class="lineCov">       5640 :         if (*ourline) {</span></a>
+<a name="692"><span class="lineNum">     692 </span><span class="lineCov">       5640 :             *ourline = '\0';</span></a>
+<a name="693"><span class="lineNum">     693 </span><span class="lineCov">       5640 :             flags = ++ourline;</span></a>
+<a name="694"><span class="lineNum">     694 </span><span class="lineCov">       5640 :         }</span></a>
+<a name="695"><span class="lineNum">     695 </span><span class="lineCov">       5640 :     }</span></a>
+<a name="696"><span class="lineNum">     696 </span>            : </a>
+<a name="697"><span class="lineNum">     697 </span><span class="lineCov">       5640 :     if (!delim || !from || !*from || !to) {</span></a>
+<a name="698"><span class="lineNum">     698 </span><span class="lineNoCov">          0 :         return &quot;Bad Substitute format, must be a complete s/// pattern&quot;;</span></a>
+<a name="699"><span class="lineNum">     699 </span>            :     }</a>
+<a name="700"><span class="lineNum">     700 </span>            : </a>
+<a name="701"><span class="lineNum">     701 </span><span class="lineCov">       5640 :     if (flags) {</span></a>
+<a name="702"><span class="lineNum">     702 </span><span class="lineCov">      14100 :         while (*flags) {</span></a>
+<a name="703"><span class="lineNum">     703 </span><span class="lineCov">       8460 :             delim = apr_tolower(*flags);    /* re-use */</span></a>
+<a name="704"><span class="lineNum">     704 </span><span class="lineCov">       8460 :             if (delim == 'i')</span></a>
+<a name="705"><span class="lineNum">     705 </span><span class="lineCov">       5640 :                 ignore_case = 1;</span></a>
+<a name="706"><span class="lineNum">     706 </span><span class="lineCov">       2820 :             else if (delim == 'n')</span></a>
+<a name="707"><span class="lineNum">     707 </span><span class="lineCov">       2820 :                 is_pattern = 1;</span></a>
+<a name="708"><span class="lineNum">     708 </span><span class="lineNoCov">          0 :             else if (delim == 'f')</span></a>
+<a name="709"><span class="lineNum">     709 </span><span class="lineNoCov">          0 :                 flatten = 1;</span></a>
+<a name="710"><span class="lineNum">     710 </span><span class="lineNoCov">          0 :             else if (delim == 'q')</span></a>
+<a name="711"><span class="lineNum">     711 </span><span class="lineNoCov">          0 :                 flatten = 0;</span></a>
+<a name="712"><span class="lineNum">     712 </span>            :             else</a>
+<a name="713"><span class="lineNum">     713 </span><span class="lineNoCov">          0 :                 return &quot;Bad Substitute flag, only s///[infq] are supported&quot;;</span></a>
+<a name="714"><span class="lineNum">     714 </span><span class="lineCov">       8460 :             flags++;</span></a>
+<a name="715"><span class="lineNum">     715 </span>            :         }</a>
+<a name="716"><span class="lineNum">     716 </span><span class="lineCov">       5640 :     }</span></a>
+<a name="717"><span class="lineNum">     717 </span>            : </a>
+<a name="718"><span class="lineNum">     718 </span>            :     /* first see if we can compile the regex */</a>
+<a name="719"><span class="lineNum">     719 </span><span class="lineCov">       5640 :     if (!is_pattern) {</span></a>
+<a name="720"><span class="lineNum">     720 </span><span class="lineCov">       2820 :         int flags = AP_REG_NO_DEFAULT</span></a>
+<a name="721"><span class="lineNum">     721 </span><span class="lineCov">       2820 :                     | (ap_regcomp_get_default_cflags() &amp; AP_REG_DOLLAR_ENDONLY)</span></a>
+<a name="722"><span class="lineNum">     722 </span><span class="lineCov">       2820 :                     | (ignore_case ? AP_REG_ICASE : 0);</span></a>
+<a name="723"><span class="lineNum">     723 </span><span class="lineCov">       2820 :         r = ap_pregcomp(cmd-&gt;pool, from, flags);</span></a>
+<a name="724"><span class="lineNum">     724 </span><span class="lineCov">       2820 :         if (!r)</span></a>
+<a name="725"><span class="lineNum">     725 </span><span class="lineNoCov">          0 :             return &quot;Substitute could not compile regex&quot;;</span></a>
+<a name="726"><span class="lineNum">     726 </span><span class="lineCov">       2820 :     }</span></a>
+<a name="727"><span class="lineNum">     727 </span><span class="lineCov">       5640 :     nscript = apr_array_push(((subst_dir_conf *) cfg)-&gt;patterns);</span></a>
+<a name="728"><span class="lineNum">     728 </span>            :     /* init the new entries */</a>
+<a name="729"><span class="lineNum">     729 </span><span class="lineCov">       5640 :     nscript-&gt;pattern = NULL;</span></a>
+<a name="730"><span class="lineNum">     730 </span><span class="lineCov">       5640 :     nscript-&gt;regexp = NULL;</span></a>
+<a name="731"><span class="lineNum">     731 </span><span class="lineCov">       5640 :     nscript-&gt;replacement = NULL;</span></a>
+<a name="732"><span class="lineNum">     732 </span><span class="lineCov">       5640 :     nscript-&gt;patlen = 0;</span></a>
+<a name="733"><span class="lineNum">     733 </span><span class="lineCov">       5640 :     nscript-&gt;from = from;</span></a>
+<a name="734"><span class="lineNum">     734 </span>            : </a>
+<a name="735"><span class="lineNum">     735 </span><span class="lineCov">       5640 :     if (is_pattern) {</span></a>
+<a name="736"><span class="lineNum">     736 </span><span class="lineCov">       2820 :         nscript-&gt;patlen = strlen(from);</span></a>
+<a name="737"><span class="lineNum">     737 </span><span class="lineCov">       5640 :         nscript-&gt;pattern = apr_strmatch_precompile(cmd-&gt;pool, from,</span></a>
+<a name="738"><span class="lineNum">     738 </span><span class="lineCov">       2820 :                                                    !ignore_case);</span></a>
+<a name="739"><span class="lineNum">     739 </span><span class="lineCov">       2820 :     }</span></a>
+<a name="740"><span class="lineNum">     740 </span>            :     else {</a>
+<a name="741"><span class="lineNum">     741 </span><span class="lineCov">       2820 :         nscript-&gt;regexp = r;</span></a>
+<a name="742"><span class="lineNum">     742 </span>            :     }</a>
+<a name="743"><span class="lineNum">     743 </span>            : </a>
+<a name="744"><span class="lineNum">     744 </span><span class="lineCov">       5640 :     nscript-&gt;replacement = to;</span></a>
+<a name="745"><span class="lineNum">     745 </span><span class="lineCov">       5640 :     nscript-&gt;replen = strlen(to);</span></a>
+<a name="746"><span class="lineNum">     746 </span>            : </a>
+<a name="747"><span class="lineNum">     747 </span><span class="lineCov">       5640 :     if (!strncasecmp(to, &quot;expr=&quot;, 5)) { </span></a>
+<a name="748"><span class="lineNum">     748 </span>            :         const char *err;</a>
+<a name="749"><span class="lineNum">     749 </span><span class="lineNoCov">          0 :         nscript-&gt;expr_replacement = ap_expr_parse_cmd(cmd, to+5,</span></a>
+<a name="750"><span class="lineNum">     750 </span>            :                                           AP_EXPR_FLAG_STRING_RESULT,</a>
+<a name="751"><span class="lineNum">     751 </span>            :                                           &amp;err, NULL);</a>
+<a name="752"><span class="lineNum">     752 </span><span class="lineNoCov">          0 :         if (err) {</span></a>
+<a name="753"><span class="lineNum">     753 </span><span class="lineNoCov">          0 :             return apr_pstrcat(cmd-&gt;pool,</span></a>
+<a name="754"><span class="lineNum">     754 </span><span class="lineNoCov">          0 :                     &quot;Can't parse value expression : &quot;, err, NULL);</span></a>
+<a name="755"><span class="lineNum">     755 </span>            :         }</a>
+<a name="756"><span class="lineNum">     756 </span><span class="lineNoCov">          0 :     } </span></a>
+<a name="757"><span class="lineNum">     757 </span>            : </a>
+<a name="758"><span class="lineNum">     758 </span><span class="lineCov">       5640 :     nscript-&gt;flatten = flatten;</span></a>
+<a name="759"><span class="lineNum">     759 </span>            : </a>
+<a name="760"><span class="lineNum">     760 </span><span class="lineCov">       5640 :     return NULL;</span></a>
+<a name="761"><span class="lineNum">     761 </span><span class="lineCov">       5640 : }</span></a>
+<a name="762"><span class="lineNum">     762 </span>            : </a>
+<a name="763"><span class="lineNum">     763 </span>            : #define KBYTE         1024</a>
+<a name="764"><span class="lineNum">     764 </span>            : #define MBYTE         1048576</a>
+<a name="765"><span class="lineNum">     765 </span>            : #define GBYTE         1073741824</a>
+<a name="766"><span class="lineNum">     766 </span>            : </a>
+<a name="767"><span class="lineNum">     767 </span><span class="lineNoCov">          0 : static const char *set_max_line_length(cmd_parms *cmd, void *cfg, const char *arg)</span></a>
+<a name="768"><span class="lineNum">     768 </span>            : {</a>
+<a name="769"><span class="lineNum">     769 </span><span class="lineNoCov">          0 :     subst_dir_conf *dcfg = (subst_dir_conf *)cfg;</span></a>
+<a name="770"><span class="lineNum">     770 </span>            :     apr_off_t max;</a>
+<a name="771"><span class="lineNum">     771 </span>            :     char *end;</a>
+<a name="772"><span class="lineNum">     772 </span>            :     apr_status_t rv;</a>
+<a name="773"><span class="lineNum">     773 </span>            : </a>
+<a name="774"><span class="lineNum">     774 </span><span class="lineNoCov">          0 :     rv = apr_strtoff(&amp;max, arg, &amp;end, 10);</span></a>
+<a name="775"><span class="lineNum">     775 </span><span class="lineNoCov">          0 :     if (rv == APR_SUCCESS) {</span></a>
+<a name="776"><span class="lineNum">     776 </span><span class="lineNoCov">          0 :         if ((*end == 'K' || *end == 'k') &amp;&amp; !end[1]) {</span></a>
+<a name="777"><span class="lineNum">     777 </span><span class="lineNoCov">          0 :             max *= KBYTE;</span></a>
+<a name="778"><span class="lineNum">     778 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="779"><span class="lineNum">     779 </span><span class="lineNoCov">          0 :         else if ((*end == 'M' || *end == 'm') &amp;&amp; !end[1]) {</span></a>
+<a name="780"><span class="lineNum">     780 </span><span class="lineNoCov">          0 :             max *= MBYTE;</span></a>
+<a name="781"><span class="lineNum">     781 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="782"><span class="lineNum">     782 </span><span class="lineNoCov">          0 :         else if ((*end == 'G' || *end == 'g') &amp;&amp; !end[1]) {</span></a>
+<a name="783"><span class="lineNum">     783 </span><span class="lineNoCov">          0 :             max *= GBYTE;</span></a>
+<a name="784"><span class="lineNum">     784 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="785"><span class="lineNum">     785 </span><span class="lineNoCov">          0 :         else if (*end &amp;&amp; /* neither empty nor [Bb] */</span></a>
+<a name="786"><span class="lineNum">     786 </span><span class="lineNoCov">          0 :                  ((*end != 'B' &amp;&amp; *end != 'b') || end[1])) {</span></a>
+<a name="787"><span class="lineNum">     787 </span><span class="lineNoCov">          0 :             rv = APR_EGENERAL;</span></a>
+<a name="788"><span class="lineNum">     788 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="789"><span class="lineNum">     789 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="790"><span class="lineNum">     790 </span>            : </a>
+<a name="791"><span class="lineNum">     791 </span><span class="lineNoCov">          0 :     if (rv != APR_SUCCESS || max &lt; 0)</span></a>
+<a name="792"><span class="lineNum">     792 </span>            :     {</a>
+<a name="793"><span class="lineNum">     793 </span><span class="lineNoCov">          0 :         return &quot;SubstituteMaxLineLength must be a non-negative integer optionally &quot;</span></a>
+<a name="794"><span class="lineNum">     794 </span>            :                &quot;suffixed with 'b', 'k', 'm' or 'g'.&quot;;</a>
+<a name="795"><span class="lineNum">     795 </span>            :     }</a>
+<a name="796"><span class="lineNum">     796 </span><span class="lineNoCov">          0 :     dcfg-&gt;max_line_length = (apr_size_t)max;</span></a>
+<a name="797"><span class="lineNum">     797 </span><span class="lineNoCov">          0 :     dcfg-&gt;max_line_length_set = 1;</span></a>
+<a name="798"><span class="lineNum">     798 </span><span class="lineNoCov">          0 :     return NULL;</span></a>
+<a name="799"><span class="lineNum">     799 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="800"><span class="lineNum">     800 </span>            : </a>
+<a name="801"><span class="lineNum">     801 </span>            : #define PROTO_FLAGS AP_FILTER_PROTO_CHANGE|AP_FILTER_PROTO_CHANGE_LENGTH</a>
+<a name="802"><span class="lineNum">     802 </span><span class="lineCov">       2820 : static void register_hooks(apr_pool_t *pool)</span></a>
+<a name="803"><span class="lineNum">     803 </span>            : {</a>
+<a name="804"><span class="lineNum">     804 </span><span class="lineCov">       2820 :     ap_register_output_filter(substitute_filter_name, substitute_filter,</span></a>
+<a name="805"><span class="lineNum">     805 </span>            :                               NULL, AP_FTYPE_RESOURCE);</a>
+<a name="806"><span class="lineNum">     806 </span><span class="lineCov">       2820 : }</span></a>
+<a name="807"><span class="lineNum">     807 </span>            : </a>
+<a name="808"><span class="lineNum">     808 </span>            : static const command_rec substitute_cmds[] = {</a>
+<a name="809"><span class="lineNum">     809 </span>            :     AP_INIT_TAKE1(&quot;Substitute&quot;, set_pattern, NULL, OR_FILEINFO,</a>
+<a name="810"><span class="lineNum">     810 </span>            :                   &quot;Pattern to filter the response content (s/foo/bar/[inf])&quot;),</a>
+<a name="811"><span class="lineNum">     811 </span>            :     AP_INIT_TAKE1(&quot;SubstituteMaxLineLength&quot;, set_max_line_length, NULL, OR_FILEINFO,</a>
+<a name="812"><span class="lineNum">     812 </span>            :                   &quot;Maximum line length&quot;),</a>
+<a name="813"><span class="lineNum">     813 </span>            :     AP_INIT_FLAG(&quot;SubstituteInheritBefore&quot;, ap_set_flag_slot,</a>
+<a name="814"><span class="lineNum">     814 </span>            :                  (void *)APR_OFFSETOF(subst_dir_conf, inherit_before), OR_FILEINFO,</a>
+<a name="815"><span class="lineNum">     815 </span>            :                  &quot;Apply inherited patterns before those of the current context&quot;),</a>
+<a name="816"><span class="lineNum">     816 </span>            :     {NULL}</a>
+<a name="817"><span class="lineNum">     817 </span>            : };</a>
+<a name="818"><span class="lineNum">     818 </span>            : </a>
+<a name="819"><span class="lineNum">     819 </span>            : AP_DECLARE_MODULE(substitute) = {</a>
+<a name="820"><span class="lineNum">     820 </span>            :     STANDARD20_MODULE_STUFF,</a>
+<a name="821"><span class="lineNum">     821 </span>            :     create_substitute_dcfg,     /* dir config creater */</a>
+<a name="822"><span class="lineNum">     822 </span>            :     merge_substitute_dcfg,      /* dir merger --- default is to override */</a>
+<a name="823"><span class="lineNum">     823 </span>            :     NULL,                       /* server config */</a>
+<a name="824"><span class="lineNum">     824 </span>            :     NULL,                       /* merge server config */</a>
+<a name="825"><span class="lineNum">     825 </span>            :     substitute_cmds,            /* command table */</a>
+<a name="826"><span class="lineNum">     826 </span>            :     register_hooks              /* register hooks */</a>
+<a name="827"><span class="lineNum">     827 </span>            : };</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

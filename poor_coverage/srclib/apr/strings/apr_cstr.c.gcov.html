@@ -1,0 +1,476 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - poor_coverage.lcov_info_final - srclib/apr/strings/apr_cstr.c</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">srclib/apr/strings</a> - apr_cstr.c<span style="font-size: 80%;"> (source / <a href="apr_cstr.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">poor_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">130</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 17:33:32</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">15</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*    Licensed to the Apache Software Foundation (ASF) under one</a>
+<a name="2"><span class="lineNum">       2 </span>            :  *    or more contributor license agreements.  See the NOTICE file</a>
+<a name="3"><span class="lineNum">       3 </span>            :  *    distributed with this work for additional information</a>
+<a name="4"><span class="lineNum">       4 </span>            :  *    regarding copyright ownership.  The ASF licenses this file</a>
+<a name="5"><span class="lineNum">       5 </span>            :  *    to you under the Apache License, Version 2.0 (the</a>
+<a name="6"><span class="lineNum">       6 </span>            :  *    &quot;License&quot;); you may not use this file except in compliance</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *    with the License.  You may obtain a copy of the License at</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="10"><span class="lineNum">      10 </span>            :  *</a>
+<a name="11"><span class="lineNum">      11 </span>            :  *    Unless required by applicable law or agreed to in writing,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  *    software distributed under the License is distributed on an</a>
+<a name="13"><span class="lineNum">      13 </span>            :  *    &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</a>
+<a name="14"><span class="lineNum">      14 </span>            :  *    KIND, either express or implied.  See the License for the</a>
+<a name="15"><span class="lineNum">      15 </span>            :  *    specific language governing permissions and limitations</a>
+<a name="16"><span class="lineNum">      16 </span>            :  *    under the License.</a>
+<a name="17"><span class="lineNum">      17 </span>            :  */</a>
+<a name="18"><span class="lineNum">      18 </span>            : </a>
+<a name="19"><span class="lineNum">      19 </span>            : #include &quot;apr.h&quot;</a>
+<a name="20"><span class="lineNum">      20 </span>            : #include &quot;apr_lib.h&quot;</a>
+<a name="21"><span class="lineNum">      21 </span>            : #include &quot;apr_strings.h&quot;</a>
+<a name="22"><span class="lineNum">      22 </span>            : #include &quot;apr_fnmatch.h&quot;</a>
+<a name="23"><span class="lineNum">      23 </span>            : #if 0</a>
+<a name="24"><span class="lineNum">      24 </span>            : #define APR_WANT_STDIO</a>
+<a name="25"><span class="lineNum">      25 </span>            : #define APR_WANT_STRFUNC</a>
+<a name="26"><span class="lineNum">      26 </span>            : #endif</a>
+<a name="27"><span class="lineNum">      27 </span>            : #include &quot;apr_want.h&quot;</a>
+<a name="28"><span class="lineNum">      28 </span>            : #include &quot;apr_cstr.h&quot;</a>
+<a name="29"><span class="lineNum">      29 </span>            : </a>
+<a name="30"><span class="lineNum">      30 </span><span class="lineNoCov">          0 : APR_DECLARE(void) apr_cstr_split_append(apr_array_header_t *array,</span></a>
+<a name="31"><span class="lineNum">      31 </span>            :                                         const char *input,</a>
+<a name="32"><span class="lineNum">      32 </span>            :                                         const char *sep_chars,</a>
+<a name="33"><span class="lineNum">      33 </span>            :                                         int chop_whitespace,</a>
+<a name="34"><span class="lineNum">      34 </span>            :                                         apr_pool_t *pool)</a>
+<a name="35"><span class="lineNum">      35 </span>            : {</a>
+<a name="36"><span class="lineNum">      36 </span>            :   char *pats;</a>
+<a name="37"><span class="lineNum">      37 </span>            :   char *p;</a>
+<a name="38"><span class="lineNum">      38 </span>            : </a>
+<a name="39"><span class="lineNum">      39 </span><span class="lineNoCov">          0 :   pats = apr_pstrdup(pool, input);  /* strtok wants non-const data */</span></a>
+<a name="40"><span class="lineNum">      40 </span><span class="lineNoCov">          0 :   p = apr_cstr_tokenize(sep_chars, &amp;pats);</span></a>
+<a name="41"><span class="lineNum">      41 </span>            : </a>
+<a name="42"><span class="lineNum">      42 </span><span class="lineNoCov">          0 :   while (p)</span></a>
+<a name="43"><span class="lineNum">      43 </span>            :     {</a>
+<a name="44"><span class="lineNum">      44 </span><span class="lineNoCov">          0 :       if (chop_whitespace)</span></a>
+<a name="45"><span class="lineNum">      45 </span>            :         {</a>
+<a name="46"><span class="lineNum">      46 </span><span class="lineNoCov">          0 :           while (apr_isspace(*p))</span></a>
+<a name="47"><span class="lineNum">      47 </span><span class="lineNoCov">          0 :             p++;</span></a>
+<a name="48"><span class="lineNum">      48 </span>            : </a>
+<a name="49"><span class="lineNum">      49 </span>            :           {</a>
+<a name="50"><span class="lineNum">      50 </span><span class="lineNoCov">          0 :             char *e = p + (strlen(p) - 1);</span></a>
+<a name="51"><span class="lineNum">      51 </span><span class="lineNoCov">          0 :             while ((e &gt;= p) &amp;&amp; (apr_isspace(*e)))</span></a>
+<a name="52"><span class="lineNum">      52 </span><span class="lineNoCov">          0 :               e--;</span></a>
+<a name="53"><span class="lineNum">      53 </span><span class="lineNoCov">          0 :             *(++e) = '\0';</span></a>
+<a name="54"><span class="lineNum">      54 </span>            :           }</a>
+<a name="55"><span class="lineNum">      55 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="56"><span class="lineNum">      56 </span>            : </a>
+<a name="57"><span class="lineNum">      57 </span><span class="lineNoCov">          0 :       if (p[0] != '\0')</span></a>
+<a name="58"><span class="lineNum">      58 </span><span class="lineNoCov">          0 :         APR_ARRAY_PUSH(array, const char *) = p;</span></a>
+<a name="59"><span class="lineNum">      59 </span>            : </a>
+<a name="60"><span class="lineNum">      60 </span><span class="lineNoCov">          0 :       p = apr_cstr_tokenize(sep_chars, &amp;pats);</span></a>
+<a name="61"><span class="lineNum">      61 </span>            :     }</a>
+<a name="62"><span class="lineNum">      62 </span>            : </a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineNoCov">          0 :   return;</span></a>
+<a name="64"><span class="lineNum">      64 </span>            : }</a>
+<a name="65"><span class="lineNum">      65 </span>            : </a>
+<a name="66"><span class="lineNum">      66 </span>            : </a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_array_header_t *) apr_cstr_split(const char *input,</span></a>
+<a name="68"><span class="lineNum">      68 </span>            :                                                  const char *sep_chars,</a>
+<a name="69"><span class="lineNum">      69 </span>            :                                                  int chop_whitespace,</a>
+<a name="70"><span class="lineNum">      70 </span>            :                                                  apr_pool_t *pool)</a>
+<a name="71"><span class="lineNum">      71 </span>            : {</a>
+<a name="72"><span class="lineNum">      72 </span><span class="lineNoCov">          0 :   apr_array_header_t *a = apr_array_make(pool, 5, sizeof(input));</span></a>
+<a name="73"><span class="lineNum">      73 </span><span class="lineNoCov">          0 :   apr_cstr_split_append(a, input, sep_chars, chop_whitespace, pool);</span></a>
+<a name="74"><span class="lineNum">      74 </span><span class="lineNoCov">          0 :   return a;</span></a>
+<a name="75"><span class="lineNum">      75 </span>            : }</a>
+<a name="76"><span class="lineNum">      76 </span>            : </a>
+<a name="77"><span class="lineNum">      77 </span>            : </a>
+<a name="78"><span class="lineNum">      78 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_cstr_match_glob_list(const char *str,</span></a>
+<a name="79"><span class="lineNum">      79 </span>            :                                           const apr_array_header_t *list)</a>
+<a name="80"><span class="lineNum">      80 </span>            : {</a>
+<a name="81"><span class="lineNum">      81 </span>            :   int i;</a>
+<a name="82"><span class="lineNum">      82 </span>            : </a>
+<a name="83"><span class="lineNum">      83 </span><span class="lineNoCov">          0 :   for (i = 0; i &lt; list-&gt;nelts; i++)</span></a>
+<a name="84"><span class="lineNum">      84 </span>            :     {</a>
+<a name="85"><span class="lineNum">      85 </span><span class="lineNoCov">          0 :       const char *this_pattern = APR_ARRAY_IDX(list, i, char *);</span></a>
+<a name="86"><span class="lineNum">      86 </span>            : </a>
+<a name="87"><span class="lineNum">      87 </span><span class="lineNoCov">          0 :       if (apr_fnmatch(this_pattern, str, 0) == APR_SUCCESS)</span></a>
+<a name="88"><span class="lineNum">      88 </span><span class="lineNoCov">          0 :         return TRUE;</span></a>
+<a name="89"><span class="lineNum">      89 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="90"><span class="lineNum">      90 </span>            : </a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineNoCov">          0 :   return FALSE;</span></a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="93"><span class="lineNum">      93 </span>            : </a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_cstr_match_list(const char *str,</span></a>
+<a name="95"><span class="lineNum">      95 </span>            :                                      const apr_array_header_t *list)</a>
+<a name="96"><span class="lineNum">      96 </span>            : {</a>
+<a name="97"><span class="lineNum">      97 </span>            :   int i;</a>
+<a name="98"><span class="lineNum">      98 </span>            : </a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineNoCov">          0 :   for (i = 0; i &lt; list-&gt;nelts; i++)</span></a>
+<a name="100"><span class="lineNum">     100 </span>            :     {</a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineNoCov">          0 :       const char *this_str = APR_ARRAY_IDX(list, i, char *);</span></a>
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<a name="103"><span class="lineNum">     103 </span><span class="lineNoCov">          0 :       if (strcmp(this_str, str) == 0)</span></a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 :         return TRUE;</span></a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="106"><span class="lineNum">     106 </span>            : </a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :   return FALSE;</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="109"><span class="lineNum">     109 </span>            : </a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 : APR_DECLARE(char *) apr_cstr_tokenize(const char *sep, char **str)</span></a>
+<a name="111"><span class="lineNum">     111 </span>            : {</a>
+<a name="112"><span class="lineNum">     112 </span>            :     char *token;</a>
+<a name="113"><span class="lineNum">     113 </span>            :     char *next;</a>
+<a name="114"><span class="lineNum">     114 </span>            :     char csep;</a>
+<a name="115"><span class="lineNum">     115 </span>            : </a>
+<a name="116"><span class="lineNum">     116 </span>            :     /* check parameters */</a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineNoCov">          0 :     if ((sep == NULL) || (str == NULL) || (*str == NULL))</span></a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="119"><span class="lineNum">     119 </span>            : </a>
+<a name="120"><span class="lineNum">     120 </span>            :     /* let APR handle edge cases and multiple separators */</a>
+<a name="121"><span class="lineNum">     121 </span><span class="lineNoCov">          0 :     csep = *sep;</span></a>
+<a name="122"><span class="lineNum">     122 </span><span class="lineNoCov">          0 :     if (csep == '\0' || sep[1] != '\0')</span></a>
+<a name="123"><span class="lineNum">     123 </span><span class="lineNoCov">          0 :       return apr_strtok(NULL, sep, str);</span></a>
+<a name="124"><span class="lineNum">     124 </span>            : </a>
+<a name="125"><span class="lineNum">     125 </span>            :     /* skip characters in sep (will terminate at '\0') */</a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :     token = *str;</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :     while (*token == csep)</span></a>
+<a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 :         ++token;</span></a>
+<a name="129"><span class="lineNum">     129 </span>            : </a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :     if (!*token)          /* no more tokens */</span></a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="132"><span class="lineNum">     132 </span>            : </a>
+<a name="133"><span class="lineNum">     133 </span>            :     /* skip valid token characters to terminate token and</a>
+<a name="134"><span class="lineNum">     134 </span>            :      * prepare for the next call (will terminate at '\0)</a>
+<a name="135"><span class="lineNum">     135 </span>            :      */</a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineNoCov">          0 :     next = strchr(token, csep);</span></a>
+<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :     if (next == NULL)</span></a>
+<a name="138"><span class="lineNum">     138 </span>            :       {</a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 :         *str = token + strlen(token);</span></a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :       }</span></a>
+<a name="141"><span class="lineNum">     141 </span>            :     else</a>
+<a name="142"><span class="lineNum">     142 </span>            :       {</a>
+<a name="143"><span class="lineNum">     143 </span><span class="lineNoCov">          0 :         *next = '\0';</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :         *str = next + 1;</span></a>
+<a name="145"><span class="lineNum">     145 </span>            :       }</a>
+<a name="146"><span class="lineNum">     146 </span>            : </a>
+<a name="147"><span class="lineNum">     147 </span><span class="lineNoCov">          0 :     return token;</span></a>
+<a name="148"><span class="lineNum">     148 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="149"><span class="lineNum">     149 </span>            : </a>
+<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_cstr_count_newlines(const char *msg)</span></a>
+<a name="151"><span class="lineNum">     151 </span>            : {</a>
+<a name="152"><span class="lineNum">     152 </span><span class="lineNoCov">          0 :   int count = 0;</span></a>
+<a name="153"><span class="lineNum">     153 </span>            :   const char *p;</a>
+<a name="154"><span class="lineNum">     154 </span>            : </a>
+<a name="155"><span class="lineNum">     155 </span><span class="lineNoCov">          0 :   for (p = msg; *p; p++)</span></a>
+<a name="156"><span class="lineNum">     156 </span>            :     {</a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineNoCov">          0 :       if (*p == '\n')</span></a>
+<a name="158"><span class="lineNum">     158 </span>            :         {</a>
+<a name="159"><span class="lineNum">     159 </span><span class="lineNoCov">          0 :           count++;</span></a>
+<a name="160"><span class="lineNum">     160 </span><span class="lineNoCov">          0 :           if (*(p + 1) == '\r')</span></a>
+<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :             p++;</span></a>
+<a name="162"><span class="lineNum">     162 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="163"><span class="lineNum">     163 </span><span class="lineNoCov">          0 :       else if (*p == '\r')</span></a>
+<a name="164"><span class="lineNum">     164 </span>            :         {</a>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :           count++;</span></a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :           if (*(p + 1) == '\n')</span></a>
+<a name="167"><span class="lineNum">     167 </span><span class="lineNoCov">          0 :             p++;</span></a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="170"><span class="lineNum">     170 </span>            : </a>
+<a name="171"><span class="lineNum">     171 </span><span class="lineNoCov">          0 :   return count;</span></a>
+<a name="172"><span class="lineNum">     172 </span>            : }</a>
+<a name="173"><span class="lineNum">     173 </span>            : </a>
+<a name="174"><span class="lineNum">     174 </span>            : #if 0 /* XXX: stringbuf logic is not present in APR */</a>
+<a name="175"><span class="lineNum">     175 </span>            : APR_DECLARE(char *) apr_cstr_join(const apr_array_header_t *strings,</a>
+<a name="176"><span class="lineNum">     176 </span>            :                                   const char *separator,</a>
+<a name="177"><span class="lineNum">     177 </span>            :                                   apr_pool_t *pool)</a>
+<a name="178"><span class="lineNum">     178 </span>            : {</a>
+<a name="179"><span class="lineNum">     179 </span>            :   svn_stringbuf_t *new_str = svn_stringbuf_create_empty(pool);</a>
+<a name="180"><span class="lineNum">     180 </span>            :   size_t sep_len = strlen(separator);</a>
+<a name="181"><span class="lineNum">     181 </span>            :   int i;</a>
+<a name="182"><span class="lineNum">     182 </span>            : </a>
+<a name="183"><span class="lineNum">     183 </span>            :   for (i = 0; i &lt; strings-&gt;nelts; i++)</a>
+<a name="184"><span class="lineNum">     184 </span>            :     {</a>
+<a name="185"><span class="lineNum">     185 </span>            :       const char *string = APR_ARRAY_IDX(strings, i, const char *);</a>
+<a name="186"><span class="lineNum">     186 </span>            :       svn_stringbuf_appendbytes(new_str, string, strlen(string));</a>
+<a name="187"><span class="lineNum">     187 </span>            :       svn_stringbuf_appendbytes(new_str, separator, sep_len);</a>
+<a name="188"><span class="lineNum">     188 </span>            :     }</a>
+<a name="189"><span class="lineNum">     189 </span>            :   return new_str-&gt;data;</a>
+<a name="190"><span class="lineNum">     190 </span>            : }</a>
+<a name="191"><span class="lineNum">     191 </span>            : #endif</a>
+<a name="192"><span class="lineNum">     192 </span>            : </a>
+<a name="193"><span class="lineNum">     193 </span>            : #if !APR_CHARSET_EBCDIC</a>
+<a name="194"><span class="lineNum">     194 </span>            : /*</a>
+<a name="195"><span class="lineNum">     195 </span>            :  * Our own known-fast translation table for casecmp by character.</a>
+<a name="196"><span class="lineNum">     196 </span>            :  * Only ASCII alpha characters 41-5A are folded to 61-7A, other</a>
+<a name="197"><span class="lineNum">     197 </span>            :  * octets (such as extended latin alphabetics) are never case-folded.</a>
+<a name="198"><span class="lineNum">     198 </span>            :  * NOTE: Other than Alpha A-Z/a-z, each code point is unique!</a>
+<a name="199"><span class="lineNum">     199 </span>            :  */</a>
+<a name="200"><span class="lineNum">     200 </span>            : static const unsigned char ucharmap[256] = {</a>
+<a name="201"><span class="lineNum">     201 </span>            :     0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,</a>
+<a name="202"><span class="lineNum">     202 </span>            :     0x8,  0x9,  0xa,  0xb,  0xc,  0xd,  0xe,  0xf,</a>
+<a name="203"><span class="lineNum">     203 </span>            :     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,</a>
+<a name="204"><span class="lineNum">     204 </span>            :     0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,</a>
+<a name="205"><span class="lineNum">     205 </span>            :     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27,</a>
+<a name="206"><span class="lineNum">     206 </span>            :     0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f,</a>
+<a name="207"><span class="lineNum">     207 </span>            :     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,</a>
+<a name="208"><span class="lineNum">     208 </span>            :     0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,</a>
+<a name="209"><span class="lineNum">     209 </span>            :     0x40,  'a',  'b',  'c',  'd',  'e',  'f',  'g',</a>
+<a name="210"><span class="lineNum">     210 </span>            :      'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',</a>
+<a name="211"><span class="lineNum">     211 </span>            :      'p',  'q',  'r',  's',  't',  'u',  'v',  'w',</a>
+<a name="212"><span class="lineNum">     212 </span>            :      'x',  'y',  'z', 0x5b, 0x5c, 0x5d, 0x5e, 0x5f,</a>
+<a name="213"><span class="lineNum">     213 </span>            :     0x60,  'a',  'b',  'c',  'd',  'e',  'f',  'g',</a>
+<a name="214"><span class="lineNum">     214 </span>            :      'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',</a>
+<a name="215"><span class="lineNum">     215 </span>            :      'p',  'q',  'r',  's',  't',  'u',  'v',  'w',</a>
+<a name="216"><span class="lineNum">     216 </span>            :      'x',  'y',  'z', 0x7b, 0x7c, 0x7d, 0x7e, 0x7f,</a>
+<a name="217"><span class="lineNum">     217 </span>            :     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,</a>
+<a name="218"><span class="lineNum">     218 </span>            :     0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f,</a>
+<a name="219"><span class="lineNum">     219 </span>            :     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97,</a>
+<a name="220"><span class="lineNum">     220 </span>            :     0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f,</a>
+<a name="221"><span class="lineNum">     221 </span>            :     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7,</a>
+<a name="222"><span class="lineNum">     222 </span>            :     0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf,</a>
+<a name="223"><span class="lineNum">     223 </span>            :     0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7,</a>
+<a name="224"><span class="lineNum">     224 </span>            :     0xb8, 0xb9, 0xba, 0xbb, 0xbc, 0xbd, 0xbe, 0xbf,</a>
+<a name="225"><span class="lineNum">     225 </span>            :     0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,</a>
+<a name="226"><span class="lineNum">     226 </span>            :     0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf,</a>
+<a name="227"><span class="lineNum">     227 </span>            :     0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7,</a>
+<a name="228"><span class="lineNum">     228 </span>            :     0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdd, 0xde, 0xdf,</a>
+<a name="229"><span class="lineNum">     229 </span>            :     0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7,</a>
+<a name="230"><span class="lineNum">     230 </span>            :     0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef,</a>
+<a name="231"><span class="lineNum">     231 </span>            :     0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,</a>
+<a name="232"><span class="lineNum">     232 </span>            :     0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff</a>
+<a name="233"><span class="lineNum">     233 </span>            : };</a>
+<a name="234"><span class="lineNum">     234 </span>            : #else /* APR_CHARSET_EBCDIC */</a>
+<a name="235"><span class="lineNum">     235 </span>            : /*</a>
+<a name="236"><span class="lineNum">     236 </span>            :  * Derived from apr-iconv/ccs/cp037.c for EBCDIC case comparison,</a>
+<a name="237"><span class="lineNum">     237 </span>            :  * provides unique identity of every char value (strict ISO-646</a>
+<a name="238"><span class="lineNum">     238 </span>            :  * conformance, arbitrary election of an ISO-8859-1 ordering, and</a>
+<a name="239"><span class="lineNum">     239 </span>            :  * very arbitrary control code assignments into C1 to achieve</a>
+<a name="240"><span class="lineNum">     240 </span>            :  * identity and a reversible mapping of code points),</a>
+<a name="241"><span class="lineNum">     241 </span>            :  * then folding the equivalences of ASCII 41-5A into 61-7A,</a>
+<a name="242"><span class="lineNum">     242 </span>            :  * presenting comparison results in a somewhat ISO/IEC 10646</a>
+<a name="243"><span class="lineNum">     243 </span>            :  * (ASCII-like) order, depending on the EBCDIC code page in use.</a>
+<a name="244"><span class="lineNum">     244 </span>            :  *</a>
+<a name="245"><span class="lineNum">     245 </span>            :  * NOTE: Other than Alpha A-Z/a-z, each code point is unique!</a>
+<a name="246"><span class="lineNum">     246 </span>            :  */</a>
+<a name="247"><span class="lineNum">     247 </span>            : static const unsigned char ucharmap[256] = {</a>
+<a name="248"><span class="lineNum">     248 </span>            :     0x00, 0x01, 0x02, 0x03, 0x9C, 0x09, 0x86, 0x7F,</a>
+<a name="249"><span class="lineNum">     249 </span>            :     0x97, 0x8D, 0x8E, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,</a>
+<a name="250"><span class="lineNum">     250 </span>            :     0x10, 0x11, 0x12, 0x13, 0x9D, 0x85, 0x08, 0x87,</a>
+<a name="251"><span class="lineNum">     251 </span>            :     0x18, 0x19, 0x92, 0x8F, 0x1C, 0x1D, 0x1E, 0x1F,</a>
+<a name="252"><span class="lineNum">     252 </span>            :     0x80, 0x81, 0x82, 0x83, 0x84, 0x0A, 0x17, 0x1B,</a>
+<a name="253"><span class="lineNum">     253 </span>            :     0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x05, 0x06, 0x07,</a>
+<a name="254"><span class="lineNum">     254 </span>            :     0x90, 0x91, 0x16, 0x93, 0x94, 0x95, 0x96, 0x04,</a>
+<a name="255"><span class="lineNum">     255 </span>            :     0x98, 0x99, 0x9A, 0x9B, 0x14, 0x15, 0x9E, 0x1A,</a>
+<a name="256"><span class="lineNum">     256 </span>            :     0x20, 0xA0, 0xE2, 0xE4, 0xE0, 0xE1, 0xE3, 0xE5,</a>
+<a name="257"><span class="lineNum">     257 </span>            :     0xE7, 0xF1, 0xA2, 0x2E, 0x3C, 0x28, 0x2B, 0x7C,</a>
+<a name="258"><span class="lineNum">     258 </span>            :     0x26, 0xE9, 0xEA, 0xEB, 0xE8, 0xED, 0xEE, 0xEF,</a>
+<a name="259"><span class="lineNum">     259 </span>            :     0xEC, 0xDF, 0x21, 0x24, 0x2A, 0x29, 0x3B, 0xAC,</a>
+<a name="260"><span class="lineNum">     260 </span>            :     0x2D, 0x2F, 0xC2, 0xC4, 0xC0, 0xC1, 0xC3, 0xC5,</a>
+<a name="261"><span class="lineNum">     261 </span>            :     0xC7, 0xD1, 0xA6, 0x2C, 0x25, 0x5F, 0x3E, 0x3F,</a>
+<a name="262"><span class="lineNum">     262 </span>            :     0xF8, 0xC9, 0xCA, 0xCB, 0xC8, 0xCD, 0xCE, 0xCF,</a>
+<a name="263"><span class="lineNum">     263 </span>            :     0xCC, 0x60, 0x3A, 0x23, 0x40, 0x27, 0x3D, 0x22,</a>
+<a name="264"><span class="lineNum">     264 </span>            :     0xD8, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67,</a>
+<a name="265"><span class="lineNum">     265 </span>            :     0x68, 0x69, 0xAB, 0xBB, 0xF0, 0xFD, 0xFE, 0xB1,</a>
+<a name="266"><span class="lineNum">     266 </span>            :     0xB0, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70,</a>
+<a name="267"><span class="lineNum">     267 </span>            :     0x71, 0x72, 0xAA, 0xBA, 0xE6, 0xB8, 0xC6, 0xA4,</a>
+<a name="268"><span class="lineNum">     268 </span>            :     0xB5, 0x7E, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,</a>
+<a name="269"><span class="lineNum">     269 </span>            :     0x79, 0x7A, 0xA1, 0xBF, 0xD0, 0xDD, 0xDE, 0xAE,</a>
+<a name="270"><span class="lineNum">     270 </span>            :     0x5E, 0xA3, 0xA5, 0xB7, 0xA9, 0xA7, 0xB6, 0xBC,</a>
+<a name="271"><span class="lineNum">     271 </span>            :     0xBD, 0xBE, 0x5B, 0x5D, 0xAF, 0xA8, 0xB4, 0xD7,</a>
+<a name="272"><span class="lineNum">     272 </span>            :     0x7B, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67,</a>
+<a name="273"><span class="lineNum">     273 </span>            :     0x68, 0x69, 0xAD, 0xF4, 0xF6, 0xF2, 0xF3, 0xF5,</a>
+<a name="274"><span class="lineNum">     274 </span>            :     0x7D, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70,</a>
+<a name="275"><span class="lineNum">     275 </span>            :     0x71, 0x72, 0xB9, 0xFB, 0xFC, 0xF9, 0xFA, 0xFF,</a>
+<a name="276"><span class="lineNum">     276 </span>            :     0x5C, 0xF7, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,</a>
+<a name="277"><span class="lineNum">     277 </span>            :     0x79, 0x7A, 0xB2, 0xD4, 0xD6, 0xD2, 0xD3, 0xD5,</a>
+<a name="278"><span class="lineNum">     278 </span>            :     0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,</a>
+<a name="279"><span class="lineNum">     279 </span>            :     0x38, 0x39, 0xB3, 0xDB, 0xDC, 0xD9, 0xDA, 0x9F</a>
+<a name="280"><span class="lineNum">     280 </span>            : };</a>
+<a name="281"><span class="lineNum">     281 </span>            : #endif</a>
+<a name="282"><span class="lineNum">     282 </span>            : </a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_cstr_casecmp(const char *s1, const char *s2)</span></a>
+<a name="284"><span class="lineNum">     284 </span>            : {</a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineNoCov">          0 :     const unsigned char *u1 = (const unsigned char *)s1;</span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :     const unsigned char *u2 = (const unsigned char *)s2;</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :     for (;;) {</span></a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :         const int c2 = ucharmap[*u2++];</span></a>
+<a name="289"><span class="lineNum">     289 </span><span class="lineNoCov">          0 :         const int cmp = (int)ucharmap[*u1++] - c2;</span></a>
+<a name="290"><span class="lineNum">     290 </span>            :         /* Not necessary to test for !c1, this is caught by cmp */</a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :         if (cmp || !c2)</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :             return cmp;</span></a>
+<a name="293"><span class="lineNum">     293 </span>            :     }</a>
+<a name="294"><span class="lineNum">     294 </span>            : }</a>
+<a name="295"><span class="lineNum">     295 </span>            : </a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 : APR_DECLARE(int) apr_cstr_casecmpn(const char *s1, const char *s2,</span></a>
+<a name="297"><span class="lineNum">     297 </span>            :                                    apr_size_t n)</a>
+<a name="298"><span class="lineNum">     298 </span>            : {</a>
+<a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :     const unsigned char *u1 = (const unsigned char *)s1;</span></a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :     const unsigned char *u2 = (const unsigned char *)s2;</span></a>
+<a name="301"><span class="lineNum">     301 </span><span class="lineNoCov">          0 :     while (n--) {</span></a>
+<a name="302"><span class="lineNum">     302 </span><span class="lineNoCov">          0 :         const int c2 = ucharmap[*u2++];</span></a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :         const int cmp = (int)ucharmap[*u1++] - c2;</span></a>
+<a name="304"><span class="lineNum">     304 </span>            :         /* Not necessary to test for !c1, this is caught by cmp */</a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineNoCov">          0 :         if (cmp || !c2)</span></a>
+<a name="306"><span class="lineNum">     306 </span><span class="lineNoCov">          0 :             return cmp;</span></a>
+<a name="307"><span class="lineNum">     307 </span>            :     }</a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 :     return 0;</span></a>
+<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="310"><span class="lineNum">     310 </span>            : </a>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_strtoui64(apr_uint64_t *n,</span></a>
+<a name="312"><span class="lineNum">     312 </span>            :                                              const char *str,</a>
+<a name="313"><span class="lineNum">     313 </span>            :                                              apr_uint64_t minval,</a>
+<a name="314"><span class="lineNum">     314 </span>            :                                              apr_uint64_t maxval,</a>
+<a name="315"><span class="lineNum">     315 </span>            :                                              int base)</a>
+<a name="316"><span class="lineNum">     316 </span>            : {</a>
+<a name="317"><span class="lineNum">     317 </span>            :   apr_int64_t val;</a>
+<a name="318"><span class="lineNum">     318 </span>            :   char *endptr;</a>
+<a name="319"><span class="lineNum">     319 </span>            : </a>
+<a name="320"><span class="lineNum">     320 </span>            :   /* We assume errno is thread-safe. */</a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :   errno = 0; /* APR-0.9 doesn't always set errno */</span></a>
+<a name="322"><span class="lineNum">     322 </span>            : </a>
+<a name="323"><span class="lineNum">     323 </span>            :   /* ### We're throwing away half the number range here.</a>
+<a name="324"><span class="lineNum">     324 </span>            :    * ### APR needs a apr_strtoui64() function. */</a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineNoCov">          0 :   val = apr_strtoi64(str, &amp;endptr, base);</span></a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineNoCov">          0 :   if (errno == EINVAL || endptr == str || str[0] == '\0' || *endptr != '\0')</span></a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineNoCov">          0 :     return APR_EINVAL;</span></a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineNoCov">          0 :   if ((errno == ERANGE &amp;&amp; (val == APR_INT64_MIN || val == APR_INT64_MAX)) ||</span></a>
+<a name="329"><span class="lineNum">     329 </span><span class="lineNoCov">          0 :       val &lt; 0 || (apr_uint64_t)val &lt; minval || (apr_uint64_t)val &gt; maxval)</span></a>
+<a name="330"><span class="lineNum">     330 </span><span class="lineNoCov">          0 :     return APR_ERANGE;</span></a>
+<a name="331"><span class="lineNum">     331 </span><span class="lineNoCov">          0 :   *n = val;</span></a>
+<a name="332"><span class="lineNum">     332 </span><span class="lineNoCov">          0 :   return APR_SUCCESS;</span></a>
+<a name="333"><span class="lineNum">     333 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="334"><span class="lineNum">     334 </span>            : </a>
+<a name="335"><span class="lineNum">     335 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_atoui64(apr_uint64_t *n, const char *str)</span></a>
+<a name="336"><span class="lineNum">     336 </span>            : {</a>
+<a name="337"><span class="lineNum">     337 </span><span class="lineNoCov">          0 :   return apr_cstr_strtoui64(n, str, 0, APR_UINT64_MAX, 10);</span></a>
+<a name="338"><span class="lineNum">     338 </span>            : }</a>
+<a name="339"><span class="lineNum">     339 </span>            : </a>
+<a name="340"><span class="lineNum">     340 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_atoui(unsigned int *n, const char *str)</span></a>
+<a name="341"><span class="lineNum">     341 </span>            : {</a>
+<a name="342"><span class="lineNum">     342 </span>            :   apr_uint64_t val;</a>
+<a name="343"><span class="lineNum">     343 </span><span class="lineNoCov">          0 :   apr_status_t rv = apr_cstr_strtoui64(&amp;val, str, 0, APR_UINT32_MAX, 10);</span></a>
+<a name="344"><span class="lineNum">     344 </span><span class="lineNoCov">          0 :   if (rv == APR_SUCCESS)</span></a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :     *n = (unsigned int)val;</span></a>
+<a name="346"><span class="lineNum">     346 </span><span class="lineNoCov">          0 :   return rv;</span></a>
+<a name="347"><span class="lineNum">     347 </span>            : }</a>
+<a name="348"><span class="lineNum">     348 </span>            : </a>
+<a name="349"><span class="lineNum">     349 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_strtoi64(apr_int64_t *n,</span></a>
+<a name="350"><span class="lineNum">     350 </span>            :                                             const char *str,</a>
+<a name="351"><span class="lineNum">     351 </span>            :                                             apr_int64_t minval,</a>
+<a name="352"><span class="lineNum">     352 </span>            :                                             apr_int64_t maxval,</a>
+<a name="353"><span class="lineNum">     353 </span>            :                                             int base)</a>
+<a name="354"><span class="lineNum">     354 </span>            : {</a>
+<a name="355"><span class="lineNum">     355 </span>            :   apr_int64_t val;</a>
+<a name="356"><span class="lineNum">     356 </span>            :   char *endptr;</a>
+<a name="357"><span class="lineNum">     357 </span>            : </a>
+<a name="358"><span class="lineNum">     358 </span>            :   /* We assume errno is thread-safe. */</a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineNoCov">          0 :   errno = 0; /* APR-0.9 doesn't always set errno */</span></a>
+<a name="360"><span class="lineNum">     360 </span>            : </a>
+<a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 :   val = apr_strtoi64(str, &amp;endptr, base);</span></a>
+<a name="362"><span class="lineNum">     362 </span><span class="lineNoCov">          0 :   if (errno == EINVAL || endptr == str || str[0] == '\0' || *endptr != '\0')</span></a>
+<a name="363"><span class="lineNum">     363 </span><span class="lineNoCov">          0 :     return APR_EINVAL;</span></a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineNoCov">          0 :   if ((errno == ERANGE &amp;&amp; (val == APR_INT64_MIN || val == APR_INT64_MAX)) ||</span></a>
+<a name="365"><span class="lineNum">     365 </span><span class="lineNoCov">          0 :       val &lt; minval || val &gt; maxval)</span></a>
+<a name="366"><span class="lineNum">     366 </span><span class="lineNoCov">          0 :     return APR_ERANGE;</span></a>
+<a name="367"><span class="lineNum">     367 </span><span class="lineNoCov">          0 :   *n = val;</span></a>
+<a name="368"><span class="lineNum">     368 </span><span class="lineNoCov">          0 :   return APR_SUCCESS;</span></a>
+<a name="369"><span class="lineNum">     369 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="370"><span class="lineNum">     370 </span>            : </a>
+<a name="371"><span class="lineNum">     371 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_atoi64(apr_int64_t *n, const char *str)</span></a>
+<a name="372"><span class="lineNum">     372 </span>            : {</a>
+<a name="373"><span class="lineNum">     373 </span><span class="lineNoCov">          0 :   return apr_cstr_strtoi64(n, str, APR_INT64_MIN, APR_INT64_MAX, 10);</span></a>
+<a name="374"><span class="lineNum">     374 </span>            : }</a>
+<a name="375"><span class="lineNum">     375 </span>            : </a>
+<a name="376"><span class="lineNum">     376 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_cstr_atoi(int *n, const char *str)</span></a>
+<a name="377"><span class="lineNum">     377 </span>            : {</a>
+<a name="378"><span class="lineNum">     378 </span>            :   apr_int64_t val;</a>
+<a name="379"><span class="lineNum">     379 </span>            :   apr_status_t rv;</a>
+<a name="380"><span class="lineNum">     380 </span>            : </a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :   rv = apr_cstr_strtoi64(&amp;val, str, APR_INT32_MIN, APR_INT32_MAX, 10);</span></a>
+<a name="382"><span class="lineNum">     382 </span><span class="lineNoCov">          0 :   if (rv == APR_SUCCESS)</span></a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :     *n = (int)val;</span></a>
+<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :   return rv;</span></a>
+<a name="385"><span class="lineNum">     385 </span>            : }</a>
+<a name="386"><span class="lineNum">     386 </span>            : </a>
+<a name="387"><span class="lineNum">     387 </span>            : APR_DECLARE(const char *)</a>
+<a name="388"><span class="lineNum">     388 </span><span class="lineNoCov">          0 : apr_cstr_skip_prefix(const char *str, const char *prefix)</span></a>
+<a name="389"><span class="lineNum">     389 </span>            : {</a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineNoCov">          0 :   apr_size_t len = strlen(prefix);</span></a>
+<a name="391"><span class="lineNum">     391 </span>            : </a>
+<a name="392"><span class="lineNum">     392 </span><span class="lineNoCov">          0 :   if (strncmp(str, prefix, len) == 0)</span></a>
+<a name="393"><span class="lineNum">     393 </span>            :     {</a>
+<a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :       return str + len;</span></a>
+<a name="395"><span class="lineNum">     395 </span>            :     }</a>
+<a name="396"><span class="lineNum">     396 </span>            :   else</a>
+<a name="397"><span class="lineNum">     397 </span>            :     {</a>
+<a name="398"><span class="lineNum">     398 </span><span class="lineNoCov">          0 :       return NULL;</span></a>
+<a name="399"><span class="lineNum">     399 </span>            :     }</a>
+<a name="400"><span class="lineNum">     400 </span><span class="lineNoCov">          0 : }</span></a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
