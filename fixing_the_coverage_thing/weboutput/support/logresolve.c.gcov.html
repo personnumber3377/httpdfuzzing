@@ -1,0 +1,405 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - support/logresolve.c</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">support</a> - logresolve.c<span style="font-size: 80%;"> (source / <a href="logresolve.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">126</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-12 20:51:26</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : /*</a>
+<a name="18"><span class="lineNum">      18 </span>            :  * logresolve 2.0</a>
+<a name="19"><span class="lineNum">      19 </span>            :  *</a>
+<a name="20"><span class="lineNum">      20 </span>            :  * Tom Rathborne - tomr uunet.ca - http://www.uunet.ca/~tomr/</a>
+<a name="21"><span class="lineNum">      21 </span>            :  * UUNET Canada, April 16, 1995</a>
+<a name="22"><span class="lineNum">      22 </span>            :  *</a>
+<a name="23"><span class="lineNum">      23 </span>            :  * Rewritten by David Robinson. (drtr ast.cam.ac.uk)</a>
+<a name="24"><span class="lineNum">      24 </span>            :  * Rewritten again, and ported to APR by Colm MacCarthaigh</a>
+<a name="25"><span class="lineNum">      25 </span>            :  *</a>
+<a name="26"><span class="lineNum">      26 </span>            :  * Usage: logresolve [-s filename] [-c] &lt; access_log &gt; new_log</a>
+<a name="27"><span class="lineNum">      27 </span>            :  *</a>
+<a name="28"><span class="lineNum">      28 </span>            :  * Arguments:</a>
+<a name="29"><span class="lineNum">      29 </span>            :  *    -s filename     name of a file to record statistics</a>
+<a name="30"><span class="lineNum">      30 </span>            :  *    -c              check the DNS for a matching A record for the host.</a>
+<a name="31"><span class="lineNum">      31 </span>            :  *</a>
+<a name="32"><span class="lineNum">      32 </span>            :  * Notes:             (For historical interest)</a>
+<a name="33"><span class="lineNum">      33 </span>            :  *</a>
+<a name="34"><span class="lineNum">      34 </span>            :  * To generate meaningful statistics from an HTTPD log file, it's good</a>
+<a name="35"><span class="lineNum">      35 </span>            :  * to have the domain name of each machine that accessed your site, but</a>
+<a name="36"><span class="lineNum">      36 </span>            :  * doing this on the fly can slow HTTPD down.</a>
+<a name="37"><span class="lineNum">      37 </span>            :  *</a>
+<a name="38"><span class="lineNum">      38 </span>            :  * Compiling NCSA HTTPD with the -DMINIMAL_DNS flag turns IP#-&gt;hostname</a>
+<a name="39"><span class="lineNum">      39 </span>            :  * resolution off. Before running your stats program, just run your log</a>
+<a name="40"><span class="lineNum">      40 </span>            :  * file through this program (logresolve) and all of your IP numbers will</a>
+<a name="41"><span class="lineNum">      41 </span>            :  * be resolved into hostnames (where possible).</a>
+<a name="42"><span class="lineNum">      42 </span>            :  *</a>
+<a name="43"><span class="lineNum">      43 </span>            :  * logresolve takes an HTTPD access log (in the COMMON log file format,</a>
+<a name="44"><span class="lineNum">      44 </span>            :  * or any other format that has the IP number/domain name as the first</a>
+<a name="45"><span class="lineNum">      45 </span>            :  * field for that matter), and outputs the same file with all of the</a>
+<a name="46"><span class="lineNum">      46 </span>            :  * domain names looked up. Where no domain name can be found, the IP</a>
+<a name="47"><span class="lineNum">      47 </span>            :  * number is left in.</a>
+<a name="48"><span class="lineNum">      48 </span>            :  *</a>
+<a name="49"><span class="lineNum">      49 </span>            :  * To minimize impact on your nameserver, logresolve has its very own</a>
+<a name="50"><span class="lineNum">      50 </span>            :  * internal hash-table cache. This means that each IP number will only</a>
+<a name="51"><span class="lineNum">      51 </span>            :  * be looked up the first time it is found in the log file.</a>
+<a name="52"><span class="lineNum">      52 </span>            :  *</a>
+<a name="53"><span class="lineNum">      53 </span>            :  * The -c option causes logresolve to apply the same check as httpd</a>
+<a name="54"><span class="lineNum">      54 </span>            :  * compiled with -DMAXIMUM_DNS; after finding the hostname from the IP</a>
+<a name="55"><span class="lineNum">      55 </span>            :  * address, it looks up the IP addresses for the hostname and checks</a>
+<a name="56"><span class="lineNum">      56 </span>            :  * that one of these matches the original address.</a>
+<a name="57"><span class="lineNum">      57 </span>            :  */</a>
+<a name="58"><span class="lineNum">      58 </span>            : </a>
+<a name="59"><span class="lineNum">      59 </span>            : #include &quot;apr.h&quot;</a>
+<a name="60"><span class="lineNum">      60 </span>            : #include &quot;apr_lib.h&quot;</a>
+<a name="61"><span class="lineNum">      61 </span>            : #include &quot;apr_hash.h&quot;</a>
+<a name="62"><span class="lineNum">      62 </span>            : #include &quot;apr_getopt.h&quot;</a>
+<a name="63"><span class="lineNum">      63 </span>            : #include &quot;apr_strings.h&quot;</a>
+<a name="64"><span class="lineNum">      64 </span>            : #include &quot;apr_file_io.h&quot;</a>
+<a name="65"><span class="lineNum">      65 </span>            : #include &quot;apr_network_io.h&quot;</a>
+<a name="66"><span class="lineNum">      66 </span>            : </a>
+<a name="67"><span class="lineNum">      67 </span>            : #if APR_HAVE_STDLIB_H</a>
+<a name="68"><span class="lineNum">      68 </span>            : #include &lt;stdlib.h&gt;</a>
+<a name="69"><span class="lineNum">      69 </span>            : #endif</a>
+<a name="70"><span class="lineNum">      70 </span>            : </a>
+<a name="71"><span class="lineNum">      71 </span>            : #define READ_BUF_SIZE  128*1024</a>
+<a name="72"><span class="lineNum">      72 </span>            : #define WRITE_BUF_SIZE 128*1024</a>
+<a name="73"><span class="lineNum">      73 </span>            : #define LINE_BUF_SIZE  128*1024</a>
+<a name="74"><span class="lineNum">      74 </span>            : </a>
+<a name="75"><span class="lineNum">      75 </span>            : static apr_file_t *errfile;</a>
+<a name="76"><span class="lineNum">      76 </span>            : static const char *shortname = &quot;logresolve&quot;;</a>
+<a name="77"><span class="lineNum">      77 </span>            : static apr_hash_t *cache;</a>
+<a name="78"><span class="lineNum">      78 </span>            : </a>
+<a name="79"><span class="lineNum">      79 </span>            : /* Statistics */</a>
+<a name="80"><span class="lineNum">      80 </span>            : static int cachehits = 0;</a>
+<a name="81"><span class="lineNum">      81 </span>            : static int cachesize = 0;</a>
+<a name="82"><span class="lineNum">      82 </span>            : static int entries = 0;</a>
+<a name="83"><span class="lineNum">      83 </span>            : static int resolves = 0;</a>
+<a name="84"><span class="lineNum">      84 </span>            : static int withname = 0;</a>
+<a name="85"><span class="lineNum">      85 </span>            : static int doublefailed = 0;</a>
+<a name="86"><span class="lineNum">      86 </span>            : static int noreverse = 0;</a>
+<a name="87"><span class="lineNum">      87 </span>            : </a>
+<a name="88"><span class="lineNum">      88 </span>            : /*</a>
+<a name="89"><span class="lineNum">      89 </span>            :  * prints various statistics to output</a>
+<a name="90"><span class="lineNum">      90 </span>            :  */</a>
+<a name="91"><span class="lineNum">      91 </span>            : #define NL APR_EOL_STR</a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineNoCov">          0 : static void print_statistics (apr_file_t *output)</span></a>
+<a name="93"><span class="lineNum">      93 </span>            : {</a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;logresolve Statistics:&quot; NL);</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;Entries: %d&quot; NL, entries);</span></a>
+<a name="96"><span class="lineNum">      96 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;    With name   : %d&quot; NL, withname);</span></a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;    Resolves    : %d&quot; NL, resolves);</span></a>
+<a name="98"><span class="lineNum">      98 </span>            : </a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineNoCov">          0 :     if (noreverse) {</span></a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineNoCov">          0 :         apr_file_printf(output, &quot;    - No reverse : %d&quot; NL,</span></a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineNoCov">          0 :                         noreverse);</span></a>
+<a name="102"><span class="lineNum">     102 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="103"><span class="lineNum">     103 </span>            : </a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 :     if (doublefailed) {</span></a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :         apr_file_printf(output, &quot;    - Double lookup failed : %d&quot; NL,</span></a>
+<a name="106"><span class="lineNum">     106 </span><span class="lineNoCov">          0 :                         doublefailed);</span></a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="108"><span class="lineNum">     108 </span>            : </a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;Cache hits      : %d&quot; NL, cachehits);</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :     apr_file_printf(output, &quot;Cache size      : %d&quot; NL, cachesize);</span></a>
+<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="112"><span class="lineNum">     112 </span>            : </a>
+<a name="113"><span class="lineNum">     113 </span>            : /*</a>
+<a name="114"><span class="lineNum">     114 </span>            :  * usage info</a>
+<a name="115"><span class="lineNum">     115 </span>            :  */</a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 : static void usage(void)</span></a>
+<a name="117"><span class="lineNum">     117 </span>            : {</a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 :     apr_file_printf(errfile,</span></a>
+<a name="119"><span class="lineNum">     119 </span>            :     &quot;%s -- Resolve IP-addresses to hostnames in Apache log files.&quot;           NL</a>
+<a name="120"><span class="lineNum">     120 </span>            :     &quot;Usage: %s [-s STATFILE] [-c]&quot;                                           NL</a>
+<a name="121"><span class="lineNum">     121 </span>            :                                                                              NL</a>
+<a name="122"><span class="lineNum">     122 </span>            :     &quot;Options:&quot;                                                               NL</a>
+<a name="123"><span class="lineNum">     123 </span>            :     &quot;  -s   Record statistics to STATFILE when finished.&quot;                    NL</a>
+<a name="124"><span class="lineNum">     124 </span>            :                                                                              NL</a>
+<a name="125"><span class="lineNum">     125 </span>            :     &quot;  -c   Perform double lookups when resolving IP addresses.&quot;             NL,</a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :     shortname, shortname);</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :     exit(1);</span></a>
+<a name="128"><span class="lineNum">     128 </span>            : }</a>
+<a name="129"><span class="lineNum">     129 </span>            : #undef NL</a>
+<a name="130"><span class="lineNum">     130 </span>            : </a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineNoCov">          0 : int main(int argc, const char * const argv[])</span></a>
+<a name="132"><span class="lineNum">     132 </span>            : {</a>
+<a name="133"><span class="lineNum">     133 </span>            :     apr_file_t * outfile;</a>
+<a name="134"><span class="lineNum">     134 </span>            :     apr_file_t * infile;</a>
+<a name="135"><span class="lineNum">     135 </span>            :     apr_getopt_t * o;</a>
+<a name="136"><span class="lineNum">     136 </span>            :     apr_pool_t * pool;</a>
+<a name="137"><span class="lineNum">     137 </span>            :     apr_pool_t *pline;</a>
+<a name="138"><span class="lineNum">     138 </span>            :     apr_status_t status;</a>
+<a name="139"><span class="lineNum">     139 </span>            :     const char * arg;</a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :     char * stats = NULL;</span></a>
+<a name="141"><span class="lineNum">     141 </span>            :     char * inbuffer;</a>
+<a name="142"><span class="lineNum">     142 </span>            :     char * outbuffer;</a>
+<a name="143"><span class="lineNum">     143 </span>            :     char * line;</a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :     int doublelookups = 0;</span></a>
+<a name="145"><span class="lineNum">     145 </span>            : </a>
+<a name="146"><span class="lineNum">     146 </span><span class="lineNoCov">          0 :     if (apr_app_initialize(&amp;argc, &amp;argv, NULL) != APR_SUCCESS) {</span></a>
+<a name="147"><span class="lineNum">     147 </span><span class="lineNoCov">          0 :         return 1;</span></a>
+<a name="148"><span class="lineNum">     148 </span>            :     }</a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :     atexit(apr_terminate);</span></a>
+<a name="150"><span class="lineNum">     150 </span>            : </a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 :     if (argc) {</span></a>
+<a name="152"><span class="lineNum">     152 </span><span class="lineNoCov">          0 :         shortname = apr_filepath_name_get(argv[0]);</span></a>
+<a name="153"><span class="lineNum">     153 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="154"><span class="lineNum">     154 </span>            : </a>
+<a name="155"><span class="lineNum">     155 </span><span class="lineNoCov">          0 :     if (apr_pool_create(&amp;pool, NULL) != APR_SUCCESS) {</span></a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 :         return 1;</span></a>
+<a name="157"><span class="lineNum">     157 </span>            :     }</a>
+<a name="158"><span class="lineNum">     158 </span><span class="lineNoCov">          0 :     apr_file_open_stderr(&amp;errfile, pool);</span></a>
+<a name="159"><span class="lineNum">     159 </span><span class="lineNoCov">          0 :     apr_getopt_init(&amp;o, pool, argc, argv);</span></a>
+<a name="160"><span class="lineNum">     160 </span>            : </a>
+<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :     while (1) {</span></a>
+<a name="162"><span class="lineNum">     162 </span>            :         char opt;</a>
+<a name="163"><span class="lineNum">     163 </span><span class="lineNoCov">          0 :         status = apr_getopt(o, &quot;s:c&quot;, &amp;opt, &amp;arg);</span></a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 :         if (status == APR_EOF) {</span></a>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="166"><span class="lineNum">     166 </span>            :         }</a>
+<a name="167"><span class="lineNum">     167 </span><span class="lineNoCov">          0 :         else if (status != APR_SUCCESS) {</span></a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :             usage();</span></a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="170"><span class="lineNum">     170 </span>            :         else {</a>
+<a name="171"><span class="lineNum">     171 </span><span class="lineNoCov">          0 :             switch (opt) {</span></a>
+<a name="172"><span class="lineNum">     172 </span>            :             case 'c':</a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 :                 if (doublelookups) {</span></a>
+<a name="174"><span class="lineNum">     174 </span><span class="lineNoCov">          0 :                     usage();</span></a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :                 doublelookups = 1;</span></a>
+<a name="177"><span class="lineNum">     177 </span><span class="lineNoCov">          0 :                 break;</span></a>
+<a name="178"><span class="lineNum">     178 </span>            :             case 's':</a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineNoCov">          0 :                 if (stats) {</span></a>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :                     usage();</span></a>
+<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 :                 }</span></a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :                 stats = apr_pstrdup(pool, arg);</span></a>
+<a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 :                 break;</span></a>
+<a name="184"><span class="lineNum">     184 </span>            :             } /* switch */</a>
+<a name="185"><span class="lineNum">     185 </span>            :         } /* else */</a>
+<a name="186"><span class="lineNum">     186 </span>            :     } /* while */</a>
+<a name="187"><span class="lineNum">     187 </span>            : </a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :     apr_file_open_stdout(&amp;outfile, pool);</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :     apr_file_open_stdin(&amp;infile, pool);</span></a>
+<a name="190"><span class="lineNum">     190 </span>            : </a>
+<a name="191"><span class="lineNum">     191 </span>            :     /* Allocate two new 10k file buffers */</a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :     if (   (outbuffer = apr_palloc(pool, WRITE_BUF_SIZE)) == NULL</span></a>
+<a name="193"><span class="lineNum">     193 </span><span class="lineNoCov">          0 :         || (inbuffer  = apr_palloc(pool, READ_BUF_SIZE))  == NULL</span></a>
+<a name="194"><span class="lineNum">     194 </span><span class="lineNoCov">          0 :         || (line      = apr_palloc(pool, LINE_BUF_SIZE))  == NULL) {</span></a>
+<a name="195"><span class="lineNum">     195 </span><span class="lineNoCov">          0 :         return 1;</span></a>
+<a name="196"><span class="lineNum">     196 </span>            :     }</a>
+<a name="197"><span class="lineNum">     197 </span>            : </a>
+<a name="198"><span class="lineNum">     198 </span>            :     /* Set the buffers */</a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineNoCov">          0 :     apr_file_buffer_set(infile, inbuffer, READ_BUF_SIZE);</span></a>
+<a name="200"><span class="lineNum">     200 </span><span class="lineNoCov">          0 :     apr_file_buffer_set(outfile, outbuffer, WRITE_BUF_SIZE);</span></a>
+<a name="201"><span class="lineNum">     201 </span>            : </a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineNoCov">          0 :     cache = apr_hash_make(pool);</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :     if (apr_pool_create(&amp;pline, pool) != APR_SUCCESS) {</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineNoCov">          0 :         return 1;</span></a>
+<a name="205"><span class="lineNum">     205 </span>            :     }</a>
+<a name="206"><span class="lineNum">     206 </span>            : </a>
+<a name="207"><span class="lineNum">     207 </span><span class="lineNoCov">          0 :     while (apr_file_gets(line, LINE_BUF_SIZE, infile) == APR_SUCCESS) {</span></a>
+<a name="208"><span class="lineNum">     208 </span>            :         char *hostname;</a>
+<a name="209"><span class="lineNum">     209 </span>            :         char *space;</a>
+<a name="210"><span class="lineNum">     210 </span>            :         apr_sockaddr_t *ip;</a>
+<a name="211"><span class="lineNum">     211 </span>            :         apr_sockaddr_t *ipdouble;</a>
+<a name="212"><span class="lineNum">     212 </span><span class="lineNoCov">          0 :         char dummy[] = &quot; &quot; APR_EOL_STR;</span></a>
+<a name="213"><span class="lineNum">     213 </span>            : </a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :         if (line[0] == '\0') {</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineNoCov">          0 :             continue;</span></a>
+<a name="216"><span class="lineNum">     216 </span>            :         }</a>
+<a name="217"><span class="lineNum">     217 </span>            : </a>
+<a name="218"><span class="lineNum">     218 </span>            :         /* Count our log entries */</a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineNoCov">          0 :         entries++;</span></a>
+<a name="220"><span class="lineNum">     220 </span>            : </a>
+<a name="221"><span class="lineNum">     221 </span>            :         /* Check if this could even be an IP address */</a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 :         if (!apr_isxdigit(line[0]) &amp;&amp; line[0] != ':') {</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 :             withname++;</span></a>
+<a name="224"><span class="lineNum">     224 </span><span class="lineNoCov">          0 :             apr_file_puts(line, outfile);</span></a>
+<a name="225"><span class="lineNum">     225 </span><span class="lineNoCov">          0 :             continue;</span></a>
+<a name="226"><span class="lineNum">     226 </span>            :         }</a>
+<a name="227"><span class="lineNum">     227 </span>            : </a>
+<a name="228"><span class="lineNum">     228 </span>            :         /* Terminate the line at the next space */</a>
+<a name="229"><span class="lineNum">     229 </span><span class="lineNoCov">          0 :         if ((space = strchr(line, ' ')) != NULL) {</span></a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineNoCov">          0 :             *space = '\0';</span></a>
+<a name="231"><span class="lineNum">     231 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="232"><span class="lineNum">     232 </span>            :         else {</a>
+<a name="233"><span class="lineNum">     233 </span><span class="lineNoCov">          0 :             space = dummy;</span></a>
+<a name="234"><span class="lineNum">     234 </span>            :         }</a>
+<a name="235"><span class="lineNum">     235 </span>            : </a>
+<a name="236"><span class="lineNum">     236 </span>            :         /* See if we have it in our cache */</a>
+<a name="237"><span class="lineNum">     237 </span><span class="lineNoCov">          0 :         hostname = (char *) apr_hash_get(cache, line, APR_HASH_KEY_STRING);</span></a>
+<a name="238"><span class="lineNum">     238 </span><span class="lineNoCov">          0 :         if (hostname) {</span></a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineNoCov">          0 :             apr_file_printf(outfile, &quot;%s %s&quot;, hostname, space + 1);</span></a>
+<a name="240"><span class="lineNum">     240 </span><span class="lineNoCov">          0 :             cachehits++;</span></a>
+<a name="241"><span class="lineNum">     241 </span><span class="lineNoCov">          0 :             continue;</span></a>
+<a name="242"><span class="lineNum">     242 </span>            :         }</a>
+<a name="243"><span class="lineNum">     243 </span>            : </a>
+<a name="244"><span class="lineNum">     244 </span>            :         /* Parse the IP address */</a>
+<a name="245"><span class="lineNum">     245 </span><span class="lineNoCov">          0 :         status = apr_sockaddr_info_get(&amp;ip, line, APR_UNSPEC, 0, 0, pline);</span></a>
+<a name="246"><span class="lineNum">     246 </span><span class="lineNoCov">          0 :         if (status != APR_SUCCESS) {</span></a>
+<a name="247"><span class="lineNum">     247 </span>            :             /* Not an IP address */</a>
+<a name="248"><span class="lineNum">     248 </span><span class="lineNoCov">          0 :             withname++;</span></a>
+<a name="249"><span class="lineNum">     249 </span><span class="lineNoCov">          0 :             *space = ' ';</span></a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineNoCov">          0 :             apr_file_puts(line, outfile);</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineNoCov">          0 :             continue;</span></a>
+<a name="252"><span class="lineNum">     252 </span>            :         }</a>
+<a name="253"><span class="lineNum">     253 </span>            : </a>
+<a name="254"><span class="lineNum">     254 </span>            :         /* This does not make much sense, but historically &quot;resolves&quot; means</a>
+<a name="255"><span class="lineNum">     255 </span>            :          * &quot;parsed as an IP address&quot;. It does not mean we actually resolved</a>
+<a name="256"><span class="lineNum">     256 </span>            :          * the IP address into a hostname.</a>
+<a name="257"><span class="lineNum">     257 </span>            :          */</a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineNoCov">          0 :         resolves++;</span></a>
+<a name="259"><span class="lineNum">     259 </span>            : </a>
+<a name="260"><span class="lineNum">     260 </span>            :         /* From here on our we cache each result, even if it was not</a>
+<a name="261"><span class="lineNum">     261 </span>            :          * successful</a>
+<a name="262"><span class="lineNum">     262 </span>            :          */</a>
+<a name="263"><span class="lineNum">     263 </span><span class="lineNoCov">          0 :         cachesize++;</span></a>
+<a name="264"><span class="lineNum">     264 </span>            : </a>
+<a name="265"><span class="lineNum">     265 </span>            :         /* Try and perform a reverse lookup */</a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :         status = apr_getnameinfo(&amp;hostname, ip, 0) != APR_SUCCESS;</span></a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineNoCov">          0 :         if (status || hostname == NULL) {</span></a>
+<a name="268"><span class="lineNum">     268 </span>            :             /* Could not perform a reverse lookup */</a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineNoCov">          0 :             *space = ' ';</span></a>
+<a name="270"><span class="lineNum">     270 </span><span class="lineNoCov">          0 :             apr_file_puts(line, outfile);</span></a>
+<a name="271"><span class="lineNum">     271 </span><span class="lineNoCov">          0 :             noreverse++;</span></a>
+<a name="272"><span class="lineNum">     272 </span>            : </a>
+<a name="273"><span class="lineNum">     273 </span>            :             /* Add to cache */</a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineNoCov">          0 :             *space = '\0';</span></a>
+<a name="275"><span class="lineNum">     275 </span><span class="lineNoCov">          0 :             apr_hash_set(cache, line, APR_HASH_KEY_STRING,</span></a>
+<a name="276"><span class="lineNum">     276 </span><span class="lineNoCov">          0 :                          apr_pstrdup(apr_hash_pool_get(cache), line));</span></a>
+<a name="277"><span class="lineNum">     277 </span><span class="lineNoCov">          0 :             continue;</span></a>
+<a name="278"><span class="lineNum">     278 </span>            :         }</a>
+<a name="279"><span class="lineNum">     279 </span>            : </a>
+<a name="280"><span class="lineNum">     280 </span>            :         /* Perform a double lookup */</a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :         if (doublelookups) {</span></a>
+<a name="282"><span class="lineNum">     282 </span>            :             /* Do a forward lookup on our hostname, and see if that matches our</a>
+<a name="283"><span class="lineNum">     283 </span>            :              * original IP address.</a>
+<a name="284"><span class="lineNum">     284 </span>            :              */</a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineNoCov">          0 :             status = apr_sockaddr_info_get(&amp;ipdouble, hostname, ip-&gt;family, 0,</span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :                                            0, pline);</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :             if (status != APR_SUCCESS ||</span></a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :                 memcmp(ipdouble-&gt;ipaddr_ptr, ip-&gt;ipaddr_ptr, ip-&gt;ipaddr_len)) {</span></a>
+<a name="289"><span class="lineNum">     289 </span>            :                 /* Double-lookup failed  */</a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :                 *space = ' ';</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :                 apr_file_puts(line, outfile);</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :                 doublefailed++;</span></a>
+<a name="293"><span class="lineNum">     293 </span>            : </a>
+<a name="294"><span class="lineNum">     294 </span>            :                 /* Add to cache */</a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineNoCov">          0 :                 *space = '\0';</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 :                 apr_hash_set(cache, line, APR_HASH_KEY_STRING,</span></a>
+<a name="297"><span class="lineNum">     297 </span><span class="lineNoCov">          0 :                              apr_pstrdup(apr_hash_pool_get(cache), line));</span></a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineNoCov">          0 :                 continue;</span></a>
+<a name="299"><span class="lineNum">     299 </span>            :             }</a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="301"><span class="lineNum">     301 </span>            : </a>
+<a name="302"><span class="lineNum">     302 </span>            :         /* Output the resolved name */</a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :         apr_file_printf(outfile, &quot;%s %s&quot;, hostname, space + 1);</span></a>
+<a name="304"><span class="lineNum">     304 </span>            : </a>
+<a name="305"><span class="lineNum">     305 </span>            :         /* Store it in the cache */</a>
+<a name="306"><span class="lineNum">     306 </span><span class="lineNoCov">          0 :         apr_hash_set(cache, line, APR_HASH_KEY_STRING,</span></a>
+<a name="307"><span class="lineNum">     307 </span><span class="lineNoCov">          0 :                      apr_pstrdup(apr_hash_pool_get(cache), hostname));</span></a>
+<a name="308"><span class="lineNum">     308 </span>            : </a>
+<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 :         apr_pool_clear(pline);</span></a>
+<a name="310"><span class="lineNum">     310 </span>            :     }</a>
+<a name="311"><span class="lineNum">     311 </span>            : </a>
+<a name="312"><span class="lineNum">     312 </span>            :     /* Flush any remaining output */</a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineNoCov">          0 :     apr_file_flush(outfile);</span></a>
+<a name="314"><span class="lineNum">     314 </span>            : </a>
+<a name="315"><span class="lineNum">     315 </span><span class="lineNoCov">          0 :     if (stats) {</span></a>
+<a name="316"><span class="lineNum">     316 </span>            :         apr_file_t *statsfile;</a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :         if (apr_file_open(&amp;statsfile, stats,</span></a>
+<a name="318"><span class="lineNum">     318 </span>            :                           APR_FOPEN_WRITE | APR_FOPEN_CREATE | APR_FOPEN_TRUNCATE,</a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :                           APR_OS_DEFAULT, pool) != APR_SUCCESS) {</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 :             apr_file_printf(errfile, &quot;%s: Could not open %s for writing.&quot;,</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :                             shortname, stats);</span></a>
+<a name="322"><span class="lineNum">     322 </span><span class="lineNoCov">          0 :             return 1;</span></a>
+<a name="323"><span class="lineNum">     323 </span>            :         }</a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineNoCov">          0 :         print_statistics(statsfile);</span></a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineNoCov">          0 :         apr_file_close(statsfile);</span></a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="327"><span class="lineNum">     327 </span>            : </a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineNoCov">          0 :     return 0;</span></a>
+<a name="329"><span class="lineNum">     329 </span><span class="lineNoCov">          0 : }</span></a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

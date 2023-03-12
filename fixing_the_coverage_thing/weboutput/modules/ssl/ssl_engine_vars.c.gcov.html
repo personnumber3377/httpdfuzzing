@@ -1,0 +1,1349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - modules/ssl/ssl_engine_vars.c</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">modules/ssl</a> - ssl_engine_vars.c<span style="font-size: 80%;"> (source / <a href="ssl_engine_vars.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">714</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-12 20:51:26</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">34</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : /*                      _             _</a>
+<a name="18"><span class="lineNum">      18 </span>            :  *  _ __ ___   ___   __| |    ___ ___| |  mod_ssl</a>
+<a name="19"><span class="lineNum">      19 </span>            :  * | '_ ` _ \ / _ \ / _` |   / __/ __| |  Apache Interface to OpenSSL</a>
+<a name="20"><span class="lineNum">      20 </span>            :  * | | | | | | (_) | (_| |   \__ \__ \ |</a>
+<a name="21"><span class="lineNum">      21 </span>            :  * |_| |_| |_|\___/ \__,_|___|___/___/_|</a>
+<a name="22"><span class="lineNum">      22 </span>            :  *                      |_____|</a>
+<a name="23"><span class="lineNum">      23 </span>            :  *  ssl_engine_vars.c</a>
+<a name="24"><span class="lineNum">      24 </span>            :  *  Variable Lookup Facility</a>
+<a name="25"><span class="lineNum">      25 </span>            :  */</a>
+<a name="26"><span class="lineNum">      26 </span>            :                              /* ``Those of you who think they</a>
+<a name="27"><span class="lineNum">      27 </span>            :                                   know everything are very annoying</a>
+<a name="28"><span class="lineNum">      28 </span>            :                                   to those of us who do.''</a>
+<a name="29"><span class="lineNum">      29 </span>            :                                                   -- Unknown       */</a>
+<a name="30"><span class="lineNum">      30 </span>            : #include &quot;ssl_private.h&quot;</a>
+<a name="31"><span class="lineNum">      31 </span>            : #include &quot;mod_ssl.h&quot;</a>
+<a name="32"><span class="lineNum">      32 </span>            : #include &quot;ap_expr.h&quot;</a>
+<a name="33"><span class="lineNum">      33 </span>            : </a>
+<a name="34"><span class="lineNum">      34 </span>            : #include &quot;apr_time.h&quot;</a>
+<a name="35"><span class="lineNum">      35 </span>            : </a>
+<a name="36"><span class="lineNum">      36 </span>            : /*  _________________________________________________________________</a>
+<a name="37"><span class="lineNum">      37 </span>            : **</a>
+<a name="38"><span class="lineNum">      38 </span>            : **  Variable Lookup</a>
+<a name="39"><span class="lineNum">      39 </span>            : **  _________________________________________________________________</a>
+<a name="40"><span class="lineNum">      40 </span>            : */</a>
+<a name="41"><span class="lineNum">      41 </span>            : </a>
+<a name="42"><span class="lineNum">      42 </span>            : static const char *ssl_var_lookup_ssl(apr_pool_t *p, const SSLConnRec *sslconn, request_rec *r, const char *var);</a>
+<a name="43"><span class="lineNum">      43 </span>            : static const char *ssl_var_lookup_ssl_cert(apr_pool_t *p, request_rec *r, X509 *xs, const char *var);</a>
+<a name="44"><span class="lineNum">      44 </span>            : static const char *ssl_var_lookup_ssl_cert_dn(apr_pool_t *p, X509_NAME *xsname, const char *var);</a>
+<a name="45"><span class="lineNum">      45 </span>            : static const char *ssl_var_lookup_ssl_cert_san(apr_pool_t *p, X509 *xs, const char *var);</a>
+<a name="46"><span class="lineNum">      46 </span>            : static const char *ssl_var_lookup_ssl_cert_valid(apr_pool_t *p, ASN1_TIME *tm);</a>
+<a name="47"><span class="lineNum">      47 </span>            : static const char *ssl_var_lookup_ssl_cert_remain(apr_pool_t *p, ASN1_TIME *tm);</a>
+<a name="48"><span class="lineNum">      48 </span>            : static const char *ssl_var_lookup_ssl_cert_serial(apr_pool_t *p, X509 *xs);</a>
+<a name="49"><span class="lineNum">      49 </span>            : static const char *ssl_var_lookup_ssl_cert_chain(apr_pool_t *p, STACK_OF(X509) *sk, const char *var);</a>
+<a name="50"><span class="lineNum">      50 </span>            : static const char *ssl_var_lookup_ssl_cert_rfc4523_cea(apr_pool_t *p, SSL *ssl);</a>
+<a name="51"><span class="lineNum">      51 </span>            : static const char *ssl_var_lookup_ssl_cert_PEM(apr_pool_t *p, X509 *xs);</a>
+<a name="52"><span class="lineNum">      52 </span>            : static const char *ssl_var_lookup_ssl_cert_verify(apr_pool_t *p, const SSLConnRec *sslconn);</a>
+<a name="53"><span class="lineNum">      53 </span>            : static const char *ssl_var_lookup_ssl_cipher(apr_pool_t *p, const SSLConnRec *sslconn, const char *var);</a>
+<a name="54"><span class="lineNum">      54 </span>            : static void  ssl_var_lookup_ssl_cipher_bits(SSL *ssl, int *usekeysize, int *algkeysize);</a>
+<a name="55"><span class="lineNum">      55 </span>            : static const char *ssl_var_lookup_ssl_version(const char *var);</a>
+<a name="56"><span class="lineNum">      56 </span>            : static const char *ssl_var_lookup_ssl_compress_meth(SSL *ssl);</a>
+<a name="57"><span class="lineNum">      57 </span>            : </a>
+<a name="58"><span class="lineNum">      58 </span><span class="lineNoCov">          0 : static const SSLConnRec *ssl_get_effective_config(conn_rec *c)</span></a>
+<a name="59"><span class="lineNum">      59 </span>            : {</a>
+<a name="60"><span class="lineNum">      60 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = myConnConfig(c);</span></a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 :     if (!(sslconn &amp;&amp; sslconn-&gt;ssl) &amp;&amp; c-&gt;master) {</span></a>
+<a name="62"><span class="lineNum">      62 </span>            :         /* use master connection if no SSL defined here */</a>
+<a name="63"><span class="lineNum">      63 </span><span class="lineNoCov">          0 :         sslconn = myConnConfig(c-&gt;master);</span></a>
+<a name="64"><span class="lineNum">      64 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="65"><span class="lineNum">      65 </span><span class="lineNoCov">          0 :     return sslconn;</span></a>
+<a name="66"><span class="lineNum">      66 </span>            : }</a>
+<a name="67"><span class="lineNum">      67 </span>            : </a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineNoCov">          0 : static int ssl_is_https(conn_rec *c)</span></a>
+<a name="69"><span class="lineNum">      69 </span>            : {</a>
+<a name="70"><span class="lineNum">      70 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = ssl_get_effective_config(c);</span></a>
+<a name="71"><span class="lineNum">      71 </span><span class="lineNoCov">          0 :     return sslconn &amp;&amp; sslconn-&gt;ssl;</span></a>
+<a name="72"><span class="lineNum">      72 </span>            : }</a>
+<a name="73"><span class="lineNum">      73 </span>            : </a>
+<a name="74"><span class="lineNum">      74 </span>            : /* SSLv3 uses 36 bytes for Finishd messages, TLS1.0 12 bytes,</a>
+<a name="75"><span class="lineNum">      75 </span>            :  * So tls-unique is max 36 bytes, however with tls-server-end-point,</a>
+<a name="76"><span class="lineNum">      76 </span>            :  * the CB data is the certificate signature, so we use the maximum</a>
+<a name="77"><span class="lineNum">      77 </span>            :  * hash size known to the library (currently 64).</a>
+<a name="78"><span class="lineNum">      78 </span>            :  * */</a>
+<a name="79"><span class="lineNum">      79 </span>            : #define TLS_CB_MAX EVP_MAX_MD_SIZE</a>
+<a name="80"><span class="lineNum">      80 </span>            : #define TLS_UNIQUE_PREFIX &quot;tls-unique:&quot;</a>
+<a name="81"><span class="lineNum">      81 </span>            : #define TLS_SERVER_END_POINT_PREFIX &quot;tls-server-end-point:&quot;</a>
+<a name="82"><span class="lineNum">      82 </span>            : </a>
+<a name="83"><span class="lineNum">      83 </span><span class="lineNoCov">          0 : static apr_status_t ssl_get_tls_cb(apr_pool_t *p, conn_rec *c, const char *type,</span></a>
+<a name="84"><span class="lineNum">      84 </span>            :                                    unsigned char **buf, apr_size_t *size)</a>
+<a name="85"><span class="lineNum">      85 </span>            : {</a>
+<a name="86"><span class="lineNum">      86 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = ssl_get_effective_config(c);</span></a>
+<a name="87"><span class="lineNum">      87 </span>            :     const char *prefix;</a>
+<a name="88"><span class="lineNum">      88 </span>            :     apr_size_t preflen;</a>
+<a name="89"><span class="lineNum">      89 </span>            :     const unsigned char *data;</a>
+<a name="90"><span class="lineNum">      90 </span>            :     unsigned char cb[TLS_CB_MAX], *retbuf;</a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineNoCov">          0 :     unsigned int l = 0;</span></a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineNoCov">          0 :     X509 *x = NULL;</span></a>
+<a name="93"><span class="lineNum">      93 </span>            : </a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineNoCov">          0 :     if (!sslconn || !sslconn-&gt;ssl) {</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineNoCov">          0 :         return APR_EGENERAL;</span></a>
+<a name="96"><span class="lineNum">      96 </span>            :     }</a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :     if (strcEQ(type, &quot;SERVER_TLS_UNIQUE&quot;)) {</span></a>
+<a name="98"><span class="lineNum">      98 </span><span class="lineNoCov">          0 :         l = SSL_get_peer_finished(sslconn-&gt;ssl, cb, TLS_CB_MAX);</span></a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineNoCov">          0 :     else if (strcEQ(type, &quot;CLIENT_TLS_UNIQUE&quot;)) {</span></a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineNoCov">          0 :         l = SSL_get_finished(sslconn-&gt;ssl, cb, TLS_CB_MAX);</span></a>
+<a name="102"><span class="lineNum">     102 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="103"><span class="lineNum">     103 </span><span class="lineNoCov">          0 :     else if (strcEQ(type, &quot;SERVER_TLS_SERVER_END_POINT&quot;)) {</span></a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 :         x = SSL_get_certificate(sslconn-&gt;ssl);</span></a>
+<a name="105"><span class="lineNum">     105 </span>            :         /* Increase refcount so X509_free below works for both client</a>
+<a name="106"><span class="lineNum">     106 </span>            :          * and server cases. */</a>
+<a name="107"><span class="lineNum">     107 </span><span class="lineNoCov">          0 :         if (x) X509_up_ref(x);</span></a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :     else if (strcEQ(type, &quot;CLIENT_TLS_SERVER_END_POINT&quot;)) {</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :         x = SSL_get_peer_certificate(sslconn-&gt;ssl);</span></a>
+<a name="111"><span class="lineNum">     111 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :     if (l &gt; 0) {</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :         preflen = sizeof(TLS_UNIQUE_PREFIX) -1;</span></a>
+<a name="114"><span class="lineNum">     114 </span><span class="lineNoCov">          0 :         prefix = TLS_UNIQUE_PREFIX;</span></a>
+<a name="115"><span class="lineNum">     115 </span><span class="lineNoCov">          0 :         data = cb;</span></a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineNoCov">          0 :     } </span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineNoCov">          0 :     else if (x != NULL) {</span></a>
+<a name="118"><span class="lineNum">     118 </span>            :         const EVP_MD *md;</a>
+<a name="119"><span class="lineNum">     119 </span>            : </a>
+<a name="120"><span class="lineNum">     120 </span>            : #if MODSSL_USE_OPENSSL_PRE_1_1_API</a>
+<a name="121"><span class="lineNum">     121 </span>            :         md = EVP_get_digestbynid(OBJ_obj2nid(x-&gt;sig_alg-&gt;algorithm));</a>
+<a name="122"><span class="lineNum">     122 </span>            : #else</a>
+<a name="123"><span class="lineNum">     123 </span><span class="lineNoCov">          0 :         md = EVP_get_digestbynid(X509_get_signature_nid(x));</span></a>
+<a name="124"><span class="lineNum">     124 </span>            : #endif</a>
+<a name="125"><span class="lineNum">     125 </span>            :         /* Override digest as specified by RFC 5929 section 4.1. */</a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :         if (md == NULL || md == EVP_md5() || md == EVP_sha1()) {</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :             md = EVP_sha256();</span></a>
+<a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="129"><span class="lineNum">     129 </span><span class="lineNoCov">          0 :         if (!X509_digest(x, md, cb, &amp;l)) {</span></a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :             return APR_EGENERAL;</span></a>
+<a name="131"><span class="lineNum">     131 </span>            :         }</a>
+<a name="132"><span class="lineNum">     132 </span>            : </a>
+<a name="133"><span class="lineNum">     133 </span><span class="lineNoCov">          0 :         preflen = sizeof(TLS_SERVER_END_POINT_PREFIX) - 1;</span></a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 :         prefix = TLS_SERVER_END_POINT_PREFIX;</span></a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :         data = cb;</span></a>
+<a name="136"><span class="lineNum">     136 </span>            : </a>
+<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :         X509_free(x);</span></a>
+<a name="138"><span class="lineNum">     138 </span><span class="lineNoCov">          0 :     } </span></a>
+<a name="139"><span class="lineNum">     139 </span>            :     else {</a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 :         return APR_EGENERAL;</span></a>
+<a name="141"><span class="lineNum">     141 </span>            :     }</a>
+<a name="142"><span class="lineNum">     142 </span>            : </a>
+<a name="143"><span class="lineNum">     143 </span><span class="lineNoCov">          0 :     retbuf = apr_palloc(p, preflen + l);</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :     memcpy(retbuf, prefix, preflen);</span></a>
+<a name="145"><span class="lineNum">     145 </span><span class="lineNoCov">          0 :     memcpy(&amp;retbuf[preflen], data, l);</span></a>
+<a name="146"><span class="lineNum">     146 </span><span class="lineNoCov">          0 :     *size = preflen + l;</span></a>
+<a name="147"><span class="lineNum">     147 </span><span class="lineNoCov">          0 :     *buf = retbuf;</span></a>
+<a name="148"><span class="lineNum">     148 </span>            : </a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="150"><span class="lineNum">     150 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="151"><span class="lineNum">     151 </span>            : </a>
+<a name="152"><span class="lineNum">     152 </span>            : static const char var_interface[] = &quot;mod_ssl/&quot; AP_SERVER_BASEREVISION;</a>
+<a name="153"><span class="lineNum">     153 </span>            : static char var_library_interface[] = MODSSL_LIBRARY_TEXT;</a>
+<a name="154"><span class="lineNum">     154 </span>            : static char *var_library = NULL;</a>
+<a name="155"><span class="lineNum">     155 </span>            : </a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 : static apr_array_header_t *expr_peer_ext_list_fn(ap_expr_eval_ctx_t *ctx,</span></a>
+<a name="157"><span class="lineNum">     157 </span>            :                                                  const void *dummy,</a>
+<a name="158"><span class="lineNum">     158 </span>            :                                                  const char *arg)</a>
+<a name="159"><span class="lineNum">     159 </span>            : {</a>
+<a name="160"><span class="lineNum">     160 </span><span class="lineNoCov">          0 :     return ssl_ext_list(ctx-&gt;p, ctx-&gt;c, 1, arg);</span></a>
+<a name="161"><span class="lineNum">     161 </span>            : }</a>
+<a name="162"><span class="lineNum">     162 </span>            : </a>
+<a name="163"><span class="lineNum">     163 </span><span class="lineNoCov">          0 : static const char *expr_var_fn(ap_expr_eval_ctx_t *ctx, const void *data)</span></a>
+<a name="164"><span class="lineNum">     164 </span>            : {</a>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :     const char *var = data;</span></a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = ssl_get_effective_config(ctx-&gt;c);</span></a>
+<a name="167"><span class="lineNum">     167 </span>            : </a>
+<a name="168"><span class="lineNum">     168 </span><span class="lineNoCov">          0 :     return sslconn ? ssl_var_lookup_ssl(ctx-&gt;p, sslconn, ctx-&gt;r, var) : NULL;</span></a>
+<a name="169"><span class="lineNum">     169 </span>            : }</a>
+<a name="170"><span class="lineNum">     170 </span>            : </a>
+<a name="171"><span class="lineNum">     171 </span><span class="lineNoCov">          0 : static const char *expr_func_fn(ap_expr_eval_ctx_t *ctx, const void *data,</span></a>
+<a name="172"><span class="lineNum">     172 </span>            :                                 const char *arg)</a>
+<a name="173"><span class="lineNum">     173 </span>            : {</a>
+<a name="174"><span class="lineNum">     174 </span><span class="lineNoCov">          0 :     const char *var = arg;</span></a>
+<a name="175"><span class="lineNum">     175 </span>            : </a>
+<a name="176"><span class="lineNum">     176 </span><span class="lineNoCov">          0 :     return var ? ssl_var_lookup(ctx-&gt;p, ctx-&gt;s, ctx-&gt;c, ctx-&gt;r, var) : NULL;</span></a>
+<a name="177"><span class="lineNum">     177 </span>            : }</a>
+<a name="178"><span class="lineNum">     178 </span>            : </a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineNoCov">          0 : static int ssl_expr_lookup(ap_expr_lookup_parms *parms)</span></a>
+<a name="180"><span class="lineNum">     180 </span>            : {</a>
+<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 :     switch (parms-&gt;type) {</span></a>
+<a name="182"><span class="lineNum">     182 </span>            :     case AP_EXPR_FUNC_VAR:</a>
+<a name="183"><span class="lineNum">     183 </span>            :         /* for now, we just handle everything that starts with SSL_, but</a>
+<a name="184"><span class="lineNum">     184 </span>            :          * register our hook as APR_HOOK_LAST</a>
+<a name="185"><span class="lineNum">     185 </span>            :          * XXX: This can be optimized</a>
+<a name="186"><span class="lineNum">     186 </span>            :          */</a>
+<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :         if (strcEQn(parms-&gt;name, &quot;SSL_&quot;, 4)) {</span></a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :             *parms-&gt;func = expr_var_fn;</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :             *parms-&gt;data = parms-&gt;name + 4;</span></a>
+<a name="190"><span class="lineNum">     190 </span><span class="lineNoCov">          0 :             return OK;</span></a>
+<a name="191"><span class="lineNum">     191 </span>            :         }</a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="193"><span class="lineNum">     193 </span>            :     case AP_EXPR_FUNC_STRING:</a>
+<a name="194"><span class="lineNum">     194 </span>            :         /* Function SSL() is implemented by us.</a>
+<a name="195"><span class="lineNum">     195 </span>            :          */</a>
+<a name="196"><span class="lineNum">     196 </span><span class="lineNoCov">          0 :         if (strcEQ(parms-&gt;name, &quot;SSL&quot;)) {</span></a>
+<a name="197"><span class="lineNum">     197 </span><span class="lineNoCov">          0 :             *parms-&gt;func = expr_func_fn;</span></a>
+<a name="198"><span class="lineNum">     198 </span><span class="lineNoCov">          0 :             *parms-&gt;data = NULL;</span></a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineNoCov">          0 :             return OK;</span></a>
+<a name="200"><span class="lineNum">     200 </span>            :         }</a>
+<a name="201"><span class="lineNum">     201 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="202"><span class="lineNum">     202 </span>            :     case AP_EXPR_FUNC_LIST:</a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :         if (strcEQ(parms-&gt;name, &quot;PeerExtList&quot;)) {</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineNoCov">          0 :             *parms-&gt;func = expr_peer_ext_list_fn;</span></a>
+<a name="205"><span class="lineNum">     205 </span><span class="lineNoCov">          0 :             *parms-&gt;data = &quot;PeerExtList&quot;;</span></a>
+<a name="206"><span class="lineNum">     206 </span><span class="lineNoCov">          0 :             return OK;</span></a>
+<a name="207"><span class="lineNum">     207 </span>            :         }</a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :         break;</span></a>
+<a name="209"><span class="lineNum">     209 </span>            :     }</a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :     return DECLINED;</span></a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="212"><span class="lineNum">     212 </span>            : </a>
+<a name="213"><span class="lineNum">     213 </span>            : </a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 : void ssl_var_register(apr_pool_t *p)</span></a>
+<a name="215"><span class="lineNum">     215 </span>            : {</a>
+<a name="216"><span class="lineNum">     216 </span>            :     char *cp, *cp2;</a>
+<a name="217"><span class="lineNum">     217 </span>            : </a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineNoCov">          0 :     APR_REGISTER_OPTIONAL_FN(ssl_is_https);</span></a>
+<a name="219"><span class="lineNum">     219 </span><span class="lineNoCov">          0 :     APR_REGISTER_OPTIONAL_FN(ssl_get_tls_cb);</span></a>
+<a name="220"><span class="lineNum">     220 </span><span class="lineNoCov">          0 :     APR_REGISTER_OPTIONAL_FN(ssl_var_lookup);</span></a>
+<a name="221"><span class="lineNum">     221 </span><span class="lineNoCov">          0 :     APR_REGISTER_OPTIONAL_FN(ssl_ext_list);</span></a>
+<a name="222"><span class="lineNum">     222 </span>            : </a>
+<a name="223"><span class="lineNum">     223 </span>            :     /* Perform once-per-process library version determination: */</a>
+<a name="224"><span class="lineNum">     224 </span><span class="lineNoCov">          0 :     var_library = apr_pstrdup(p, MODSSL_LIBRARY_DYNTEXT);</span></a>
+<a name="225"><span class="lineNum">     225 </span>            : </a>
+<a name="226"><span class="lineNum">     226 </span><span class="lineNoCov">          0 :     if ((cp = strchr(var_library, ' ')) != NULL) {</span></a>
+<a name="227"><span class="lineNum">     227 </span><span class="lineNoCov">          0 :         *cp = '/';</span></a>
+<a name="228"><span class="lineNum">     228 </span><span class="lineNoCov">          0 :         if ((cp2 = strchr(cp, ' ')) != NULL)</span></a>
+<a name="229"><span class="lineNum">     229 </span><span class="lineNoCov">          0 :             *cp2 = NUL;</span></a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="231"><span class="lineNum">     231 </span>            : </a>
+<a name="232"><span class="lineNum">     232 </span><span class="lineNoCov">          0 :     if ((cp = strchr(var_library_interface, ' ')) != NULL) {</span></a>
+<a name="233"><span class="lineNum">     233 </span><span class="lineNoCov">          0 :         *cp = '/';</span></a>
+<a name="234"><span class="lineNum">     234 </span><span class="lineNoCov">          0 :         if ((cp2 = strchr(cp, ' ')) != NULL)</span></a>
+<a name="235"><span class="lineNum">     235 </span><span class="lineNoCov">          0 :             *cp2 = NUL;</span></a>
+<a name="236"><span class="lineNum">     236 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="237"><span class="lineNum">     237 </span>            : </a>
+<a name="238"><span class="lineNum">     238 </span><span class="lineNoCov">          0 :     ap_hook_expr_lookup(ssl_expr_lookup, NULL, NULL, APR_HOOK_MIDDLE);</span></a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="240"><span class="lineNum">     240 </span>            : </a>
+<a name="241"><span class="lineNum">     241 </span>            : /* This function must remain safe to use for a non-SSL connection. */</a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineNoCov">          0 : const char *ssl_var_lookup(apr_pool_t *p, server_rec *s,</span></a>
+<a name="243"><span class="lineNum">     243 </span>            :                            conn_rec *c, request_rec *r,</a>
+<a name="244"><span class="lineNum">     244 </span>            :                            const char *var)</a>
+<a name="245"><span class="lineNum">     245 </span>            : {</a>
+<a name="246"><span class="lineNum">     246 </span><span class="lineNoCov">          0 :     const char *result = NULL;</span></a>
+<a name="247"><span class="lineNum">     247 </span>            :     apr_time_exp_t tm;</a>
+<a name="248"><span class="lineNum">     248 </span>            : </a>
+<a name="249"><span class="lineNum">     249 </span>            :     /*</a>
+<a name="250"><span class="lineNum">     250 </span>            :      * Request dependent stuff</a>
+<a name="251"><span class="lineNum">     251 </span>            :      */</a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineNoCov">          0 :     if (r != NULL) {</span></a>
+<a name="253"><span class="lineNum">     253 </span><span class="lineNoCov">          0 :         switch (var[0]) {</span></a>
+<a name="254"><span class="lineNum">     254 </span>            :         case 'H':</a>
+<a name="255"><span class="lineNum">     255 </span>            :         case 'h':</a>
+<a name="256"><span class="lineNum">     256 </span><span class="lineNoCov">          0 :             if (strcEQ(var, &quot;HTTP_USER_AGENT&quot;))</span></a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;User-Agent&quot;);</span></a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_REFERER&quot;))</span></a>
+<a name="259"><span class="lineNum">     259 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Referer&quot;);</span></a>
+<a name="260"><span class="lineNum">     260 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_COOKIE&quot;))</span></a>
+<a name="261"><span class="lineNum">     261 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Cookie&quot;);</span></a>
+<a name="262"><span class="lineNum">     262 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_FORWARDED&quot;))</span></a>
+<a name="263"><span class="lineNum">     263 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Forwarded&quot;);</span></a>
+<a name="264"><span class="lineNum">     264 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_HOST&quot;))</span></a>
+<a name="265"><span class="lineNum">     265 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Host&quot;);</span></a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_PROXY_CONNECTION&quot;))</span></a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Proxy-Connection&quot;);</span></a>
+<a name="268"><span class="lineNum">     268 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;HTTP_ACCEPT&quot;))</span></a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, &quot;Accept&quot;);</span></a>
+<a name="270"><span class="lineNum">     270 </span><span class="lineNoCov">          0 :             else if (strlen(var) &gt; 5 &amp;&amp; strcEQn(var, &quot;HTTP:&quot;, 5))</span></a>
+<a name="271"><span class="lineNum">     271 </span>            :                 /* all other headers from which we are still not know about */</a>
+<a name="272"><span class="lineNum">     272 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;headers_in, var+5);</span></a>
+<a name="273"><span class="lineNum">     273 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="274"><span class="lineNum">     274 </span>            : </a>
+<a name="275"><span class="lineNum">     275 </span>            :         case 'R':</a>
+<a name="276"><span class="lineNum">     276 </span>            :         case 'r':</a>
+<a name="277"><span class="lineNum">     277 </span><span class="lineNoCov">          0 :             if (strcEQ(var, &quot;REQUEST_METHOD&quot;))</span></a>
+<a name="278"><span class="lineNum">     278 </span><span class="lineNoCov">          0 :                 result = r-&gt;method;</span></a>
+<a name="279"><span class="lineNum">     279 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REQUEST_SCHEME&quot;))</span></a>
+<a name="280"><span class="lineNum">     280 </span><span class="lineNoCov">          0 :                 result = ap_http_scheme(r);</span></a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REQUEST_URI&quot;))</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineNoCov">          0 :                 result = r-&gt;uri;</span></a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REQUEST_FILENAME&quot;))</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineNoCov">          0 :                 result = r-&gt;filename;</span></a>
+<a name="285"><span class="lineNum">     285 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REMOTE_ADDR&quot;))</span></a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineNoCov">          0 :                 result = r-&gt;useragent_ip;</span></a>
+<a name="287"><span class="lineNum">     287 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REMOTE_HOST&quot;))</span></a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 :                 result = ap_get_useragent_host(r, REMOTE_NAME, NULL);</span></a>
+<a name="289"><span class="lineNum">     289 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REMOTE_IDENT&quot;))</span></a>
+<a name="290"><span class="lineNum">     290 </span><span class="lineNoCov">          0 :                 result = ap_get_remote_logname(r);</span></a>
+<a name="291"><span class="lineNum">     291 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;REMOTE_USER&quot;))</span></a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :                 result = r-&gt;user;</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="294"><span class="lineNum">     294 </span>            : </a>
+<a name="295"><span class="lineNum">     295 </span>            :         case 'S':</a>
+<a name="296"><span class="lineNum">     296 </span>            :         case 's':</a>
+<a name="297"><span class="lineNum">     297 </span><span class="lineNoCov">          0 :             if (strcEQn(var, &quot;SSL&quot;, 3)) break; /* shortcut common case */</span></a>
+<a name="298"><span class="lineNum">     298 </span>            : </a>
+<a name="299"><span class="lineNum">     299 </span><span class="lineNoCov">          0 :             if (strcEQ(var, &quot;SERVER_ADMIN&quot;))</span></a>
+<a name="300"><span class="lineNum">     300 </span><span class="lineNoCov">          0 :                 result = r-&gt;server-&gt;server_admin;</span></a>
+<a name="301"><span class="lineNum">     301 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;SERVER_NAME&quot;))</span></a>
+<a name="302"><span class="lineNum">     302 </span><span class="lineNoCov">          0 :                 result = ap_get_server_name_for_url(r);</span></a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;SERVER_PORT&quot;))</span></a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineNoCov">          0 :                 result = apr_psprintf(p, &quot;%u&quot;, ap_get_server_port(r));</span></a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;SERVER_PROTOCOL&quot;))</span></a>
+<a name="306"><span class="lineNum">     306 </span><span class="lineNoCov">          0 :                 result = r-&gt;protocol;</span></a>
+<a name="307"><span class="lineNum">     307 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;SCRIPT_FILENAME&quot;))</span></a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 :                 result = r-&gt;filename;</span></a>
+<a name="309"><span class="lineNum">     309 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="310"><span class="lineNum">     310 </span>            : </a>
+<a name="311"><span class="lineNum">     311 </span>            :         default:</a>
+<a name="312"><span class="lineNum">     312 </span><span class="lineNoCov">          0 :             if (strcEQ(var, &quot;PATH_INFO&quot;))</span></a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineNoCov">          0 :                 result = r-&gt;path_info;</span></a>
+<a name="314"><span class="lineNum">     314 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;QUERY_STRING&quot;))</span></a>
+<a name="315"><span class="lineNum">     315 </span><span class="lineNoCov">          0 :                 result = r-&gt;args;</span></a>
+<a name="316"><span class="lineNum">     316 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;IS_SUBREQ&quot;))</span></a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :                 result = (r-&gt;main != NULL ? &quot;true&quot; : &quot;false&quot;);</span></a>
+<a name="318"><span class="lineNum">     318 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;DOCUMENT_ROOT&quot;))</span></a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :                 result = ap_document_root(r);</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;AUTH_TYPE&quot;))</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 :                 result = r-&gt;ap_auth_type;</span></a>
+<a name="322"><span class="lineNum">     322 </span><span class="lineNoCov">          0 :             else if (strcEQ(var, &quot;THE_REQUEST&quot;))</span></a>
+<a name="323"><span class="lineNum">     323 </span><span class="lineNoCov">          0 :                 result = r-&gt;the_request;</span></a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineNoCov">          0 :             else if (strlen(var) &gt; 4 &amp;&amp; strcEQn(var, &quot;ENV:&quot;, 4)) {</span></a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineNoCov">          0 :                 result = apr_table_get(r-&gt;notes, var+4);</span></a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineNoCov">          0 :                 if (result == NULL)</span></a>
+<a name="327"><span class="lineNum">     327 </span><span class="lineNoCov">          0 :                     result = apr_table_get(r-&gt;subprocess_env, var+4);</span></a>
+<a name="328"><span class="lineNum">     328 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="329"><span class="lineNum">     329 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="330"><span class="lineNum">     330 </span>            :         }</a>
+<a name="331"><span class="lineNum">     331 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="332"><span class="lineNum">     332 </span>            : </a>
+<a name="333"><span class="lineNum">     333 </span>            :     /*</a>
+<a name="334"><span class="lineNum">     334 </span>            :      * Connection stuff</a>
+<a name="335"><span class="lineNum">     335 </span>            :      */</a>
+<a name="336"><span class="lineNum">     336 </span><span class="lineNoCov">          0 :     if (result == NULL &amp;&amp; c != NULL) {</span></a>
+<a name="337"><span class="lineNum">     337 </span><span class="lineNoCov">          0 :         const SSLConnRec *sslconn = ssl_get_effective_config(c);</span></a>
+<a name="338"><span class="lineNum">     338 </span><span class="lineNoCov">          0 :         if (strlen(var) &gt; 4 &amp;&amp; strcEQn(var, &quot;SSL_&quot;, 4)</span></a>
+<a name="339"><span class="lineNum">     339 </span><span class="lineNoCov">          0 :             &amp;&amp; sslconn &amp;&amp; sslconn-&gt;ssl)</span></a>
+<a name="340"><span class="lineNum">     340 </span><span class="lineNoCov">          0 :             result = ssl_var_lookup_ssl(p, sslconn, r, var+4);</span></a>
+<a name="341"><span class="lineNum">     341 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;HTTPS&quot;)) {</span></a>
+<a name="342"><span class="lineNum">     342 </span><span class="lineNoCov">          0 :             if (sslconn &amp;&amp; sslconn-&gt;ssl)</span></a>
+<a name="343"><span class="lineNum">     343 </span><span class="lineNoCov">          0 :                 result = &quot;on&quot;;</span></a>
+<a name="344"><span class="lineNum">     344 </span>            :             else</a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :                 result = &quot;off&quot;;</span></a>
+<a name="346"><span class="lineNum">     346 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="347"><span class="lineNum">     347 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="348"><span class="lineNum">     348 </span>            : </a>
+<a name="349"><span class="lineNum">     349 </span>            :     /*</a>
+<a name="350"><span class="lineNum">     350 </span>            :      * Totally independent stuff</a>
+<a name="351"><span class="lineNum">     351 </span>            :      */</a>
+<a name="352"><span class="lineNum">     352 </span><span class="lineNoCov">          0 :     if (result == NULL) {</span></a>
+<a name="353"><span class="lineNum">     353 </span><span class="lineNoCov">          0 :         if (strlen(var) &gt; 12 &amp;&amp; strcEQn(var, &quot;SSL_VERSION_&quot;, 12))</span></a>
+<a name="354"><span class="lineNum">     354 </span><span class="lineNoCov">          0 :             result = ssl_var_lookup_ssl_version(var+12);</span></a>
+<a name="355"><span class="lineNum">     355 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;SERVER_SOFTWARE&quot;))</span></a>
+<a name="356"><span class="lineNum">     356 </span><span class="lineNoCov">          0 :             result = ap_get_server_banner();</span></a>
+<a name="357"><span class="lineNum">     357 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;API_VERSION&quot;)) {</span></a>
+<a name="358"><span class="lineNum">     358 </span><span class="lineNoCov">          0 :             result = apr_itoa(p, MODULE_MAGIC_NUMBER_MAJOR);</span></a>
+<a name="359"><span class="lineNum">     359 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="360"><span class="lineNum">     360 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_YEAR&quot;)) {</span></a>
+<a name="361"><span class="lineNum">     361 </span><span class="lineNoCov">          0 :             apr_time_exp_lt(&amp;tm, apr_time_now());</span></a>
+<a name="362"><span class="lineNum">     362 </span><span class="lineNoCov">          0 :             result = apr_psprintf(p, &quot;%02d%02d&quot;,</span></a>
+<a name="363"><span class="lineNum">     363 </span><span class="lineNoCov">          0 :                                  (tm.tm_year / 100) + 19, tm.tm_year % 100);</span></a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="365"><span class="lineNum">     365 </span>            : #define MKTIMESTR(format, tmfield) \</a>
+<a name="366"><span class="lineNum">     366 </span>            :             apr_time_exp_lt(&amp;tm, apr_time_now()); \</a>
+<a name="367"><span class="lineNum">     367 </span>            :             result = apr_psprintf(p, format, tm.tmfield);</a>
+<a name="368"><span class="lineNum">     368 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_MON&quot;)) {</span></a>
+<a name="369"><span class="lineNum">     369 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%02d&quot;, tm_mon+1)</span></a>
+<a name="370"><span class="lineNum">     370 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="371"><span class="lineNum">     371 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_DAY&quot;)) {</span></a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%02d&quot;, tm_mday)</span></a>
+<a name="373"><span class="lineNum">     373 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="374"><span class="lineNum">     374 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_HOUR&quot;)) {</span></a>
+<a name="375"><span class="lineNum">     375 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%02d&quot;, tm_hour)</span></a>
+<a name="376"><span class="lineNum">     376 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="377"><span class="lineNum">     377 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_MIN&quot;)) {</span></a>
+<a name="378"><span class="lineNum">     378 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%02d&quot;, tm_min)</span></a>
+<a name="379"><span class="lineNum">     379 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="380"><span class="lineNum">     380 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_SEC&quot;)) {</span></a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%02d&quot;, tm_sec)</span></a>
+<a name="382"><span class="lineNum">     382 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME_WDAY&quot;)) {</span></a>
+<a name="384"><span class="lineNum">     384 </span><span class="lineNoCov">          0 :             MKTIMESTR(&quot;%d&quot;, tm_wday)</span></a>
+<a name="385"><span class="lineNum">     385 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="386"><span class="lineNum">     386 </span><span class="lineNoCov">          0 :         else if (strcEQ(var, &quot;TIME&quot;)) {</span></a>
+<a name="387"><span class="lineNum">     387 </span><span class="lineNoCov">          0 :             apr_time_exp_lt(&amp;tm, apr_time_now());</span></a>
+<a name="388"><span class="lineNum">     388 </span><span class="lineNoCov">          0 :             result = apr_psprintf(p,</span></a>
+<a name="389"><span class="lineNum">     389 </span><span class="lineNoCov">          0 :                         &quot;%02d%02d%02d%02d%02d%02d%02d&quot;, (tm.tm_year / 100) + 19,</span></a>
+<a name="390"><span class="lineNum">     390 </span><span class="lineNoCov">          0 :                         (tm.tm_year % 100), tm.tm_mon+1, tm.tm_mday,</span></a>
+<a name="391"><span class="lineNum">     391 </span><span class="lineNoCov">          0 :                         tm.tm_hour, tm.tm_min, tm.tm_sec);</span></a>
+<a name="392"><span class="lineNum">     392 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="393"><span class="lineNum">     393 </span>            :         /* all other env-variables from the parent Apache process */</a>
+<a name="394"><span class="lineNum">     394 </span><span class="lineNoCov">          0 :         else if (strlen(var) &gt; 4 &amp;&amp; strcEQn(var, &quot;ENV:&quot;, 4)) {</span></a>
+<a name="395"><span class="lineNum">     395 </span><span class="lineNoCov">          0 :             result = getenv(var+4);</span></a>
+<a name="396"><span class="lineNum">     396 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="397"><span class="lineNum">     397 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="398"><span class="lineNum">     398 </span>            : </a>
+<a name="399"><span class="lineNum">     399 </span><span class="lineNoCov">          0 :     return result ? result : &quot;&quot;;</span></a>
+<a name="400"><span class="lineNum">     400 </span>            : }</a>
+<a name="401"><span class="lineNum">     401 </span>            : </a>
+<a name="402"><span class="lineNum">     402 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl(apr_pool_t *p, const SSLConnRec *sslconn,</span></a>
+<a name="403"><span class="lineNum">     403 </span>            :                                       request_rec *r, const char *var)</a>
+<a name="404"><span class="lineNum">     404 </span>            : {</a>
+<a name="405"><span class="lineNum">     405 </span>            :     const char *result;</a>
+<a name="406"><span class="lineNum">     406 </span>            :     X509 *xs;</a>
+<a name="407"><span class="lineNum">     407 </span>            :     STACK_OF(X509) *sk;</a>
+<a name="408"><span class="lineNum">     408 </span>            :     SSL *ssl;</a>
+<a name="409"><span class="lineNum">     409 </span>            : </a>
+<a name="410"><span class="lineNum">     410 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="411"><span class="lineNum">     411 </span>            : </a>
+<a name="412"><span class="lineNum">     412 </span><span class="lineNoCov">          0 :     ssl = sslconn-&gt;ssl;</span></a>
+<a name="413"><span class="lineNum">     413 </span><span class="lineNoCov">          0 :     if (strlen(var) &gt; 8 &amp;&amp; strcEQn(var, &quot;VERSION_&quot;, 8)) {</span></a>
+<a name="414"><span class="lineNum">     414 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_version(var+8);</span></a>
+<a name="415"><span class="lineNum">     415 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="416"><span class="lineNum">     416 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;PROTOCOL&quot;)) {</span></a>
+<a name="417"><span class="lineNum">     417 </span><span class="lineNoCov">          0 :         result = SSL_get_version(ssl);</span></a>
+<a name="418"><span class="lineNum">     418 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="419"><span class="lineNum">     419 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;SESSION_ID&quot;)) {</span></a>
+<a name="420"><span class="lineNum">     420 </span>            :         char buf[MODSSL_SESSION_ID_STRING_LEN];</a>
+<a name="421"><span class="lineNum">     421 </span><span class="lineNoCov">          0 :         SSL_SESSION *pSession = SSL_get_session(ssl);</span></a>
+<a name="422"><span class="lineNum">     422 </span><span class="lineNoCov">          0 :         if (pSession) {</span></a>
+<a name="423"><span class="lineNum">     423 </span>            :             IDCONST unsigned char *id;</a>
+<a name="424"><span class="lineNum">     424 </span>            :             unsigned int idlen;</a>
+<a name="425"><span class="lineNum">     425 </span>            : </a>
+<a name="426"><span class="lineNum">     426 </span>            : #ifdef OPENSSL_NO_SSL_INTERN</a>
+<a name="427"><span class="lineNum">     427 </span><span class="lineNoCov">          0 :             id = (unsigned char *)SSL_SESSION_get_id(pSession, &amp;idlen);</span></a>
+<a name="428"><span class="lineNum">     428 </span>            : #else</a>
+<a name="429"><span class="lineNum">     429 </span>            :             id = pSession-&gt;session_id;</a>
+<a name="430"><span class="lineNum">     430 </span>            :             idlen = pSession-&gt;session_id_length;</a>
+<a name="431"><span class="lineNum">     431 </span>            : #endif</a>
+<a name="432"><span class="lineNum">     432 </span>            : </a>
+<a name="433"><span class="lineNum">     433 </span><span class="lineNoCov">          0 :             result = apr_pstrdup(p, modssl_SSL_SESSION_id2sz(id, idlen,</span></a>
+<a name="434"><span class="lineNum">     434 </span><span class="lineNoCov">          0 :                                                              buf, sizeof(buf)));</span></a>
+<a name="435"><span class="lineNum">     435 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="436"><span class="lineNum">     436 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="437"><span class="lineNum">     437 </span><span class="lineNoCov">          0 :     else if(ssl != NULL &amp;&amp; strcEQ(var, &quot;SESSION_RESUMED&quot;)) {</span></a>
+<a name="438"><span class="lineNum">     438 </span><span class="lineNoCov">          0 :         if (SSL_session_reused(ssl) == 1)</span></a>
+<a name="439"><span class="lineNum">     439 </span><span class="lineNoCov">          0 :             result = &quot;Resumed&quot;;</span></a>
+<a name="440"><span class="lineNum">     440 </span>            :         else</a>
+<a name="441"><span class="lineNum">     441 </span><span class="lineNoCov">          0 :             result = &quot;Initial&quot;;</span></a>
+<a name="442"><span class="lineNum">     442 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="443"><span class="lineNum">     443 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strlen(var) &gt;= 6 &amp;&amp; strcEQn(var, &quot;CIPHER&quot;, 6)) {</span></a>
+<a name="444"><span class="lineNum">     444 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cipher(p, sslconn, var+6);</span></a>
+<a name="445"><span class="lineNum">     445 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="446"><span class="lineNum">     446 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strlen(var) &gt; 18 &amp;&amp; strcEQn(var, &quot;CLIENT_CERT_CHAIN_&quot;, 18)) {</span></a>
+<a name="447"><span class="lineNum">     447 </span><span class="lineNoCov">          0 :         sk = SSL_get_peer_cert_chain(ssl);</span></a>
+<a name="448"><span class="lineNum">     448 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_chain(p, sk, var+18);</span></a>
+<a name="449"><span class="lineNum">     449 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="450"><span class="lineNum">     450 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;CLIENT_CERT_RFC4523_CEA&quot;)) {</span></a>
+<a name="451"><span class="lineNum">     451 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_rfc4523_cea(p, ssl);</span></a>
+<a name="452"><span class="lineNum">     452 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="453"><span class="lineNum">     453 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;CLIENT_VERIFY&quot;)) {</span></a>
+<a name="454"><span class="lineNum">     454 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_verify(p, sslconn);</span></a>
+<a name="455"><span class="lineNum">     455 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="456"><span class="lineNum">     456 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strlen(var) &gt; 7 &amp;&amp; strcEQn(var, &quot;CLIENT_&quot;, 7)) {</span></a>
+<a name="457"><span class="lineNum">     457 </span><span class="lineNoCov">          0 :         if ((xs = SSL_get_peer_certificate(ssl)) != NULL) {</span></a>
+<a name="458"><span class="lineNum">     458 </span><span class="lineNoCov">          0 :             result = ssl_var_lookup_ssl_cert(p, r, xs, var+7);</span></a>
+<a name="459"><span class="lineNum">     459 </span><span class="lineNoCov">          0 :             X509_free(xs);</span></a>
+<a name="460"><span class="lineNum">     460 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="461"><span class="lineNum">     461 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="462"><span class="lineNum">     462 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strlen(var) &gt; 7 &amp;&amp; strcEQn(var, &quot;SERVER_&quot;, 7)) {</span></a>
+<a name="463"><span class="lineNum">     463 </span><span class="lineNoCov">          0 :         if ((xs = SSL_get_certificate(ssl)) != NULL) {</span></a>
+<a name="464"><span class="lineNum">     464 </span><span class="lineNoCov">          0 :             result = ssl_var_lookup_ssl_cert(p, r, xs, var+7);</span></a>
+<a name="465"><span class="lineNum">     465 </span>            :             /* SSL_get_certificate is different from SSL_get_peer_certificate.</a>
+<a name="466"><span class="lineNum">     466 </span>            :              * No need to X509_free(xs).</a>
+<a name="467"><span class="lineNum">     467 </span>            :              */</a>
+<a name="468"><span class="lineNum">     468 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="469"><span class="lineNum">     469 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="470"><span class="lineNum">     470 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;COMPRESS_METHOD&quot;)) {</span></a>
+<a name="471"><span class="lineNum">     471 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_compress_meth(ssl);</span></a>
+<a name="472"><span class="lineNum">     472 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="473"><span class="lineNum">     473 </span>            : #ifdef HAVE_TLSEXT</a>
+<a name="474"><span class="lineNum">     474 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;TLS_SNI&quot;)) {</span></a>
+<a name="475"><span class="lineNum">     475 </span><span class="lineNoCov">          0 :         result = apr_pstrdup(p, SSL_get_servername(ssl,</span></a>
+<a name="476"><span class="lineNum">     476 </span>            :                                                    TLSEXT_NAMETYPE_host_name));</a>
+<a name="477"><span class="lineNum">     477 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="478"><span class="lineNum">     478 </span>            : #endif</a>
+<a name="479"><span class="lineNum">     479 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;SECURE_RENEG&quot;)) {</span></a>
+<a name="480"><span class="lineNum">     480 </span><span class="lineNoCov">          0 :         int flag = 0;</span></a>
+<a name="481"><span class="lineNum">     481 </span>            : #ifdef SSL_get_secure_renegotiation_support</a>
+<a name="482"><span class="lineNum">     482 </span><span class="lineNoCov">          0 :         flag = SSL_get_secure_renegotiation_support(ssl);</span></a>
+<a name="483"><span class="lineNum">     483 </span>            : #endif</a>
+<a name="484"><span class="lineNum">     484 </span><span class="lineNoCov">          0 :         result = flag ? &quot;true&quot; : &quot;false&quot;;</span></a>
+<a name="485"><span class="lineNum">     485 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="486"><span class="lineNum">     486 </span>            : #ifdef HAVE_SRP</a>
+<a name="487"><span class="lineNum">     487 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;SRP_USER&quot;)) {</span></a>
+<a name="488"><span class="lineNum">     488 </span><span class="lineNoCov">          0 :         if ((result = SSL_get_srp_username(ssl)) != NULL) {</span></a>
+<a name="489"><span class="lineNum">     489 </span><span class="lineNoCov">          0 :             result = apr_pstrdup(p, result);</span></a>
+<a name="490"><span class="lineNum">     490 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="491"><span class="lineNum">     491 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="492"><span class="lineNum">     492 </span><span class="lineNoCov">          0 :     else if (ssl != NULL &amp;&amp; strcEQ(var, &quot;SRP_USERINFO&quot;)) {</span></a>
+<a name="493"><span class="lineNum">     493 </span><span class="lineNoCov">          0 :         if ((result = SSL_get_srp_userinfo(ssl)) != NULL) {</span></a>
+<a name="494"><span class="lineNum">     494 </span><span class="lineNoCov">          0 :             result = apr_pstrdup(p, result);</span></a>
+<a name="495"><span class="lineNum">     495 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="496"><span class="lineNum">     496 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="497"><span class="lineNum">     497 </span>            : #endif</a>
+<a name="498"><span class="lineNum">     498 </span>            : </a>
+<a name="499"><span class="lineNum">     499 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="500"><span class="lineNum">     500 </span>            : }</a>
+<a name="501"><span class="lineNum">     501 </span>            : </a>
+<a name="502"><span class="lineNum">     502 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_dn_oneline(apr_pool_t *p, request_rec *r,</span></a>
+<a name="503"><span class="lineNum">     503 </span>            :                                                 X509_NAME *xsname)</a>
+<a name="504"><span class="lineNum">     504 </span>            : {</a>
+<a name="505"><span class="lineNum">     505 </span><span class="lineNoCov">          0 :     char *result = NULL;</span></a>
+<a name="506"><span class="lineNum">     506 </span>            :     SSLDirConfigRec *dc;</a>
+<a name="507"><span class="lineNum">     507 </span><span class="lineNoCov">          0 :     int legacy_format = 0;</span></a>
+<a name="508"><span class="lineNum">     508 </span><span class="lineNoCov">          0 :     if (r) {</span></a>
+<a name="509"><span class="lineNum">     509 </span><span class="lineNoCov">          0 :         dc = myDirConfig(r);</span></a>
+<a name="510"><span class="lineNum">     510 </span><span class="lineNoCov">          0 :         legacy_format = dc-&gt;nOptions &amp; SSL_OPT_LEGACYDNFORMAT;</span></a>
+<a name="511"><span class="lineNum">     511 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="512"><span class="lineNum">     512 </span><span class="lineNoCov">          0 :     if (legacy_format) {</span></a>
+<a name="513"><span class="lineNum">     513 </span><span class="lineNoCov">          0 :         char *cp = X509_NAME_oneline(xsname, NULL, 0);</span></a>
+<a name="514"><span class="lineNum">     514 </span><span class="lineNoCov">          0 :         result = apr_pstrdup(p, cp);</span></a>
+<a name="515"><span class="lineNum">     515 </span><span class="lineNoCov">          0 :         OPENSSL_free(cp);</span></a>
+<a name="516"><span class="lineNum">     516 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="517"><span class="lineNum">     517 </span>            :     else {</a>
+<a name="518"><span class="lineNum">     518 </span>            :         BIO* bio;</a>
+<a name="519"><span class="lineNum">     519 </span><span class="lineNoCov">          0 :         unsigned long flags = XN_FLAG_RFC2253 &amp; ~ASN1_STRFLGS_ESC_MSB;</span></a>
+<a name="520"><span class="lineNum">     520 </span>            : </a>
+<a name="521"><span class="lineNum">     521 </span><span class="lineNoCov">          0 :         if ((bio = BIO_new(BIO_s_mem())) == NULL)</span></a>
+<a name="522"><span class="lineNum">     522 </span><span class="lineNoCov">          0 :             return NULL;</span></a>
+<a name="523"><span class="lineNum">     523 </span><span class="lineNoCov">          0 :         X509_NAME_print_ex(bio, xsname, 0, flags);</span></a>
+<a name="524"><span class="lineNum">     524 </span>            : </a>
+<a name="525"><span class="lineNum">     525 </span><span class="lineNoCov">          0 :         result = modssl_bio_free_read(p, bio);</span></a>
+<a name="526"><span class="lineNum">     526 </span>            :     }</a>
+<a name="527"><span class="lineNum">     527 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="528"><span class="lineNum">     528 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="529"><span class="lineNum">     529 </span>            : </a>
+<a name="530"><span class="lineNum">     530 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert(apr_pool_t *p, request_rec *r, X509 *xs,</span></a>
+<a name="531"><span class="lineNum">     531 </span>            :                                            const char *var)</a>
+<a name="532"><span class="lineNum">     532 </span>            : {</a>
+<a name="533"><span class="lineNum">     533 </span>            :     const char *result;</a>
+<a name="534"><span class="lineNum">     534 </span>            :     X509_NAME *xsname;</a>
+<a name="535"><span class="lineNum">     535 </span>            :     int nid;</a>
+<a name="536"><span class="lineNum">     536 </span>            : </a>
+<a name="537"><span class="lineNum">     537 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="538"><span class="lineNum">     538 </span>            : </a>
+<a name="539"><span class="lineNum">     539 </span><span class="lineNoCov">          0 :     if (strcEQ(var, &quot;M_VERSION&quot;)) {</span></a>
+<a name="540"><span class="lineNum">     540 </span><span class="lineNoCov">          0 :         result = apr_psprintf(p, &quot;%lu&quot;, X509_get_version(xs)+1);</span></a>
+<a name="541"><span class="lineNum">     541 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="542"><span class="lineNum">     542 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;M_SERIAL&quot;)) {</span></a>
+<a name="543"><span class="lineNum">     543 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_serial(p, xs);</span></a>
+<a name="544"><span class="lineNum">     544 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="545"><span class="lineNum">     545 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;V_START&quot;)) {</span></a>
+<a name="546"><span class="lineNum">     546 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_valid(p, X509_get_notBefore(xs));</span></a>
+<a name="547"><span class="lineNum">     547 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="548"><span class="lineNum">     548 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;V_END&quot;)) {</span></a>
+<a name="549"><span class="lineNum">     549 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_valid(p, X509_get_notAfter(xs));</span></a>
+<a name="550"><span class="lineNum">     550 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="551"><span class="lineNum">     551 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;V_REMAIN&quot;)) {</span></a>
+<a name="552"><span class="lineNum">     552 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_remain(p, X509_get_notAfter(xs));</span></a>
+<a name="553"><span class="lineNum">     553 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="554"><span class="lineNum">     554 </span><span class="lineNoCov">          0 :     else if (*var &amp;&amp; strcEQ(var+1, &quot;_DN&quot;)) {</span></a>
+<a name="555"><span class="lineNum">     555 </span><span class="lineNoCov">          0 :         if (*var == 'S')</span></a>
+<a name="556"><span class="lineNum">     556 </span><span class="lineNoCov">          0 :             xsname = X509_get_subject_name(xs);</span></a>
+<a name="557"><span class="lineNum">     557 </span><span class="lineNoCov">          0 :         else if (*var == 'I')</span></a>
+<a name="558"><span class="lineNum">     558 </span><span class="lineNoCov">          0 :             xsname = X509_get_issuer_name(xs);</span></a>
+<a name="559"><span class="lineNum">     559 </span>            :         else</a>
+<a name="560"><span class="lineNum">     560 </span><span class="lineNoCov">          0 :             return NULL;</span></a>
+<a name="561"><span class="lineNum">     561 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_dn_oneline(p, r, xsname);</span></a>
+<a name="562"><span class="lineNum">     562 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="563"><span class="lineNum">     563 </span><span class="lineNoCov">          0 :     else if (strlen(var) &gt; 5 &amp;&amp; strcEQn(var+1, &quot;_DN_&quot;, 4)) {</span></a>
+<a name="564"><span class="lineNum">     564 </span><span class="lineNoCov">          0 :         if (*var == 'S')</span></a>
+<a name="565"><span class="lineNum">     565 </span><span class="lineNoCov">          0 :             xsname = X509_get_subject_name(xs);</span></a>
+<a name="566"><span class="lineNum">     566 </span><span class="lineNoCov">          0 :         else if (*var == 'I')</span></a>
+<a name="567"><span class="lineNum">     567 </span><span class="lineNoCov">          0 :             xsname = X509_get_issuer_name(xs);</span></a>
+<a name="568"><span class="lineNum">     568 </span>            :         else</a>
+<a name="569"><span class="lineNum">     569 </span><span class="lineNoCov">          0 :             return NULL;</span></a>
+<a name="570"><span class="lineNum">     570 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_dn(p, xsname, var+5);</span></a>
+<a name="571"><span class="lineNum">     571 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="572"><span class="lineNum">     572 </span><span class="lineNoCov">          0 :     else if (strlen(var) &gt; 4 &amp;&amp; strcEQn(var, &quot;SAN_&quot;, 4)) {</span></a>
+<a name="573"><span class="lineNum">     573 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_san(p, xs, var+4);</span></a>
+<a name="574"><span class="lineNum">     574 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="575"><span class="lineNum">     575 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;A_SIG&quot;)) {</span></a>
+<a name="576"><span class="lineNum">     576 </span>            : #if MODSSL_USE_OPENSSL_PRE_1_1_API</a>
+<a name="577"><span class="lineNum">     577 </span>            :         nid = OBJ_obj2nid((ASN1_OBJECT *)(xs-&gt;cert_info-&gt;signature-&gt;algorithm));</a>
+<a name="578"><span class="lineNum">     578 </span>            : #else</a>
+<a name="579"><span class="lineNum">     579 </span>            :         const ASN1_OBJECT *paobj;</a>
+<a name="580"><span class="lineNum">     580 </span><span class="lineNoCov">          0 :         X509_ALGOR_get0(&amp;paobj, NULL, NULL, X509_get0_tbs_sigalg(xs));</span></a>
+<a name="581"><span class="lineNum">     581 </span><span class="lineNoCov">          0 :         nid = OBJ_obj2nid(paobj);</span></a>
+<a name="582"><span class="lineNum">     582 </span>            : #endif</a>
+<a name="583"><span class="lineNum">     583 </span><span class="lineNoCov">          0 :         result = (nid == NID_undef) ? &quot;UNKNOWN&quot; : OBJ_nid2ln(nid);</span></a>
+<a name="584"><span class="lineNum">     584 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="585"><span class="lineNum">     585 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;A_KEY&quot;)) {</span></a>
+<a name="586"><span class="lineNum">     586 </span>            : #if OPENSSL_VERSION_NUMBER &lt; 0x10100000L</a>
+<a name="587"><span class="lineNum">     587 </span>            :         nid = OBJ_obj2nid((ASN1_OBJECT *)(xs-&gt;cert_info-&gt;key-&gt;algor-&gt;algorithm));</a>
+<a name="588"><span class="lineNum">     588 </span>            : #else</a>
+<a name="589"><span class="lineNum">     589 </span>            :         ASN1_OBJECT *paobj;</a>
+<a name="590"><span class="lineNum">     590 </span><span class="lineNoCov">          0 :         X509_PUBKEY_get0_param(&amp;paobj, NULL, 0, NULL, X509_get_X509_PUBKEY(xs));</span></a>
+<a name="591"><span class="lineNum">     591 </span><span class="lineNoCov">          0 :         nid = OBJ_obj2nid(paobj);</span></a>
+<a name="592"><span class="lineNum">     592 </span>            : #endif</a>
+<a name="593"><span class="lineNum">     593 </span><span class="lineNoCov">          0 :         result = (nid == NID_undef) ? &quot;UNKNOWN&quot; : OBJ_nid2ln(nid);</span></a>
+<a name="594"><span class="lineNum">     594 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="595"><span class="lineNum">     595 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;CERT&quot;)) {</span></a>
+<a name="596"><span class="lineNum">     596 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup_ssl_cert_PEM(p, xs);</span></a>
+<a name="597"><span class="lineNum">     597 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="598"><span class="lineNum">     598 </span>            : </a>
+<a name="599"><span class="lineNum">     599 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="600"><span class="lineNum">     600 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="601"><span class="lineNum">     601 </span>            : </a>
+<a name="602"><span class="lineNum">     602 </span>            : /* In this table, .extract is non-zero if RDNs using the NID should be</a>
+<a name="603"><span class="lineNum">     603 </span>            :  * extracted to for the SSL_{CLIENT,SERVER}_{I,S}_DN_* environment</a>
+<a name="604"><span class="lineNum">     604 </span>            :  * variables. */</a>
+<a name="605"><span class="lineNum">     605 </span>            : static const struct {</a>
+<a name="606"><span class="lineNum">     606 </span>            :     const char *name;</a>
+<a name="607"><span class="lineNum">     607 </span>            :     int   nid;</a>
+<a name="608"><span class="lineNum">     608 </span>            :     int   extract;</a>
+<a name="609"><span class="lineNum">     609 </span>            : } ssl_var_lookup_ssl_cert_dn_rec[] = {</a>
+<a name="610"><span class="lineNum">     610 </span>            :     { &quot;C&quot;,     NID_countryName,            1 },</a>
+<a name="611"><span class="lineNum">     611 </span>            :     { &quot;ST&quot;,    NID_stateOrProvinceName,    1 }, /* officially    (RFC2156) */</a>
+<a name="612"><span class="lineNum">     612 </span>            :     { &quot;SP&quot;,    NID_stateOrProvinceName,    0 }, /* compatibility (SSLeay)  */</a>
+<a name="613"><span class="lineNum">     613 </span>            :     { &quot;L&quot;,     NID_localityName,           1 },</a>
+<a name="614"><span class="lineNum">     614 </span>            :     { &quot;O&quot;,     NID_organizationName,       1 },</a>
+<a name="615"><span class="lineNum">     615 </span>            :     { &quot;OU&quot;,    NID_organizationalUnitName, 1 },</a>
+<a name="616"><span class="lineNum">     616 </span>            :     { &quot;CN&quot;,    NID_commonName,             1 },</a>
+<a name="617"><span class="lineNum">     617 </span>            :     { &quot;T&quot;,     NID_title,                  1 },</a>
+<a name="618"><span class="lineNum">     618 </span>            :     { &quot;I&quot;,     NID_initials,               1 },</a>
+<a name="619"><span class="lineNum">     619 </span>            :     { &quot;G&quot;,     NID_givenName,              1 },</a>
+<a name="620"><span class="lineNum">     620 </span>            :     { &quot;S&quot;,     NID_surname,                1 },</a>
+<a name="621"><span class="lineNum">     621 </span>            :     { &quot;D&quot;,     NID_description,            1 },</a>
+<a name="622"><span class="lineNum">     622 </span>            : #ifdef NID_userId</a>
+<a name="623"><span class="lineNum">     623 </span>            :     { &quot;UID&quot;,   NID_userId,                 1 },</a>
+<a name="624"><span class="lineNum">     624 </span>            : #endif</a>
+<a name="625"><span class="lineNum">     625 </span>            :     { &quot;Email&quot;, NID_pkcs9_emailAddress,     1 },</a>
+<a name="626"><span class="lineNum">     626 </span>            :     { NULL,    0,                          0 }</a>
+<a name="627"><span class="lineNum">     627 </span>            : };</a>
+<a name="628"><span class="lineNum">     628 </span>            : </a>
+<a name="629"><span class="lineNum">     629 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_dn(apr_pool_t *p, X509_NAME *xsname,</span></a>
+<a name="630"><span class="lineNum">     630 </span>            :                                         const char *var)</a>
+<a name="631"><span class="lineNum">     631 </span>            : {</a>
+<a name="632"><span class="lineNum">     632 </span>            :     const char *ptr;</a>
+<a name="633"><span class="lineNum">     633 </span>            :     const char *result;</a>
+<a name="634"><span class="lineNum">     634 </span>            :     X509_NAME_ENTRY *xsne;</a>
+<a name="635"><span class="lineNum">     635 </span><span class="lineNoCov">          0 :     int i, j, n, idx = 0, raw = 0;</span></a>
+<a name="636"><span class="lineNum">     636 </span>            :     apr_size_t varlen;</a>
+<a name="637"><span class="lineNum">     637 </span>            : </a>
+<a name="638"><span class="lineNum">     638 </span><span class="lineNoCov">          0 :     ptr = ap_strrchr_c(var, '_');</span></a>
+<a name="639"><span class="lineNum">     639 </span><span class="lineNoCov">          0 :     if (ptr &amp;&amp; ptr &gt; var &amp;&amp; strcmp(ptr + 1, &quot;RAW&quot;) == 0) {</span></a>
+<a name="640"><span class="lineNum">     640 </span><span class="lineNoCov">          0 :         var = apr_pstrmemdup(p, var, ptr - var);</span></a>
+<a name="641"><span class="lineNum">     641 </span><span class="lineNoCov">          0 :         raw = 1;</span></a>
+<a name="642"><span class="lineNum">     642 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="643"><span class="lineNum">     643 </span>            :     </a>
+<a name="644"><span class="lineNum">     644 </span>            :     /* if an _N suffix is used, find the Nth attribute of given name */</a>
+<a name="645"><span class="lineNum">     645 </span><span class="lineNoCov">          0 :     ptr = ap_strchr_c(var, '_');</span></a>
+<a name="646"><span class="lineNum">     646 </span><span class="lineNoCov">          0 :     if (ptr != NULL &amp;&amp; strspn(ptr + 1, &quot;0123456789&quot;) == strlen(ptr + 1)) {</span></a>
+<a name="647"><span class="lineNum">     647 </span><span class="lineNoCov">          0 :         idx = atoi(ptr + 1);</span></a>
+<a name="648"><span class="lineNum">     648 </span><span class="lineNoCov">          0 :         varlen = ptr - var;</span></a>
+<a name="649"><span class="lineNum">     649 </span><span class="lineNoCov">          0 :     } else {</span></a>
+<a name="650"><span class="lineNum">     650 </span><span class="lineNoCov">          0 :         varlen = strlen(var);</span></a>
+<a name="651"><span class="lineNum">     651 </span>            :     }</a>
+<a name="652"><span class="lineNum">     652 </span>            : </a>
+<a name="653"><span class="lineNum">     653 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="654"><span class="lineNum">     654 </span>            : </a>
+<a name="655"><span class="lineNum">     655 </span><span class="lineNoCov">          0 :     for (i = 0; ssl_var_lookup_ssl_cert_dn_rec[i].name != NULL; i++) {</span></a>
+<a name="656"><span class="lineNum">     656 </span><span class="lineNoCov">          0 :         if (strEQn(var, ssl_var_lookup_ssl_cert_dn_rec[i].name, varlen)</span></a>
+<a name="657"><span class="lineNum">     657 </span><span class="lineNoCov">          0 :             &amp;&amp; strlen(ssl_var_lookup_ssl_cert_dn_rec[i].name) == varlen) {</span></a>
+<a name="658"><span class="lineNum">     658 </span><span class="lineNoCov">          0 :             for (j = 0; j &lt; X509_NAME_entry_count(xsname); j++) {</span></a>
+<a name="659"><span class="lineNum">     659 </span><span class="lineNoCov">          0 :                 xsne = X509_NAME_get_entry(xsname, j);</span></a>
+<a name="660"><span class="lineNum">     660 </span>            : </a>
+<a name="661"><span class="lineNum">     661 </span><span class="lineNoCov">          0 :                 n =OBJ_obj2nid((ASN1_OBJECT *)X509_NAME_ENTRY_get_object(xsne));</span></a>
+<a name="662"><span class="lineNum">     662 </span>            : </a>
+<a name="663"><span class="lineNum">     663 </span><span class="lineNoCov">          0 :                 if (n == ssl_var_lookup_ssl_cert_dn_rec[i].nid &amp;&amp; idx-- == 0) {</span></a>
+<a name="664"><span class="lineNum">     664 </span><span class="lineNoCov">          0 :                     result = modssl_X509_NAME_ENTRY_to_string(p, xsne, raw);</span></a>
+<a name="665"><span class="lineNum">     665 </span><span class="lineNoCov">          0 :                     break;</span></a>
+<a name="666"><span class="lineNum">     666 </span>            :                 }</a>
+<a name="667"><span class="lineNum">     667 </span><span class="lineNoCov">          0 :             }</span></a>
+<a name="668"><span class="lineNum">     668 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="669"><span class="lineNum">     669 </span>            :         }</a>
+<a name="670"><span class="lineNum">     670 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="671"><span class="lineNum">     671 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="672"><span class="lineNum">     672 </span>            : }</a>
+<a name="673"><span class="lineNum">     673 </span>            : </a>
+<a name="674"><span class="lineNum">     674 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_san(apr_pool_t *p, X509 *xs, const char *var)</span></a>
+<a name="675"><span class="lineNum">     675 </span>            : {</a>
+<a name="676"><span class="lineNum">     676 </span>            :     int type;</a>
+<a name="677"><span class="lineNum">     677 </span>            :     apr_size_t numlen;</a>
+<a name="678"><span class="lineNum">     678 </span><span class="lineNoCov">          0 :     const char *onf = NULL;</span></a>
+<a name="679"><span class="lineNum">     679 </span>            :     apr_array_header_t *entries;</a>
+<a name="680"><span class="lineNum">     680 </span>            : </a>
+<a name="681"><span class="lineNum">     681 </span><span class="lineNoCov">          0 :     if (strcEQn(var, &quot;Email_&quot;, 6)) {</span></a>
+<a name="682"><span class="lineNum">     682 </span><span class="lineNoCov">          0 :         type = GEN_EMAIL;</span></a>
+<a name="683"><span class="lineNum">     683 </span><span class="lineNoCov">          0 :         var += 6;</span></a>
+<a name="684"><span class="lineNum">     684 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="685"><span class="lineNum">     685 </span><span class="lineNoCov">          0 :     else if (strcEQn(var, &quot;DNS_&quot;, 4)) {</span></a>
+<a name="686"><span class="lineNum">     686 </span><span class="lineNoCov">          0 :         type = GEN_DNS;</span></a>
+<a name="687"><span class="lineNum">     687 </span><span class="lineNoCov">          0 :         var += 4;</span></a>
+<a name="688"><span class="lineNum">     688 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="689"><span class="lineNum">     689 </span><span class="lineNoCov">          0 :     else if (strcEQn(var, &quot;OTHER_&quot;, 6)) {</span></a>
+<a name="690"><span class="lineNum">     690 </span><span class="lineNoCov">          0 :         type = GEN_OTHERNAME;</span></a>
+<a name="691"><span class="lineNum">     691 </span><span class="lineNoCov">          0 :         var += 6;</span></a>
+<a name="692"><span class="lineNum">     692 </span><span class="lineNoCov">          0 :         if (strEQn(var, &quot;msUPN_&quot;, 6)) {</span></a>
+<a name="693"><span class="lineNum">     693 </span><span class="lineNoCov">          0 :             var += 6;</span></a>
+<a name="694"><span class="lineNum">     694 </span><span class="lineNoCov">          0 :             onf = &quot;msUPN&quot;;</span></a>
+<a name="695"><span class="lineNum">     695 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="696"><span class="lineNum">     696 </span><span class="lineNoCov">          0 :         else if (strEQn(var, &quot;dnsSRV_&quot;, 7)) {</span></a>
+<a name="697"><span class="lineNum">     697 </span><span class="lineNoCov">          0 :             var += 7;</span></a>
+<a name="698"><span class="lineNum">     698 </span><span class="lineNoCov">          0 :             onf = &quot;id-on-dnsSRV&quot;;</span></a>
+<a name="699"><span class="lineNum">     699 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="700"><span class="lineNum">     700 </span>            :         else</a>
+<a name="701"><span class="lineNum">     701 </span><span class="lineNoCov">          0 :            return NULL;</span></a>
+<a name="702"><span class="lineNum">     702 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="703"><span class="lineNum">     703 </span>            :     else</a>
+<a name="704"><span class="lineNum">     704 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="705"><span class="lineNum">     705 </span>            : </a>
+<a name="706"><span class="lineNum">     706 </span>            :     /* sanity check: number must be between 1 and 4 digits */</a>
+<a name="707"><span class="lineNum">     707 </span><span class="lineNoCov">          0 :     numlen = strspn(var, &quot;0123456789&quot;);</span></a>
+<a name="708"><span class="lineNum">     708 </span><span class="lineNoCov">          0 :     if ((numlen &lt; 1) || (numlen &gt; 4) || (numlen != strlen(var)))</span></a>
+<a name="709"><span class="lineNum">     709 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="710"><span class="lineNum">     710 </span>            : </a>
+<a name="711"><span class="lineNum">     711 </span><span class="lineNoCov">          0 :     if (modssl_X509_getSAN(p, xs, type, onf, atoi(var), &amp;entries))</span></a>
+<a name="712"><span class="lineNum">     712 </span>            :         /* return the first entry from this 1-element array */</a>
+<a name="713"><span class="lineNum">     713 </span><span class="lineNoCov">          0 :         return APR_ARRAY_IDX(entries, 0, char *);</span></a>
+<a name="714"><span class="lineNum">     714 </span>            :     else</a>
+<a name="715"><span class="lineNum">     715 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="716"><span class="lineNum">     716 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="717"><span class="lineNum">     717 </span>            : </a>
+<a name="718"><span class="lineNum">     718 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_valid(apr_pool_t *p, ASN1_TIME *tm)</span></a>
+<a name="719"><span class="lineNum">     719 </span>            : {</a>
+<a name="720"><span class="lineNum">     720 </span>            :     BIO* bio;</a>
+<a name="721"><span class="lineNum">     721 </span>            : </a>
+<a name="722"><span class="lineNum">     722 </span><span class="lineNoCov">          0 :     if ((bio = BIO_new(BIO_s_mem())) == NULL)</span></a>
+<a name="723"><span class="lineNum">     723 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="724"><span class="lineNum">     724 </span><span class="lineNoCov">          0 :     ASN1_TIME_print(bio, tm);</span></a>
+<a name="725"><span class="lineNum">     725 </span>            : </a>
+<a name="726"><span class="lineNum">     726 </span><span class="lineNoCov">          0 :     return modssl_bio_free_read(p, bio);</span></a>
+<a name="727"><span class="lineNum">     727 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="728"><span class="lineNum">     728 </span>            : </a>
+<a name="729"><span class="lineNum">     729 </span>            : #define DIGIT2NUM(x) (((x)[0] - '0') * 10 + (x)[1] - '0')</a>
+<a name="730"><span class="lineNum">     730 </span>            : </a>
+<a name="731"><span class="lineNum">     731 </span>            : /* Return a string giving the number of days remaining until 'tm', or</a>
+<a name="732"><span class="lineNum">     732 </span>            :  * &quot;0&quot; if this can't be determined. */</a>
+<a name="733"><span class="lineNum">     733 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_remain(apr_pool_t *p, ASN1_TIME *tm)</span></a>
+<a name="734"><span class="lineNum">     734 </span>            : {</a>
+<a name="735"><span class="lineNum">     735 </span><span class="lineNoCov">          0 :     apr_time_t then, now = apr_time_now();</span></a>
+<a name="736"><span class="lineNum">     736 </span><span class="lineNoCov">          0 :     apr_time_exp_t exp = {0};</span></a>
+<a name="737"><span class="lineNum">     737 </span>            :     long diff;</a>
+<a name="738"><span class="lineNum">     738 </span>            :     unsigned char *dp;</a>
+<a name="739"><span class="lineNum">     739 </span>            : </a>
+<a name="740"><span class="lineNum">     740 </span>            :     /* Fail if the time isn't a valid ASN.1 TIME; RFC3280 mandates</a>
+<a name="741"><span class="lineNum">     741 </span>            :      * that the seconds digits are present even though ASN.1</a>
+<a name="742"><span class="lineNum">     742 </span>            :      * doesn't. */</a>
+<a name="743"><span class="lineNum">     743 </span><span class="lineNoCov">          0 :     if ((tm-&gt;type == V_ASN1_UTCTIME &amp;&amp; tm-&gt;length &lt; 11) ||</span></a>
+<a name="744"><span class="lineNum">     744 </span><span class="lineNoCov">          0 :         (tm-&gt;type == V_ASN1_GENERALIZEDTIME &amp;&amp; tm-&gt;length &lt; 13) ||</span></a>
+<a name="745"><span class="lineNum">     745 </span><span class="lineNoCov">          0 :         !ASN1_TIME_check(tm)) {</span></a>
+<a name="746"><span class="lineNum">     746 </span><span class="lineNoCov">          0 :         return &quot;0&quot;;</span></a>
+<a name="747"><span class="lineNum">     747 </span>            :     }</a>
+<a name="748"><span class="lineNum">     748 </span>            : </a>
+<a name="749"><span class="lineNum">     749 </span><span class="lineNoCov">          0 :     if (tm-&gt;type == V_ASN1_UTCTIME) {</span></a>
+<a name="750"><span class="lineNum">     750 </span><span class="lineNoCov">          0 :         exp.tm_year = DIGIT2NUM(tm-&gt;data);</span></a>
+<a name="751"><span class="lineNum">     751 </span><span class="lineNoCov">          0 :         if (exp.tm_year &lt;= 50) exp.tm_year += 100;</span></a>
+<a name="752"><span class="lineNum">     752 </span><span class="lineNoCov">          0 :         dp = tm-&gt;data + 2;</span></a>
+<a name="753"><span class="lineNum">     753 </span><span class="lineNoCov">          0 :     } else {</span></a>
+<a name="754"><span class="lineNum">     754 </span><span class="lineNoCov">          0 :         exp.tm_year = DIGIT2NUM(tm-&gt;data) * 100 + DIGIT2NUM(tm-&gt;data + 2) - 1900;</span></a>
+<a name="755"><span class="lineNum">     755 </span><span class="lineNoCov">          0 :         dp = tm-&gt;data + 4;</span></a>
+<a name="756"><span class="lineNum">     756 </span>            :     }</a>
+<a name="757"><span class="lineNum">     757 </span>            : </a>
+<a name="758"><span class="lineNum">     758 </span><span class="lineNoCov">          0 :     exp.tm_mon = DIGIT2NUM(dp) - 1;</span></a>
+<a name="759"><span class="lineNum">     759 </span><span class="lineNoCov">          0 :     exp.tm_mday = DIGIT2NUM(dp + 2) + 1;</span></a>
+<a name="760"><span class="lineNum">     760 </span><span class="lineNoCov">          0 :     exp.tm_hour = DIGIT2NUM(dp + 4);</span></a>
+<a name="761"><span class="lineNum">     761 </span><span class="lineNoCov">          0 :     exp.tm_min = DIGIT2NUM(dp + 6);</span></a>
+<a name="762"><span class="lineNum">     762 </span><span class="lineNoCov">          0 :     exp.tm_sec = DIGIT2NUM(dp + 8);</span></a>
+<a name="763"><span class="lineNum">     763 </span>            : </a>
+<a name="764"><span class="lineNum">     764 </span><span class="lineNoCov">          0 :     if (apr_time_exp_gmt_get(&amp;then, &amp;exp) != APR_SUCCESS) {</span></a>
+<a name="765"><span class="lineNum">     765 </span><span class="lineNoCov">          0 :         return &quot;0&quot;;</span></a>
+<a name="766"><span class="lineNum">     766 </span>            :     }</a>
+<a name="767"><span class="lineNum">     767 </span>            : </a>
+<a name="768"><span class="lineNum">     768 </span><span class="lineNoCov">          0 :     diff = (long)((apr_time_sec(then) - apr_time_sec(now)) / (60*60*24));</span></a>
+<a name="769"><span class="lineNum">     769 </span>            : </a>
+<a name="770"><span class="lineNum">     770 </span><span class="lineNoCov">          0 :     return diff &gt; 0 ? apr_ltoa(p, diff) : &quot;0&quot;;</span></a>
+<a name="771"><span class="lineNum">     771 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="772"><span class="lineNum">     772 </span>            : </a>
+<a name="773"><span class="lineNum">     773 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_serial(apr_pool_t *p, X509 *xs)</span></a>
+<a name="774"><span class="lineNum">     774 </span>            : {</a>
+<a name="775"><span class="lineNum">     775 </span>            :     BIO *bio;</a>
+<a name="776"><span class="lineNum">     776 </span>            : </a>
+<a name="777"><span class="lineNum">     777 </span><span class="lineNoCov">          0 :     if ((bio = BIO_new(BIO_s_mem())) == NULL)</span></a>
+<a name="778"><span class="lineNum">     778 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="779"><span class="lineNum">     779 </span><span class="lineNoCov">          0 :     i2a_ASN1_INTEGER(bio, X509_get_serialNumber(xs));</span></a>
+<a name="780"><span class="lineNum">     780 </span>            : </a>
+<a name="781"><span class="lineNum">     781 </span><span class="lineNoCov">          0 :     return modssl_bio_free_read(p, bio);</span></a>
+<a name="782"><span class="lineNum">     782 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="783"><span class="lineNum">     783 </span>            : </a>
+<a name="784"><span class="lineNum">     784 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_chain(apr_pool_t *p, STACK_OF(X509) *sk, const char *var)</span></a>
+<a name="785"><span class="lineNum">     785 </span>            : {</a>
+<a name="786"><span class="lineNum">     786 </span>            :     const char *result;</a>
+<a name="787"><span class="lineNum">     787 </span>            :     X509 *xs;</a>
+<a name="788"><span class="lineNum">     788 </span>            :     int n;</a>
+<a name="789"><span class="lineNum">     789 </span>            : </a>
+<a name="790"><span class="lineNum">     790 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="791"><span class="lineNum">     791 </span>            : </a>
+<a name="792"><span class="lineNum">     792 </span><span class="lineNoCov">          0 :     if (strspn(var, &quot;0123456789&quot;) == strlen(var)) {</span></a>
+<a name="793"><span class="lineNum">     793 </span><span class="lineNoCov">          0 :         n = atoi(var);</span></a>
+<a name="794"><span class="lineNum">     794 </span><span class="lineNoCov">          0 :         if (n &lt; sk_X509_num(sk)) {</span></a>
+<a name="795"><span class="lineNum">     795 </span><span class="lineNoCov">          0 :             xs = sk_X509_value(sk, n);</span></a>
+<a name="796"><span class="lineNum">     796 </span><span class="lineNoCov">          0 :             result = ssl_var_lookup_ssl_cert_PEM(p, xs);</span></a>
+<a name="797"><span class="lineNum">     797 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="798"><span class="lineNum">     798 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="799"><span class="lineNum">     799 </span>            : </a>
+<a name="800"><span class="lineNum">     800 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="801"><span class="lineNum">     801 </span>            : }</a>
+<a name="802"><span class="lineNum">     802 </span>            : </a>
+<a name="803"><span class="lineNum">     803 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_rfc4523_cea(apr_pool_t *p, SSL *ssl)</span></a>
+<a name="804"><span class="lineNum">     804 </span>            : {</a>
+<a name="805"><span class="lineNum">     805 </span>            :     char *result;</a>
+<a name="806"><span class="lineNum">     806 </span>            :     X509 *xs;</a>
+<a name="807"><span class="lineNum">     807 </span>            : </a>
+<a name="808"><span class="lineNum">     808 </span>            :     ASN1_INTEGER *serialNumber;</a>
+<a name="809"><span class="lineNum">     809 </span>            : </a>
+<a name="810"><span class="lineNum">     810 </span><span class="lineNoCov">          0 :     if (!(xs = SSL_get_peer_certificate(ssl))) {</span></a>
+<a name="811"><span class="lineNum">     811 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="812"><span class="lineNum">     812 </span>            :     }</a>
+<a name="813"><span class="lineNum">     813 </span>            : </a>
+<a name="814"><span class="lineNum">     814 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="815"><span class="lineNum">     815 </span>            : </a>
+<a name="816"><span class="lineNum">     816 </span><span class="lineNoCov">          0 :     serialNumber = X509_get_serialNumber(xs);</span></a>
+<a name="817"><span class="lineNum">     817 </span><span class="lineNoCov">          0 :     if (serialNumber) {</span></a>
+<a name="818"><span class="lineNum">     818 </span><span class="lineNoCov">          0 :         X509_NAME *issuer = X509_get_issuer_name(xs);</span></a>
+<a name="819"><span class="lineNum">     819 </span><span class="lineNoCov">          0 :         if (issuer) {</span></a>
+<a name="820"><span class="lineNum">     820 </span><span class="lineNoCov">          0 :             BIGNUM *bn = ASN1_INTEGER_to_BN(serialNumber, NULL);</span></a>
+<a name="821"><span class="lineNum">     821 </span><span class="lineNoCov">          0 :             char *decimal = BN_bn2dec(bn);</span></a>
+<a name="822"><span class="lineNum">     822 </span><span class="lineNoCov">          0 :             result = apr_pstrcat(p, &quot;{ serialNumber &quot;, decimal,</span></a>
+<a name="823"><span class="lineNum">     823 </span>            :                     &quot;, issuer rdnSequence:\&quot;&quot;,</a>
+<a name="824"><span class="lineNum">     824 </span><span class="lineNoCov">          0 :                     modssl_X509_NAME_to_string(p, issuer, 0), &quot;\&quot; }&quot;, NULL);</span></a>
+<a name="825"><span class="lineNum">     825 </span><span class="lineNoCov">          0 :             OPENSSL_free(decimal);</span></a>
+<a name="826"><span class="lineNum">     826 </span><span class="lineNoCov">          0 :             BN_free(bn);</span></a>
+<a name="827"><span class="lineNum">     827 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="828"><span class="lineNum">     828 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="829"><span class="lineNum">     829 </span>            : </a>
+<a name="830"><span class="lineNum">     830 </span><span class="lineNoCov">          0 :     X509_free(xs);</span></a>
+<a name="831"><span class="lineNum">     831 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="832"><span class="lineNum">     832 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="833"><span class="lineNum">     833 </span>            : </a>
+<a name="834"><span class="lineNum">     834 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_PEM(apr_pool_t *p, X509 *xs)</span></a>
+<a name="835"><span class="lineNum">     835 </span>            : {</a>
+<a name="836"><span class="lineNum">     836 </span>            :     BIO *bio;</a>
+<a name="837"><span class="lineNum">     837 </span>            : </a>
+<a name="838"><span class="lineNum">     838 </span><span class="lineNoCov">          0 :     if ((bio = BIO_new(BIO_s_mem())) == NULL)</span></a>
+<a name="839"><span class="lineNum">     839 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="840"><span class="lineNum">     840 </span><span class="lineNoCov">          0 :     PEM_write_bio_X509(bio, xs);</span></a>
+<a name="841"><span class="lineNum">     841 </span>            : </a>
+<a name="842"><span class="lineNum">     842 </span><span class="lineNoCov">          0 :     return modssl_bio_free_read(p, bio);</span></a>
+<a name="843"><span class="lineNum">     843 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="844"><span class="lineNum">     844 </span>            : </a>
+<a name="845"><span class="lineNum">     845 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cert_verify(apr_pool_t *p,</span></a>
+<a name="846"><span class="lineNum">     846 </span>            :                                                   const SSLConnRec *sslconn)</a>
+<a name="847"><span class="lineNum">     847 </span>            : {</a>
+<a name="848"><span class="lineNum">     848 </span>            :     char *result;</a>
+<a name="849"><span class="lineNum">     849 </span>            :     long vrc;</a>
+<a name="850"><span class="lineNum">     850 </span>            :     const char *verr;</a>
+<a name="851"><span class="lineNum">     851 </span>            :     const char *vinfo;</a>
+<a name="852"><span class="lineNum">     852 </span>            :     SSL *ssl;</a>
+<a name="853"><span class="lineNum">     853 </span>            :     X509 *xs;</a>
+<a name="854"><span class="lineNum">     854 </span>            : </a>
+<a name="855"><span class="lineNum">     855 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="856"><span class="lineNum">     856 </span><span class="lineNoCov">          0 :     ssl   = sslconn-&gt;ssl;</span></a>
+<a name="857"><span class="lineNum">     857 </span><span class="lineNoCov">          0 :     verr  = sslconn-&gt;verify_error;</span></a>
+<a name="858"><span class="lineNum">     858 </span><span class="lineNoCov">          0 :     vinfo = sslconn-&gt;verify_info;</span></a>
+<a name="859"><span class="lineNum">     859 </span><span class="lineNoCov">          0 :     vrc   = SSL_get_verify_result(ssl);</span></a>
+<a name="860"><span class="lineNum">     860 </span><span class="lineNoCov">          0 :     xs    = SSL_get_peer_certificate(ssl);</span></a>
+<a name="861"><span class="lineNum">     861 </span>            : </a>
+<a name="862"><span class="lineNum">     862 </span><span class="lineNoCov">          0 :     if (vrc == X509_V_OK &amp;&amp; verr == NULL &amp;&amp; xs == NULL)</span></a>
+<a name="863"><span class="lineNum">     863 </span>            :         /* no client verification done at all */</a>
+<a name="864"><span class="lineNum">     864 </span><span class="lineNoCov">          0 :         result = &quot;NONE&quot;;</span></a>
+<a name="865"><span class="lineNum">     865 </span><span class="lineNoCov">          0 :     else if (vrc == X509_V_OK &amp;&amp; verr == NULL &amp;&amp; vinfo == NULL &amp;&amp; xs != NULL)</span></a>
+<a name="866"><span class="lineNum">     866 </span>            :         /* client verification done successful */</a>
+<a name="867"><span class="lineNum">     867 </span><span class="lineNoCov">          0 :         result = &quot;SUCCESS&quot;;</span></a>
+<a name="868"><span class="lineNum">     868 </span><span class="lineNoCov">          0 :     else if (vrc == X509_V_OK &amp;&amp; vinfo != NULL &amp;&amp; strEQ(vinfo, &quot;GENEROUS&quot;))</span></a>
+<a name="869"><span class="lineNum">     869 </span>            :         /* client verification done in generous way */</a>
+<a name="870"><span class="lineNum">     870 </span><span class="lineNoCov">          0 :         result = &quot;GENEROUS&quot;;</span></a>
+<a name="871"><span class="lineNum">     871 </span>            :     else</a>
+<a name="872"><span class="lineNum">     872 </span>            :         /* client verification failed */</a>
+<a name="873"><span class="lineNum">     873 </span><span class="lineNoCov">          0 :         result = apr_psprintf(p, &quot;FAILED:%s&quot;,</span></a>
+<a name="874"><span class="lineNum">     874 </span><span class="lineNoCov">          0 :                               verr ? verr : X509_verify_cert_error_string(vrc));</span></a>
+<a name="875"><span class="lineNum">     875 </span>            : </a>
+<a name="876"><span class="lineNum">     876 </span><span class="lineNoCov">          0 :     if (xs)</span></a>
+<a name="877"><span class="lineNum">     877 </span><span class="lineNoCov">          0 :         X509_free(xs);</span></a>
+<a name="878"><span class="lineNum">     878 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="879"><span class="lineNum">     879 </span>            : }</a>
+<a name="880"><span class="lineNum">     880 </span>            : </a>
+<a name="881"><span class="lineNum">     881 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_cipher(apr_pool_t *p,</span></a>
+<a name="882"><span class="lineNum">     882 </span>            :                                              const SSLConnRec *sslconn,</a>
+<a name="883"><span class="lineNum">     883 </span>            :                                              const char *var)</a>
+<a name="884"><span class="lineNum">     884 </span>            : {</a>
+<a name="885"><span class="lineNum">     885 </span>            :     const char *result;</a>
+<a name="886"><span class="lineNum">     886 </span>            :     int usekeysize, algkeysize;</a>
+<a name="887"><span class="lineNum">     887 </span>            :     SSL *ssl;</a>
+<a name="888"><span class="lineNum">     888 </span>            : </a>
+<a name="889"><span class="lineNum">     889 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="890"><span class="lineNum">     890 </span>            : </a>
+<a name="891"><span class="lineNum">     891 </span><span class="lineNoCov">          0 :     ssl = sslconn-&gt;ssl;</span></a>
+<a name="892"><span class="lineNum">     892 </span><span class="lineNoCov">          0 :     ssl_var_lookup_ssl_cipher_bits(ssl, &amp;usekeysize, &amp;algkeysize);</span></a>
+<a name="893"><span class="lineNum">     893 </span>            : </a>
+<a name="894"><span class="lineNum">     894 </span><span class="lineNoCov">          0 :     if (ssl &amp;&amp; strEQ(var, &quot;&quot;)) {</span></a>
+<a name="895"><span class="lineNum">     895 </span><span class="lineNoCov">          0 :         MODSSL_SSL_CIPHER_CONST SSL_CIPHER *cipher = SSL_get_current_cipher(ssl);</span></a>
+<a name="896"><span class="lineNum">     896 </span>            : </a>
+<a name="897"><span class="lineNum">     897 </span><span class="lineNoCov">          0 :         if (cipher) {</span></a>
+<a name="898"><span class="lineNum">     898 </span><span class="lineNoCov">          0 :             result = apr_pstrdup(p, SSL_CIPHER_get_name(cipher));</span></a>
+<a name="899"><span class="lineNum">     899 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="900"><span class="lineNum">     900 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="901"><span class="lineNum">     901 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;_EXPORT&quot;))</span></a>
+<a name="902"><span class="lineNum">     902 </span><span class="lineNoCov">          0 :         result = (usekeysize &lt; 56 ? &quot;true&quot; : &quot;false&quot;);</span></a>
+<a name="903"><span class="lineNum">     903 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;_USEKEYSIZE&quot;)) {</span></a>
+<a name="904"><span class="lineNum">     904 </span><span class="lineNoCov">          0 :         result = apr_itoa(p, usekeysize);</span></a>
+<a name="905"><span class="lineNum">     905 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="906"><span class="lineNum">     906 </span><span class="lineNoCov">          0 :     else if (strcEQ(var, &quot;_ALGKEYSIZE&quot;)) {</span></a>
+<a name="907"><span class="lineNum">     907 </span><span class="lineNoCov">          0 :         result = apr_itoa(p, algkeysize);</span></a>
+<a name="908"><span class="lineNum">     908 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="909"><span class="lineNum">     909 </span>            : </a>
+<a name="910"><span class="lineNum">     910 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="911"><span class="lineNum">     911 </span>            : }</a>
+<a name="912"><span class="lineNum">     912 </span>            : </a>
+<a name="913"><span class="lineNum">     913 </span><span class="lineNoCov">          0 : static void ssl_var_lookup_ssl_cipher_bits(SSL *ssl, int *usekeysize, int *algkeysize)</span></a>
+<a name="914"><span class="lineNum">     914 </span>            : {</a>
+<a name="915"><span class="lineNum">     915 </span>            :     MODSSL_SSL_CIPHER_CONST SSL_CIPHER *cipher;</a>
+<a name="916"><span class="lineNum">     916 </span>            : </a>
+<a name="917"><span class="lineNum">     917 </span><span class="lineNoCov">          0 :     *usekeysize = 0;</span></a>
+<a name="918"><span class="lineNum">     918 </span><span class="lineNoCov">          0 :     *algkeysize = 0;</span></a>
+<a name="919"><span class="lineNum">     919 </span><span class="lineNoCov">          0 :     if (ssl != NULL)</span></a>
+<a name="920"><span class="lineNum">     920 </span><span class="lineNoCov">          0 :         if ((cipher = SSL_get_current_cipher(ssl)) != NULL)</span></a>
+<a name="921"><span class="lineNum">     921 </span><span class="lineNoCov">          0 :             *usekeysize = SSL_CIPHER_get_bits(cipher, algkeysize);</span></a>
+<a name="922"><span class="lineNum">     922 </span><span class="lineNoCov">          0 :     return;</span></a>
+<a name="923"><span class="lineNum">     923 </span>            : }</a>
+<a name="924"><span class="lineNum">     924 </span>            : </a>
+<a name="925"><span class="lineNum">     925 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_version(const char *var)</span></a>
+<a name="926"><span class="lineNum">     926 </span>            : {</a>
+<a name="927"><span class="lineNum">     927 </span><span class="lineNoCov">          0 :     if (strEQ(var, &quot;INTERFACE&quot;)) {</span></a>
+<a name="928"><span class="lineNum">     928 </span><span class="lineNoCov">          0 :         return var_interface;</span></a>
+<a name="929"><span class="lineNum">     929 </span>            :     }</a>
+<a name="930"><span class="lineNum">     930 </span><span class="lineNoCov">          0 :     else if (strEQ(var, &quot;LIBRARY_INTERFACE&quot;)) {</span></a>
+<a name="931"><span class="lineNum">     931 </span><span class="lineNoCov">          0 :         return var_library_interface;</span></a>
+<a name="932"><span class="lineNum">     932 </span>            :     }</a>
+<a name="933"><span class="lineNum">     933 </span><span class="lineNoCov">          0 :     else if (strEQ(var, &quot;LIBRARY&quot;)) {</span></a>
+<a name="934"><span class="lineNum">     934 </span><span class="lineNoCov">          0 :         return var_library;</span></a>
+<a name="935"><span class="lineNum">     935 </span>            :     }</a>
+<a name="936"><span class="lineNum">     936 </span><span class="lineNoCov">          0 :     return NULL;</span></a>
+<a name="937"><span class="lineNum">     937 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="938"><span class="lineNum">     938 </span>            : </a>
+<a name="939"><span class="lineNum">     939 </span>            : /* Add each RDN in 'xn' to the table 't' where the NID is present in</a>
+<a name="940"><span class="lineNum">     940 </span>            :  * 'nids', using key prefix 'pfx'.  */</a>
+<a name="941"><span class="lineNum">     941 </span><span class="lineNoCov">          0 : static void extract_dn(apr_table_t *t, apr_hash_t *nids, const char *pfx,</span></a>
+<a name="942"><span class="lineNum">     942 </span>            :                        X509_NAME *xn, apr_pool_t *p)</a>
+<a name="943"><span class="lineNum">     943 </span>            : {</a>
+<a name="944"><span class="lineNum">     944 </span>            :     X509_NAME_ENTRY *xsne;</a>
+<a name="945"><span class="lineNum">     945 </span>            :     apr_hash_t *count;</a>
+<a name="946"><span class="lineNum">     946 </span>            :     int i, nid;</a>
+<a name="947"><span class="lineNum">     947 </span>            : </a>
+<a name="948"><span class="lineNum">     948 </span>            :     /* Hash of (int) NID -&gt; (int *) counter to count each time an RDN</a>
+<a name="949"><span class="lineNum">     949 </span>            :      * with the given NID has been seen. */</a>
+<a name="950"><span class="lineNum">     950 </span><span class="lineNoCov">          0 :     count = apr_hash_make(p);</span></a>
+<a name="951"><span class="lineNum">     951 </span>            : </a>
+<a name="952"><span class="lineNum">     952 </span>            :     /* For each RDN... */</a>
+<a name="953"><span class="lineNum">     953 </span><span class="lineNoCov">          0 :     for (i = 0; i &lt; X509_NAME_entry_count(xn); i++) {</span></a>
+<a name="954"><span class="lineNum">     954 </span>            :          const char *tag;</a>
+<a name="955"><span class="lineNum">     955 </span><span class="lineNoCov">          0 :          xsne = X509_NAME_get_entry(xn, i);</span></a>
+<a name="956"><span class="lineNum">     956 </span>            : </a>
+<a name="957"><span class="lineNum">     957 </span>            :          /* Retrieve the nid, and check whether this is one of the nids</a>
+<a name="958"><span class="lineNum">     958 </span>            :           * which are to be extracted. */</a>
+<a name="959"><span class="lineNum">     959 </span><span class="lineNoCov">          0 :          nid = OBJ_obj2nid((ASN1_OBJECT *)X509_NAME_ENTRY_get_object(xsne));</span></a>
+<a name="960"><span class="lineNum">     960 </span>            : </a>
+<a name="961"><span class="lineNum">     961 </span><span class="lineNoCov">          0 :          tag = apr_hash_get(nids, &amp;nid, sizeof nid);</span></a>
+<a name="962"><span class="lineNum">     962 </span><span class="lineNoCov">          0 :          if (tag) {</span></a>
+<a name="963"><span class="lineNum">     963 </span>            :              const char *key;</a>
+<a name="964"><span class="lineNum">     964 </span>            :              int *dup;</a>
+<a name="965"><span class="lineNum">     965 </span>            :              char *value;</a>
+<a name="966"><span class="lineNum">     966 </span>            : </a>
+<a name="967"><span class="lineNum">     967 </span>            :              /* Check whether a variable with this nid was already</a>
+<a name="968"><span class="lineNum">     968 </span>            :               * been used; if so, use the foo_N=bar syntax. */</a>
+<a name="969"><span class="lineNum">     969 </span><span class="lineNoCov">          0 :              dup = apr_hash_get(count, &amp;nid, sizeof nid);</span></a>
+<a name="970"><span class="lineNum">     970 </span><span class="lineNoCov">          0 :              if (dup) {</span></a>
+<a name="971"><span class="lineNum">     971 </span><span class="lineNoCov">          0 :                  key = apr_psprintf(p, &quot;%s%s_%d&quot;, pfx, tag, ++(*dup));</span></a>
+<a name="972"><span class="lineNum">     972 </span><span class="lineNoCov">          0 :              }</span></a>
+<a name="973"><span class="lineNum">     973 </span>            :              else {</a>
+<a name="974"><span class="lineNum">     974 </span>            :                  /* Otherwise, use the plain foo=bar syntax. */</a>
+<a name="975"><span class="lineNum">     975 </span><span class="lineNoCov">          0 :                  dup = apr_pcalloc(p, sizeof *dup);</span></a>
+<a name="976"><span class="lineNum">     976 </span><span class="lineNoCov">          0 :                  apr_hash_set(count, &amp;nid, sizeof nid, dup);</span></a>
+<a name="977"><span class="lineNum">     977 </span><span class="lineNoCov">          0 :                  key = apr_pstrcat(p, pfx, tag, NULL);</span></a>
+<a name="978"><span class="lineNum">     978 </span>            :              }</a>
+<a name="979"><span class="lineNum">     979 </span><span class="lineNoCov">          0 :              value = modssl_X509_NAME_ENTRY_to_string(p, xsne, 0);</span></a>
+<a name="980"><span class="lineNum">     980 </span><span class="lineNoCov">          0 :              apr_table_setn(t, key, value);</span></a>
+<a name="981"><span class="lineNum">     981 </span><span class="lineNoCov">          0 :          }</span></a>
+<a name="982"><span class="lineNum">     982 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="983"><span class="lineNum">     983 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="984"><span class="lineNum">     984 </span>            : </a>
+<a name="985"><span class="lineNum">     985 </span><span class="lineNoCov">          0 : void modssl_var_extract_dns(apr_table_t *t, SSL *ssl, apr_pool_t *p)</span></a>
+<a name="986"><span class="lineNum">     986 </span>            : {</a>
+<a name="987"><span class="lineNum">     987 </span>            :     apr_hash_t *nids;</a>
+<a name="988"><span class="lineNum">     988 </span>            :     unsigned n;</a>
+<a name="989"><span class="lineNum">     989 </span>            :     X509 *xs;</a>
+<a name="990"><span class="lineNum">     990 </span>            : </a>
+<a name="991"><span class="lineNum">     991 </span>            :     /* Build up a hash table of (int *)NID-&gt;(char *)short-name for all</a>
+<a name="992"><span class="lineNum">     992 </span>            :      * the tags which are to be extracted: */</a>
+<a name="993"><span class="lineNum">     993 </span><span class="lineNoCov">          0 :     nids = apr_hash_make(p);</span></a>
+<a name="994"><span class="lineNum">     994 </span><span class="lineNoCov">          0 :     for (n = 0; ssl_var_lookup_ssl_cert_dn_rec[n].name; n++) {</span></a>
+<a name="995"><span class="lineNum">     995 </span><span class="lineNoCov">          0 :         if (ssl_var_lookup_ssl_cert_dn_rec[n].extract) {</span></a>
+<a name="996"><span class="lineNum">     996 </span><span class="lineNoCov">          0 :             apr_hash_set(nids, &amp;ssl_var_lookup_ssl_cert_dn_rec[n].nid,</span></a>
+<a name="997"><span class="lineNum">     997 </span>            :                          sizeof(ssl_var_lookup_ssl_cert_dn_rec[0].nid),</a>
+<a name="998"><span class="lineNum">     998 </span><span class="lineNoCov">          0 :                          ssl_var_lookup_ssl_cert_dn_rec[n].name);</span></a>
+<a name="999"><span class="lineNum">     999 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1000"><span class="lineNum">    1000 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1001"><span class="lineNum">    1001 </span>            : </a>
+<a name="1002"><span class="lineNum">    1002 </span>            :     /* Extract the server cert DNS -- note that the refcount does NOT</a>
+<a name="1003"><span class="lineNum">    1003 </span>            :      * increase: */</a>
+<a name="1004"><span class="lineNum">    1004 </span><span class="lineNoCov">          0 :     xs = SSL_get_certificate(ssl);</span></a>
+<a name="1005"><span class="lineNum">    1005 </span><span class="lineNoCov">          0 :     if (xs) {</span></a>
+<a name="1006"><span class="lineNum">    1006 </span><span class="lineNoCov">          0 :         extract_dn(t, nids, &quot;SSL_SERVER_S_DN_&quot;, X509_get_subject_name(xs), p);</span></a>
+<a name="1007"><span class="lineNum">    1007 </span><span class="lineNoCov">          0 :         extract_dn(t, nids, &quot;SSL_SERVER_I_DN_&quot;, X509_get_issuer_name(xs), p);</span></a>
+<a name="1008"><span class="lineNum">    1008 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1009"><span class="lineNum">    1009 </span>            : </a>
+<a name="1010"><span class="lineNum">    1010 </span>            :     /* Extract the client cert DNs -- note that the refcount DOES</a>
+<a name="1011"><span class="lineNum">    1011 </span>            :      * increase: */</a>
+<a name="1012"><span class="lineNum">    1012 </span><span class="lineNoCov">          0 :     xs = SSL_get_peer_certificate(ssl);</span></a>
+<a name="1013"><span class="lineNum">    1013 </span><span class="lineNoCov">          0 :     if (xs) {</span></a>
+<a name="1014"><span class="lineNum">    1014 </span><span class="lineNoCov">          0 :         extract_dn(t, nids, &quot;SSL_CLIENT_S_DN_&quot;, X509_get_subject_name(xs), p);</span></a>
+<a name="1015"><span class="lineNum">    1015 </span><span class="lineNoCov">          0 :         extract_dn(t, nids, &quot;SSL_CLIENT_I_DN_&quot;, X509_get_issuer_name(xs), p);</span></a>
+<a name="1016"><span class="lineNum">    1016 </span><span class="lineNoCov">          0 :         X509_free(xs);</span></a>
+<a name="1017"><span class="lineNum">    1017 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1018"><span class="lineNum">    1018 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="1019"><span class="lineNum">    1019 </span>            : </a>
+<a name="1020"><span class="lineNum">    1020 </span><span class="lineNoCov">          0 : static void extract_san_array(apr_table_t *t, const char *pfx,</span></a>
+<a name="1021"><span class="lineNum">    1021 </span>            :                               apr_array_header_t *entries, apr_pool_t *p)</a>
+<a name="1022"><span class="lineNum">    1022 </span>            : {</a>
+<a name="1023"><span class="lineNum">    1023 </span>            :     int i;</a>
+<a name="1024"><span class="lineNum">    1024 </span>            : </a>
+<a name="1025"><span class="lineNum">    1025 </span><span class="lineNoCov">          0 :     for (i = 0; i &lt; entries-&gt;nelts; i++) {</span></a>
+<a name="1026"><span class="lineNum">    1026 </span><span class="lineNoCov">          0 :         const char *key = apr_psprintf(p, &quot;%s_%d&quot;, pfx, i);</span></a>
+<a name="1027"><span class="lineNum">    1027 </span><span class="lineNoCov">          0 :         apr_table_setn(t, key, APR_ARRAY_IDX(entries, i, const char *));</span></a>
+<a name="1028"><span class="lineNum">    1028 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1029"><span class="lineNum">    1029 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="1030"><span class="lineNum">    1030 </span>            : </a>
+<a name="1031"><span class="lineNum">    1031 </span><span class="lineNoCov">          0 : void modssl_var_extract_san_entries(apr_table_t *t, SSL *ssl, apr_pool_t *p)</span></a>
+<a name="1032"><span class="lineNum">    1032 </span>            : {</a>
+<a name="1033"><span class="lineNum">    1033 </span>            :     X509 *xs;</a>
+<a name="1034"><span class="lineNum">    1034 </span>            :     apr_array_header_t *entries;</a>
+<a name="1035"><span class="lineNum">    1035 </span>            : </a>
+<a name="1036"><span class="lineNum">    1036 </span>            :     /* subjectAltName entries of the server certificate */</a>
+<a name="1037"><span class="lineNum">    1037 </span><span class="lineNoCov">          0 :     xs = SSL_get_certificate(ssl);</span></a>
+<a name="1038"><span class="lineNum">    1038 </span><span class="lineNoCov">          0 :     if (xs) {</span></a>
+<a name="1039"><span class="lineNum">    1039 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_EMAIL, NULL, -1, &amp;entries)) {</span></a>
+<a name="1040"><span class="lineNum">    1040 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_SERVER_SAN_Email&quot;, entries, p);</span></a>
+<a name="1041"><span class="lineNum">    1041 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1042"><span class="lineNum">    1042 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_DNS, NULL, -1, &amp;entries)) {</span></a>
+<a name="1043"><span class="lineNum">    1043 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_SERVER_SAN_DNS&quot;, entries, p);</span></a>
+<a name="1044"><span class="lineNum">    1044 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1045"><span class="lineNum">    1045 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_OTHERNAME, &quot;id-on-dnsSRV&quot;, -1,</span></a>
+<a name="1046"><span class="lineNum">    1046 </span>            :                                &amp;entries)) {</a>
+<a name="1047"><span class="lineNum">    1047 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_SERVER_SAN_OTHER_dnsSRV&quot;, entries, p);</span></a>
+<a name="1048"><span class="lineNum">    1048 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1049"><span class="lineNum">    1049 </span>            :         /* no need to free xs (refcount does not increase) */</a>
+<a name="1050"><span class="lineNum">    1050 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1051"><span class="lineNum">    1051 </span>            : </a>
+<a name="1052"><span class="lineNum">    1052 </span>            :     /* subjectAltName entries of the client certificate */</a>
+<a name="1053"><span class="lineNum">    1053 </span><span class="lineNoCov">          0 :     xs = SSL_get_peer_certificate(ssl);</span></a>
+<a name="1054"><span class="lineNum">    1054 </span><span class="lineNoCov">          0 :     if (xs) {</span></a>
+<a name="1055"><span class="lineNum">    1055 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_EMAIL, NULL, -1, &amp;entries)) {</span></a>
+<a name="1056"><span class="lineNum">    1056 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_CLIENT_SAN_Email&quot;, entries, p);</span></a>
+<a name="1057"><span class="lineNum">    1057 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1058"><span class="lineNum">    1058 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_DNS, NULL, -1, &amp;entries)) {</span></a>
+<a name="1059"><span class="lineNum">    1059 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_CLIENT_SAN_DNS&quot;, entries, p);</span></a>
+<a name="1060"><span class="lineNum">    1060 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1061"><span class="lineNum">    1061 </span><span class="lineNoCov">          0 :         if (modssl_X509_getSAN(p, xs, GEN_OTHERNAME, &quot;msUPN&quot;, -1, &amp;entries)) {</span></a>
+<a name="1062"><span class="lineNum">    1062 </span><span class="lineNoCov">          0 :             extract_san_array(t, &quot;SSL_CLIENT_SAN_OTHER_msUPN&quot;, entries, p);</span></a>
+<a name="1063"><span class="lineNum">    1063 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1064"><span class="lineNum">    1064 </span><span class="lineNoCov">          0 :         X509_free(xs);</span></a>
+<a name="1065"><span class="lineNum">    1065 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1066"><span class="lineNum">    1066 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="1067"><span class="lineNum">    1067 </span>            : </a>
+<a name="1068"><span class="lineNum">    1068 </span>            : /* For an extension type which OpenSSL does not recognize, attempt to</a>
+<a name="1069"><span class="lineNum">    1069 </span>            :  * parse the extension type as a primitive string.  This will fail for</a>
+<a name="1070"><span class="lineNum">    1070 </span>            :  * any structured extension type per the docs.  Returns non-zero on</a>
+<a name="1071"><span class="lineNum">    1071 </span>            :  * success and writes the string to the given bio. */</a>
+<a name="1072"><span class="lineNum">    1072 </span><span class="lineNoCov">          0 : static int dump_extn_value(BIO *bio, ASN1_OCTET_STRING *str)</span></a>
+<a name="1073"><span class="lineNum">    1073 </span>            : {</a>
+<a name="1074"><span class="lineNum">    1074 </span><span class="lineNoCov">          0 :     const unsigned char *pp = str-&gt;data;</span></a>
+<a name="1075"><span class="lineNum">    1075 </span><span class="lineNoCov">          0 :     ASN1_STRING *ret = ASN1_STRING_new();</span></a>
+<a name="1076"><span class="lineNum">    1076 </span><span class="lineNoCov">          0 :     int rv = 0;</span></a>
+<a name="1077"><span class="lineNum">    1077 </span>            : </a>
+<a name="1078"><span class="lineNum">    1078 </span>            :     /* This allows UTF8String, IA5String, VisibleString, or BMPString;</a>
+<a name="1079"><span class="lineNum">    1079 </span>            :      * conversion to UTF-8 is forced. */</a>
+<a name="1080"><span class="lineNum">    1080 </span><span class="lineNoCov">          0 :     if (d2i_DISPLAYTEXT(&amp;ret, &amp;pp, str-&gt;length)) {</span></a>
+<a name="1081"><span class="lineNum">    1081 </span><span class="lineNoCov">          0 :         ASN1_STRING_print_ex(bio, ret, ASN1_STRFLGS_UTF8_CONVERT);</span></a>
+<a name="1082"><span class="lineNum">    1082 </span><span class="lineNoCov">          0 :         rv = 1;</span></a>
+<a name="1083"><span class="lineNum">    1083 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1084"><span class="lineNum">    1084 </span>            : </a>
+<a name="1085"><span class="lineNum">    1085 </span><span class="lineNoCov">          0 :     ASN1_STRING_free(ret);</span></a>
+<a name="1086"><span class="lineNum">    1086 </span><span class="lineNoCov">          0 :     return rv;</span></a>
+<a name="1087"><span class="lineNum">    1087 </span>            : }</a>
+<a name="1088"><span class="lineNum">    1088 </span>            : </a>
+<a name="1089"><span class="lineNum">    1089 </span><span class="lineNoCov">          0 : apr_array_header_t *ssl_ext_list(apr_pool_t *p, conn_rec *c, int peer,</span></a>
+<a name="1090"><span class="lineNum">    1090 </span>            :                                  const char *extension)</a>
+<a name="1091"><span class="lineNum">    1091 </span>            : {</a>
+<a name="1092"><span class="lineNum">    1092 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = ssl_get_effective_config(c);</span></a>
+<a name="1093"><span class="lineNum">    1093 </span><span class="lineNoCov">          0 :     SSL *ssl = NULL;</span></a>
+<a name="1094"><span class="lineNum">    1094 </span><span class="lineNoCov">          0 :     apr_array_header_t *array = NULL;</span></a>
+<a name="1095"><span class="lineNum">    1095 </span><span class="lineNoCov">          0 :     X509 *xs = NULL;</span></a>
+<a name="1096"><span class="lineNum">    1096 </span><span class="lineNoCov">          0 :     ASN1_OBJECT *oid = NULL;</span></a>
+<a name="1097"><span class="lineNum">    1097 </span><span class="lineNoCov">          0 :     int count = 0, j;</span></a>
+<a name="1098"><span class="lineNum">    1098 </span>            : </a>
+<a name="1099"><span class="lineNum">    1099 </span><span class="lineNoCov">          0 :     if (!sslconn || !sslconn-&gt;ssl || !extension) {</span></a>
+<a name="1100"><span class="lineNum">    1100 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="1101"><span class="lineNum">    1101 </span>            :     }</a>
+<a name="1102"><span class="lineNum">    1102 </span><span class="lineNoCov">          0 :     ssl = sslconn-&gt;ssl;</span></a>
+<a name="1103"><span class="lineNum">    1103 </span>            : </a>
+<a name="1104"><span class="lineNum">    1104 </span>            :     /* We accept the &quot;extension&quot; string to be converted as</a>
+<a name="1105"><span class="lineNum">    1105 </span>            :      * a long name (nsComment), short name (DN) or</a>
+<a name="1106"><span class="lineNum">    1106 </span>            :      * numeric OID (1.2.3.4).</a>
+<a name="1107"><span class="lineNum">    1107 </span>            :      */</a>
+<a name="1108"><span class="lineNum">    1108 </span><span class="lineNoCov">          0 :     oid = OBJ_txt2obj(extension, 0);</span></a>
+<a name="1109"><span class="lineNum">    1109 </span><span class="lineNoCov">          0 :     if (!oid) {</span></a>
+<a name="1110"><span class="lineNum">    1110 </span><span class="lineNoCov">          0 :         ap_log_cerror(APLOG_MARK, APLOG_DEBUG, 0, c, APLOGNO(01970)</span></a>
+<a name="1111"><span class="lineNum">    1111 </span>            :                       &quot;could not parse OID '%s'&quot;, extension);</a>
+<a name="1112"><span class="lineNum">    1112 </span><span class="lineNoCov">          0 :         ERR_clear_error();</span></a>
+<a name="1113"><span class="lineNum">    1113 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="1114"><span class="lineNum">    1114 </span>            :     }</a>
+<a name="1115"><span class="lineNum">    1115 </span>            : </a>
+<a name="1116"><span class="lineNum">    1116 </span><span class="lineNoCov">          0 :     xs = peer ? SSL_get_peer_certificate(ssl) : SSL_get_certificate(ssl);</span></a>
+<a name="1117"><span class="lineNum">    1117 </span><span class="lineNoCov">          0 :     if (xs == NULL) {</span></a>
+<a name="1118"><span class="lineNum">    1118 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="1119"><span class="lineNum">    1119 </span>            :     }</a>
+<a name="1120"><span class="lineNum">    1120 </span>            : </a>
+<a name="1121"><span class="lineNum">    1121 </span><span class="lineNoCov">          0 :     count = X509_get_ext_count(xs);</span></a>
+<a name="1122"><span class="lineNum">    1122 </span>            :     /* Create an array large enough to accommodate every extension. This is</a>
+<a name="1123"><span class="lineNum">    1123 </span>            :      * likely overkill, but safe.</a>
+<a name="1124"><span class="lineNum">    1124 </span>            :      */</a>
+<a name="1125"><span class="lineNum">    1125 </span><span class="lineNoCov">          0 :     array = apr_array_make(p, count, sizeof(char *));</span></a>
+<a name="1126"><span class="lineNum">    1126 </span><span class="lineNoCov">          0 :     for (j = 0; j &lt; count; j++) {</span></a>
+<a name="1127"><span class="lineNum">    1127 </span><span class="lineNoCov">          0 :         X509_EXTENSION *ext = X509_get_ext(xs, j);</span></a>
+<a name="1128"><span class="lineNum">    1128 </span>            : </a>
+<a name="1129"><span class="lineNum">    1129 </span><span class="lineNoCov">          0 :         if (OBJ_cmp(X509_EXTENSION_get_object(ext), oid) == 0) {</span></a>
+<a name="1130"><span class="lineNum">    1130 </span><span class="lineNoCov">          0 :             BIO *bio = BIO_new(BIO_s_mem());</span></a>
+<a name="1131"><span class="lineNum">    1131 </span>            : </a>
+<a name="1132"><span class="lineNum">    1132 </span>            :             /* We want to obtain a string representation of the extensions</a>
+<a name="1133"><span class="lineNum">    1133 </span>            :              * value and add it to the array we're building.</a>
+<a name="1134"><span class="lineNum">    1134 </span>            :              * X509V3_EXT_print() doesn't know about all the possible</a>
+<a name="1135"><span class="lineNum">    1135 </span>            :              * data types, but the value is stored as an ASN1_OCTET_STRING</a>
+<a name="1136"><span class="lineNum">    1136 </span>            :              * allowing us a fallback in case of X509V3_EXT_print</a>
+<a name="1137"><span class="lineNum">    1137 </span>            :              * not knowing how to handle the data.</a>
+<a name="1138"><span class="lineNum">    1138 </span>            :              */</a>
+<a name="1139"><span class="lineNum">    1139 </span><span class="lineNoCov">          0 :             if (X509V3_EXT_print(bio, ext, 0, 0) == 1 ||</span></a>
+<a name="1140"><span class="lineNum">    1140 </span><span class="lineNoCov">          0 :                 dump_extn_value(bio, X509_EXTENSION_get_data(ext)) == 1) {</span></a>
+<a name="1141"><span class="lineNum">    1141 </span>            :                 BUF_MEM *buf;</a>
+<a name="1142"><span class="lineNum">    1142 </span><span class="lineNoCov">          0 :                 char **ptr = apr_array_push(array);</span></a>
+<a name="1143"><span class="lineNum">    1143 </span><span class="lineNoCov">          0 :                 BIO_get_mem_ptr(bio, &amp;buf);</span></a>
+<a name="1144"><span class="lineNum">    1144 </span><span class="lineNoCov">          0 :                 *ptr = apr_pstrmemdup(p, buf-&gt;data, buf-&gt;length);</span></a>
+<a name="1145"><span class="lineNum">    1145 </span><span class="lineNoCov">          0 :             } else {</span></a>
+<a name="1146"><span class="lineNum">    1146 </span><span class="lineNoCov">          0 :                 ap_log_cerror(APLOG_MARK, APLOG_DEBUG, 0, c, APLOGNO(01971)</span></a>
+<a name="1147"><span class="lineNum">    1147 </span>            :                               &quot;Found an extension '%s', but failed to &quot;</a>
+<a name="1148"><span class="lineNum">    1148 </span>            :                               &quot;create a string from it&quot;, extension);</a>
+<a name="1149"><span class="lineNum">    1149 </span>            :             }</a>
+<a name="1150"><span class="lineNum">    1150 </span><span class="lineNoCov">          0 :             BIO_vfree(bio);</span></a>
+<a name="1151"><span class="lineNum">    1151 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="1152"><span class="lineNum">    1152 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1153"><span class="lineNum">    1153 </span>            : </a>
+<a name="1154"><span class="lineNum">    1154 </span><span class="lineNoCov">          0 :     if (array-&gt;nelts == 0)</span></a>
+<a name="1155"><span class="lineNum">    1155 </span><span class="lineNoCov">          0 :         array = NULL;</span></a>
+<a name="1156"><span class="lineNum">    1156 </span>            : </a>
+<a name="1157"><span class="lineNum">    1157 </span><span class="lineNoCov">          0 :     if (peer) {</span></a>
+<a name="1158"><span class="lineNum">    1158 </span>            :         /* only SSL_get_peer_certificate raises the refcount */</a>
+<a name="1159"><span class="lineNum">    1159 </span><span class="lineNoCov">          0 :         X509_free(xs);</span></a>
+<a name="1160"><span class="lineNum">    1160 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1161"><span class="lineNum">    1161 </span>            : </a>
+<a name="1162"><span class="lineNum">    1162 </span><span class="lineNoCov">          0 :     ASN1_OBJECT_free(oid);</span></a>
+<a name="1163"><span class="lineNum">    1163 </span><span class="lineNoCov">          0 :     ERR_clear_error();</span></a>
+<a name="1164"><span class="lineNum">    1164 </span><span class="lineNoCov">          0 :     return array;</span></a>
+<a name="1165"><span class="lineNum">    1165 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="1166"><span class="lineNum">    1166 </span>            : </a>
+<a name="1167"><span class="lineNum">    1167 </span><span class="lineNoCov">          0 : static const char *ssl_var_lookup_ssl_compress_meth(SSL *ssl)</span></a>
+<a name="1168"><span class="lineNum">    1168 </span>            : {</a>
+<a name="1169"><span class="lineNum">    1169 </span><span class="lineNoCov">          0 :     const char *result = &quot;NULL&quot;;</span></a>
+<a name="1170"><span class="lineNum">    1170 </span>            : #ifndef OPENSSL_NO_COMP</a>
+<a name="1171"><span class="lineNum">    1171 </span><span class="lineNoCov">          0 :     SSL_SESSION *pSession = SSL_get_session(ssl);</span></a>
+<a name="1172"><span class="lineNum">    1172 </span>            : </a>
+<a name="1173"><span class="lineNum">    1173 </span><span class="lineNoCov">          0 :     if (pSession) {</span></a>
+<a name="1174"><span class="lineNum">    1174 </span>            : #ifdef OPENSSL_NO_SSL_INTERN</a>
+<a name="1175"><span class="lineNum">    1175 </span><span class="lineNoCov">          0 :         switch (SSL_SESSION_get_compress_id(pSession)) {</span></a>
+<a name="1176"><span class="lineNum">    1176 </span>            : #else</a>
+<a name="1177"><span class="lineNum">    1177 </span>            :         switch (pSession-&gt;compress_meth) {</a>
+<a name="1178"><span class="lineNum">    1178 </span>            : #endif</a>
+<a name="1179"><span class="lineNum">    1179 </span>            :         case 0:</a>
+<a name="1180"><span class="lineNum">    1180 </span>            :             /* default &quot;NULL&quot; already set */</a>
+<a name="1181"><span class="lineNum">    1181 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="1182"><span class="lineNum">    1182 </span>            : </a>
+<a name="1183"><span class="lineNum">    1183 </span>            :             /* Defined by RFC 3749, deflate is coded by &quot;1&quot; */</a>
+<a name="1184"><span class="lineNum">    1184 </span>            :         case 1:</a>
+<a name="1185"><span class="lineNum">    1185 </span><span class="lineNoCov">          0 :             result = &quot;DEFLATE&quot;;</span></a>
+<a name="1186"><span class="lineNum">    1186 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="1187"><span class="lineNum">    1187 </span>            : </a>
+<a name="1188"><span class="lineNum">    1188 </span>            :             /* IANA assigned compression number for LZS */</a>
+<a name="1189"><span class="lineNum">    1189 </span>            :         case 0x40:</a>
+<a name="1190"><span class="lineNum">    1190 </span><span class="lineNoCov">          0 :             result = &quot;LZS&quot;;</span></a>
+<a name="1191"><span class="lineNum">    1191 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="1192"><span class="lineNum">    1192 </span>            : </a>
+<a name="1193"><span class="lineNum">    1193 </span>            :         default:</a>
+<a name="1194"><span class="lineNum">    1194 </span><span class="lineNoCov">          0 :             result = &quot;UNKNOWN&quot;;</span></a>
+<a name="1195"><span class="lineNum">    1195 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="1196"><span class="lineNum">    1196 </span>            :         }</a>
+<a name="1197"><span class="lineNum">    1197 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1198"><span class="lineNum">    1198 </span>            : #endif</a>
+<a name="1199"><span class="lineNum">    1199 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="1200"><span class="lineNum">    1200 </span>            : }</a>
+<a name="1201"><span class="lineNum">    1201 </span>            : </a>
+<a name="1202"><span class="lineNum">    1202 </span>            : /*  _________________________________________________________________</a>
+<a name="1203"><span class="lineNum">    1203 </span>            : **</a>
+<a name="1204"><span class="lineNum">    1204 </span>            : **  SSL Extension to mod_log_config</a>
+<a name="1205"><span class="lineNum">    1205 </span>            : **  _________________________________________________________________</a>
+<a name="1206"><span class="lineNum">    1206 </span>            : */</a>
+<a name="1207"><span class="lineNum">    1207 </span>            : </a>
+<a name="1208"><span class="lineNum">    1208 </span>            : #include &quot;../../modules/loggers/mod_log_config.h&quot;</a>
+<a name="1209"><span class="lineNum">    1209 </span>            : </a>
+<a name="1210"><span class="lineNum">    1210 </span>            : static const char *ssl_var_log_handler_c(request_rec *r, char *a);</a>
+<a name="1211"><span class="lineNum">    1211 </span>            : static const char *ssl_var_log_handler_x(request_rec *r, char *a);</a>
+<a name="1212"><span class="lineNum">    1212 </span>            : </a>
+<a name="1213"><span class="lineNum">    1213 </span>            : /*</a>
+<a name="1214"><span class="lineNum">    1214 </span>            :  * register us for the mod_log_config function registering phase</a>
+<a name="1215"><span class="lineNum">    1215 </span>            :  * to establish %{...}c and to be able to expand %{...}x variables.</a>
+<a name="1216"><span class="lineNum">    1216 </span>            :  */</a>
+<a name="1217"><span class="lineNum">    1217 </span><span class="lineNoCov">          0 : void ssl_var_log_config_register(apr_pool_t *p)</span></a>
+<a name="1218"><span class="lineNum">    1218 </span>            : {</a>
+<a name="1219"><span class="lineNum">    1219 </span>            :     APR_OPTIONAL_FN_TYPE(ap_register_log_handler) *log_pfn_register;</a>
+<a name="1220"><span class="lineNum">    1220 </span>            : </a>
+<a name="1221"><span class="lineNum">    1221 </span><span class="lineNoCov">          0 :     log_pfn_register = APR_RETRIEVE_OPTIONAL_FN(ap_register_log_handler);</span></a>
+<a name="1222"><span class="lineNum">    1222 </span>            : </a>
+<a name="1223"><span class="lineNum">    1223 </span><span class="lineNoCov">          0 :     if (log_pfn_register) {</span></a>
+<a name="1224"><span class="lineNum">    1224 </span><span class="lineNoCov">          0 :         log_pfn_register(p, &quot;c&quot;, ssl_var_log_handler_c, 0);</span></a>
+<a name="1225"><span class="lineNum">    1225 </span><span class="lineNoCov">          0 :         log_pfn_register(p, &quot;x&quot;, ssl_var_log_handler_x, 0);</span></a>
+<a name="1226"><span class="lineNum">    1226 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="1227"><span class="lineNum">    1227 </span><span class="lineNoCov">          0 :     return;</span></a>
+<a name="1228"><span class="lineNum">    1228 </span>            : }</a>
+<a name="1229"><span class="lineNum">    1229 </span>            : </a>
+<a name="1230"><span class="lineNum">    1230 </span>            : /*</a>
+<a name="1231"><span class="lineNum">    1231 </span>            :  * implement the %{..}c log function</a>
+<a name="1232"><span class="lineNum">    1232 </span>            :  * (we are the only function)</a>
+<a name="1233"><span class="lineNum">    1233 </span>            :  */</a>
+<a name="1234"><span class="lineNum">    1234 </span><span class="lineNoCov">          0 : static const char *ssl_var_log_handler_c(request_rec *r, char *a)</span></a>
+<a name="1235"><span class="lineNum">    1235 </span>            : {</a>
+<a name="1236"><span class="lineNum">    1236 </span><span class="lineNoCov">          0 :     const SSLConnRec *sslconn = ssl_get_effective_config(r-&gt;connection);</span></a>
+<a name="1237"><span class="lineNum">    1237 </span>            :     const char *result;</a>
+<a name="1238"><span class="lineNum">    1238 </span>            : </a>
+<a name="1239"><span class="lineNum">    1239 </span><span class="lineNoCov">          0 :     if (sslconn == NULL || sslconn-&gt;ssl == NULL)</span></a>
+<a name="1240"><span class="lineNum">    1240 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="1241"><span class="lineNum">    1241 </span><span class="lineNoCov">          0 :     result = NULL;</span></a>
+<a name="1242"><span class="lineNum">    1242 </span><span class="lineNoCov">          0 :     if (strEQ(a, &quot;version&quot;))</span></a>
+<a name="1243"><span class="lineNum">    1243 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup(r-&gt;pool, r-&gt;server, r-&gt;connection, r, &quot;SSL_PROTOCOL&quot;);</span></a>
+<a name="1244"><span class="lineNum">    1244 </span><span class="lineNoCov">          0 :     else if (strEQ(a, &quot;cipher&quot;))</span></a>
+<a name="1245"><span class="lineNum">    1245 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup(r-&gt;pool, r-&gt;server, r-&gt;connection, r, &quot;SSL_CIPHER&quot;);</span></a>
+<a name="1246"><span class="lineNum">    1246 </span><span class="lineNoCov">          0 :     else if (strEQ(a, &quot;subjectdn&quot;) || strEQ(a, &quot;clientcert&quot;))</span></a>
+<a name="1247"><span class="lineNum">    1247 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup(r-&gt;pool, r-&gt;server, r-&gt;connection, r, &quot;SSL_CLIENT_S_DN&quot;);</span></a>
+<a name="1248"><span class="lineNum">    1248 </span><span class="lineNoCov">          0 :     else if (strEQ(a, &quot;issuerdn&quot;) || strEQ(a, &quot;cacert&quot;))</span></a>
+<a name="1249"><span class="lineNum">    1249 </span><span class="lineNoCov">          0 :         result = ssl_var_lookup(r-&gt;pool, r-&gt;server, r-&gt;connection, r, &quot;SSL_CLIENT_I_DN&quot;);</span></a>
+<a name="1250"><span class="lineNum">    1250 </span><span class="lineNoCov">          0 :     else if (strEQ(a, &quot;errcode&quot;))</span></a>
+<a name="1251"><span class="lineNum">    1251 </span><span class="lineNoCov">          0 :         result = &quot;-&quot;;</span></a>
+<a name="1252"><span class="lineNum">    1252 </span><span class="lineNoCov">          0 :     else if (strEQ(a, &quot;errstr&quot;))</span></a>
+<a name="1253"><span class="lineNum">    1253 </span><span class="lineNoCov">          0 :         result = sslconn-&gt;verify_error;</span></a>
+<a name="1254"><span class="lineNum">    1254 </span><span class="lineNoCov">          0 :     if (result != NULL &amp;&amp; result[0] == NUL)</span></a>
+<a name="1255"><span class="lineNum">    1255 </span><span class="lineNoCov">          0 :         result = NULL;</span></a>
+<a name="1256"><span class="lineNum">    1256 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="1257"><span class="lineNum">    1257 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="1258"><span class="lineNum">    1258 </span>            : </a>
+<a name="1259"><span class="lineNum">    1259 </span>            : /*</a>
+<a name="1260"><span class="lineNum">    1260 </span>            :  * extend the implementation of the %{..}x log function</a>
+<a name="1261"><span class="lineNum">    1261 </span>            :  * (there can be more functions)</a>
+<a name="1262"><span class="lineNum">    1262 </span>            :  */</a>
+<a name="1263"><span class="lineNum">    1263 </span><span class="lineNoCov">          0 : static const char *ssl_var_log_handler_x(request_rec *r, char *a)</span></a>
+<a name="1264"><span class="lineNum">    1264 </span>            : {</a>
+<a name="1265"><span class="lineNum">    1265 </span>            :     const char *result;</a>
+<a name="1266"><span class="lineNum">    1266 </span>            : </a>
+<a name="1267"><span class="lineNum">    1267 </span><span class="lineNoCov">          0 :     result = ssl_var_lookup(r-&gt;pool, r-&gt;server, r-&gt;connection, r, a);</span></a>
+<a name="1268"><span class="lineNum">    1268 </span><span class="lineNoCov">          0 :     if (result != NULL &amp;&amp; result[0] == NUL)</span></a>
+<a name="1269"><span class="lineNum">    1269 </span><span class="lineNoCov">          0 :         result = NULL;</span></a>
+<a name="1270"><span class="lineNum">    1270 </span><span class="lineNoCov">          0 :     return result;</span></a>
+<a name="1271"><span class="lineNum">    1271 </span>            : }</a>
+<a name="1272"><span class="lineNum">    1272 </span>            : </a>
+<a name="1273"><span class="lineNum">    1273 </span>            : </a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
