@@ -1,0 +1,519 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - better_coverage.lcov_info_final - include/apreq_util.h</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">include</a> - apreq_util.h<span style="font-size: 80%;"> (source / <a href="apreq_util.h.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">better_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">30</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 18:12:53</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /*</a>
+<a name="2"><span class="lineNum">       2 </span>            : **  Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="3"><span class="lineNum">       3 </span>            : ** contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="4"><span class="lineNum">       4 </span>            : ** this work for additional information regarding copyright ownership.</a>
+<a name="5"><span class="lineNum">       5 </span>            : ** The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="6"><span class="lineNum">       6 </span>            : ** (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="7"><span class="lineNum">       7 </span>            : ** the License.  You may obtain a copy of the License at</a>
+<a name="8"><span class="lineNum">       8 </span>            : **</a>
+<a name="9"><span class="lineNum">       9 </span>            : **      http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="10"><span class="lineNum">      10 </span>            : **</a>
+<a name="11"><span class="lineNum">      11 </span>            : **  Unless required by applicable law or agreed to in writing, software</a>
+<a name="12"><span class="lineNum">      12 </span>            : **  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="13"><span class="lineNum">      13 </span>            : **  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="14"><span class="lineNum">      14 </span>            : **  See the License for the specific language governing permissions and</a>
+<a name="15"><span class="lineNum">      15 </span>            : **  limitations under the License.</a>
+<a name="16"><span class="lineNum">      16 </span>            : */</a>
+<a name="17"><span class="lineNum">      17 </span>            : </a>
+<a name="18"><span class="lineNum">      18 </span>            : #ifndef APREQ_UTIL_H</a>
+<a name="19"><span class="lineNum">      19 </span>            : #define APREQ_UTIL_H</a>
+<a name="20"><span class="lineNum">      20 </span>            : </a>
+<a name="21"><span class="lineNum">      21 </span>            : #include &quot;apr_file_io.h&quot;</a>
+<a name="22"><span class="lineNum">      22 </span>            : #include &quot;apr_buckets.h&quot;</a>
+<a name="23"><span class="lineNum">      23 </span>            : #include &quot;apreq.h&quot;</a>
+<a name="24"><span class="lineNum">      24 </span>            : </a>
+<a name="25"><span class="lineNum">      25 </span>            : #ifdef  __cplusplus</a>
+<a name="26"><span class="lineNum">      26 </span>            :  extern &quot;C&quot; {</a>
+<a name="27"><span class="lineNum">      27 </span>            : #endif</a>
+<a name="28"><span class="lineNum">      28 </span>            : </a>
+<a name="29"><span class="lineNum">      29 </span>            : /**</a>
+<a name="30"><span class="lineNum">      30 </span>            :  * This header contains useful functions for creating new</a>
+<a name="31"><span class="lineNum">      31 </span>            :  * parsers, hooks or modules.  It includes</a>
+<a name="32"><span class="lineNum">      32 </span>            :  *</a>
+<a name="33"><span class="lineNum">      33 </span>            :  *    - string &lt;-&gt; array converters</a>
+<a name="34"><span class="lineNum">      34 </span>            :  *    - substring search functions</a>
+<a name="35"><span class="lineNum">      35 </span>            :  *    - simple encoders &amp; decoders for urlencoded strings</a>
+<a name="36"><span class="lineNum">      36 </span>            :  *    - simple time, date, &amp; file-size converters</a>
+<a name="37"><span class="lineNum">      37 </span>            :  * @file apreq_util.h</a>
+<a name="38"><span class="lineNum">      38 </span>            :  * @brief Utility functions for apreq.</a>
+<a name="39"><span class="lineNum">      39 </span>            :  * @ingroup libapreq2</a>
+<a name="40"><span class="lineNum">      40 </span>            :  */</a>
+<a name="41"><span class="lineNum">      41 </span>            : </a>
+<a name="42"><span class="lineNum">      42 </span>            : /**</a>
+<a name="43"><span class="lineNum">      43 </span>            :  * Join an array of values. The result is an empty string if there are</a>
+<a name="44"><span class="lineNum">      44 </span>            :  * no values.</a>
+<a name="45"><span class="lineNum">      45 </span>            :  *</a>
+<a name="46"><span class="lineNum">      46 </span>            :  * @param p    Pool to allocate return value.</a>
+<a name="47"><span class="lineNum">      47 </span>            :  * @param sep  String that is inserted between the joined values.</a>
+<a name="48"><span class="lineNum">      48 </span>            :  * @param arr  Array of apreq_value_t entries.</a>
+<a name="49"><span class="lineNum">      49 </span>            :  * @param mode Join type- see apreq_join_t.</a>
+<a name="50"><span class="lineNum">      50 </span>            :  *</a>
+<a name="51"><span class="lineNum">      51 </span>            :  * @return Joined string, or NULL on error</a>
+<a name="52"><span class="lineNum">      52 </span>            :  */</a>
+<a name="53"><span class="lineNum">      53 </span>            : APREQ_DECLARE(char *) apreq_join(apr_pool_t *p,</a>
+<a name="54"><span class="lineNum">      54 </span>            :                                  const char *sep,</a>
+<a name="55"><span class="lineNum">      55 </span>            :                                  const apr_array_header_t *arr,</a>
+<a name="56"><span class="lineNum">      56 </span>            :                                  apreq_join_t mode);</a>
+<a name="57"><span class="lineNum">      57 </span>            : </a>
+<a name="58"><span class="lineNum">      58 </span>            : /**</a>
+<a name="59"><span class="lineNum">      59 </span>            :  * Returns offset of match string's location, or -1 if no match is found.</a>
+<a name="60"><span class="lineNum">      60 </span>            :  *</a>
+<a name="61"><span class="lineNum">      61 </span>            :  * @param hay  Location of bytes to scan.</a>
+<a name="62"><span class="lineNum">      62 </span>            :  * @param hlen Number of bytes available for scanning.</a>
+<a name="63"><span class="lineNum">      63 </span>            :  * @param ndl  Search string</a>
+<a name="64"><span class="lineNum">      64 </span>            :  * @param nlen Length of search string.</a>
+<a name="65"><span class="lineNum">      65 </span>            :  * @param type Match type.</a>
+<a name="66"><span class="lineNum">      66 </span>            :  *</a>
+<a name="67"><span class="lineNum">      67 </span>            :  * @return Offset of match string, or -1 if no match is found.</a>
+<a name="68"><span class="lineNum">      68 </span>            :  *</a>
+<a name="69"><span class="lineNum">      69 </span>            :  */</a>
+<a name="70"><span class="lineNum">      70 </span>            : APREQ_DECLARE(apr_ssize_t) apreq_index(const char* hay, apr_size_t hlen,</a>
+<a name="71"><span class="lineNum">      71 </span>            :                                        const char* ndl, apr_size_t nlen,</a>
+<a name="72"><span class="lineNum">      72 </span>            :                                        const apreq_match_t type);</a>
+<a name="73"><span class="lineNum">      73 </span>            : </a>
+<a name="74"><span class="lineNum">      74 </span>            : /**</a>
+<a name="75"><span class="lineNum">      75 </span>            :  * Places a quoted copy of src into dest.  Embedded quotes are escaped with a</a>
+<a name="76"><span class="lineNum">      76 </span>            :  * backslash ('\').</a>
+<a name="77"><span class="lineNum">      77 </span>            :  *</a>
+<a name="78"><span class="lineNum">      78 </span>            :  * @param dest Location of quoted copy.  Must be large enough to hold the copy</a>
+<a name="79"><span class="lineNum">      79 </span>            :  *             and trailing null byte.</a>
+<a name="80"><span class="lineNum">      80 </span>            :  * @param src  Original string.</a>
+<a name="81"><span class="lineNum">      81 </span>            :  * @param slen Length of original string.</a>
+<a name="82"><span class="lineNum">      82 </span>            :  * @param dest Destination string.</a>
+<a name="83"><span class="lineNum">      83 </span>            :  *</a>
+<a name="84"><span class="lineNum">      84 </span>            :  * @return length of quoted copy in dest.</a>
+<a name="85"><span class="lineNum">      85 </span>            :  */</a>
+<a name="86"><span class="lineNum">      86 </span>            : APREQ_DECLARE(apr_size_t) apreq_quote(char *dest, const char *src,</a>
+<a name="87"><span class="lineNum">      87 </span>            :                                       const apr_size_t slen);</a>
+<a name="88"><span class="lineNum">      88 </span>            : </a>
+<a name="89"><span class="lineNum">      89 </span>            : /**</a>
+<a name="90"><span class="lineNum">      90 </span>            :  *</a>
+<a name="91"><span class="lineNum">      91 </span>            :  * Same as apreq_quote() except when src begins and ends in quote marks. In</a>
+<a name="92"><span class="lineNum">      92 </span>            :  * that case it assumes src is quoted correctly, and just copies src to dest.</a>
+<a name="93"><span class="lineNum">      93 </span>            :  *</a>
+<a name="94"><span class="lineNum">      94 </span>            :  * @param dest Location of quoted copy.  Must be large enough to hold the copy</a>
+<a name="95"><span class="lineNum">      95 </span>            :  *             and trailing null byte.</a>
+<a name="96"><span class="lineNum">      96 </span>            :  * @param src  Original string.</a>
+<a name="97"><span class="lineNum">      97 </span>            :  * @param slen Length of original string.</a>
+<a name="98"><span class="lineNum">      98 </span>            :  * @param dest Destination string.</a>
+<a name="99"><span class="lineNum">      99 </span>            :  *</a>
+<a name="100"><span class="lineNum">     100 </span>            :  * @return length of quoted copy in dest.</a>
+<a name="101"><span class="lineNum">     101 </span>            :  */</a>
+<a name="102"><span class="lineNum">     102 </span>            : APREQ_DECLARE(apr_size_t) apreq_quote_once(char *dest, const char *src,</a>
+<a name="103"><span class="lineNum">     103 </span>            :                                            const apr_size_t slen);</a>
+<a name="104"><span class="lineNum">     104 </span>            : </a>
+<a name="105"><span class="lineNum">     105 </span>            : /**</a>
+<a name="106"><span class="lineNum">     106 </span>            :  * Url-encodes a string.</a>
+<a name="107"><span class="lineNum">     107 </span>            :  *</a>
+<a name="108"><span class="lineNum">     108 </span>            :  * @param dest Location of url-encoded result string. Caller must ensure it</a>
+<a name="109"><span class="lineNum">     109 </span>            :  *             is large enough to hold the encoded string and trailing '\\0'.</a>
+<a name="110"><span class="lineNum">     110 </span>            :  * @param src  Original string.</a>
+<a name="111"><span class="lineNum">     111 </span>            :  * @param slen Length of original string.</a>
+<a name="112"><span class="lineNum">     112 </span>            :  *</a>
+<a name="113"><span class="lineNum">     113 </span>            :  * @return length of url-encoded string in dest; does not exceed 3 * slen.</a>
+<a name="114"><span class="lineNum">     114 </span>            :  */</a>
+<a name="115"><span class="lineNum">     115 </span>            : APREQ_DECLARE(apr_size_t) apreq_encode(char *dest, const char *src,</a>
+<a name="116"><span class="lineNum">     116 </span>            :                                        const apr_size_t slen);</a>
+<a name="117"><span class="lineNum">     117 </span>            : </a>
+<a name="118"><span class="lineNum">     118 </span>            : /**</a>
+<a name="119"><span class="lineNum">     119 </span>            :  * Convert a string from cp1252 to utf8.  Caller must ensure it is large enough</a>
+<a name="120"><span class="lineNum">     120 </span>            :  * to hold the encoded string and trailing '\\0'.</a>
+<a name="121"><span class="lineNum">     121 </span>            :  *</a>
+<a name="122"><span class="lineNum">     122 </span>            :  * @param dest Location of utf8-encoded result string. Caller must ensure it</a>
+<a name="123"><span class="lineNum">     123 </span>            :  *             is large enough to hold the encoded string and trailing '\\0'.</a>
+<a name="124"><span class="lineNum">     124 </span>            :  * @param src  Original string.</a>
+<a name="125"><span class="lineNum">     125 </span>            :  * @param slen Length of original string.</a>
+<a name="126"><span class="lineNum">     126 </span>            :  *</a>
+<a name="127"><span class="lineNum">     127 </span>            :  * @return length of utf8-encoded string in dest; does not exceed 3 * slen.</a>
+<a name="128"><span class="lineNum">     128 </span>            :  */</a>
+<a name="129"><span class="lineNum">     129 </span>            : APREQ_DECLARE(apr_size_t) apreq_cp1252_to_utf8(char *dest,</a>
+<a name="130"><span class="lineNum">     130 </span>            :                                                const char *src, apr_size_t slen);</a>
+<a name="131"><span class="lineNum">     131 </span>            : </a>
+<a name="132"><span class="lineNum">     132 </span>            : /**</a>
+<a name="133"><span class="lineNum">     133 </span>            :  * Heuristically determine the charset of a string.</a>
+<a name="134"><span class="lineNum">     134 </span>            :  *</a>
+<a name="135"><span class="lineNum">     135 </span>            :  * @param src  String to scan.</a>
+<a name="136"><span class="lineNum">     136 </span>            :  * @param slen Length of string.</a>
+<a name="137"><span class="lineNum">     137 </span>            :  *</a>
+<a name="138"><span class="lineNum">     138 </span>            :  * @return APREQ_CHARSET_ASCII  if the string contains only 7-bit chars;</a>
+<a name="139"><span class="lineNum">     139 </span>            :  * @return APREQ_CHARSET_UTF8   if the string is a valid utf8 byte sequence;</a>
+<a name="140"><span class="lineNum">     140 </span>            :  * @return APREQ_CHARSET_LATIN1 if the string has no control chars;</a>
+<a name="141"><span class="lineNum">     141 </span>            :  * @return APREQ_CHARSET_CP1252 if the string has control chars.</a>
+<a name="142"><span class="lineNum">     142 </span>            :  */</a>
+<a name="143"><span class="lineNum">     143 </span>            : APREQ_DECLARE(apreq_charset_t) apreq_charset_divine(const char *src,</a>
+<a name="144"><span class="lineNum">     144 </span>            :                                                     apr_size_t slen);</a>
+<a name="145"><span class="lineNum">     145 </span>            : </a>
+<a name="146"><span class="lineNum">     146 </span>            : /**</a>
+<a name="147"><span class="lineNum">     147 </span>            :  * Url-decodes a string.</a>
+<a name="148"><span class="lineNum">     148 </span>            :  *</a>
+<a name="149"><span class="lineNum">     149 </span>            :  * @param dest Location of url-encoded result string. Caller must ensure dest is</a>
+<a name="150"><span class="lineNum">     150 </span>            :  *             large enough to hold the encoded string and trailing null character.</a>
+<a name="151"><span class="lineNum">     151 </span>            :  * @param dlen points to resultant length of url-decoded string in dest</a>
+<a name="152"><span class="lineNum">     152 </span>            :  * @param src  Original string.</a>
+<a name="153"><span class="lineNum">     153 </span>            :  * @param slen Length of original string.</a>
+<a name="154"><span class="lineNum">     154 </span>            :  *</a>
+<a name="155"><span class="lineNum">     155 </span>            :  * @return APR_SUCCESS.</a>
+<a name="156"><span class="lineNum">     156 </span>            :  * @return APR_INCOMPLETE if the string</a>
+<a name="157"><span class="lineNum">     157 </span>            :  *                        ends in the middle of an escape sequence.</a>
+<a name="158"><span class="lineNum">     158 </span>            :  * @return ::APREQ_ERROR_BADSEQ or ::APREQ_ERROR_BADCHAR on malformed input.</a>
+<a name="159"><span class="lineNum">     159 </span>            :  *</a>
+<a name="160"><span class="lineNum">     160 </span>            :  * @remarks In the non-success case, dlen will be set to include</a>
+<a name="161"><span class="lineNum">     161 </span>            :  *          the last successfully decoded value.  This function decodes</a>
+<a name="162"><span class="lineNum">     162 </span>            :  *          \%uXXXX into a utf8 (wide) character, following ECMA-262</a>
+<a name="163"><span class="lineNum">     163 </span>            :  *          (the Javascript spec) Section B.2.1.</a>
+<a name="164"><span class="lineNum">     164 </span>            :  */</a>
+<a name="165"><span class="lineNum">     165 </span>            : </a>
+<a name="166"><span class="lineNum">     166 </span>            : APREQ_DECLARE(apr_status_t) apreq_decode(char *dest, apr_size_t *dlen,</a>
+<a name="167"><span class="lineNum">     167 </span>            :                                          const char *src, apr_size_t slen);</a>
+<a name="168"><span class="lineNum">     168 </span>            : </a>
+<a name="169"><span class="lineNum">     169 </span>            : /**</a>
+<a name="170"><span class="lineNum">     170 </span>            :  * Url-decodes an iovec array.</a>
+<a name="171"><span class="lineNum">     171 </span>            :  *</a>
+<a name="172"><span class="lineNum">     172 </span>            :  * @param dest  Location of url-encoded result string. Caller must ensure dest is</a>
+<a name="173"><span class="lineNum">     173 </span>            :  *              large enough to hold the encoded string and trailing null character.</a>
+<a name="174"><span class="lineNum">     174 </span>            :  * @param dlen  Resultant length of dest.</a>
+<a name="175"><span class="lineNum">     175 </span>            :  * @param v     Array of iovecs that represent the source string</a>
+<a name="176"><span class="lineNum">     176 </span>            :  * @param nelts Number of iovecs in the array.</a>
+<a name="177"><span class="lineNum">     177 </span>            :  *</a>
+<a name="178"><span class="lineNum">     178 </span>            :  * @return APR_SUCCESS.</a>
+<a name="179"><span class="lineNum">     179 </span>            :  * @return APR_INCOMPLETE if the iovec</a>
+<a name="180"><span class="lineNum">     180 </span>            :  *                        ends in the middle of an escape sequence.</a>
+<a name="181"><span class="lineNum">     181 </span>            :  * @return ::APREQ_ERROR_BADSEQ or ::APREQ_ERROR_BADCHAR on malformed input.</a>
+<a name="182"><span class="lineNum">     182 </span>            :  *</a>
+<a name="183"><span class="lineNum">     183 </span>            :  * @remarks In the non-APR_SUCCESS case, dlen will be set to include</a>
+<a name="184"><span class="lineNum">     184 </span>            :  *          the last successfully decoded value.  This function decodes</a>
+<a name="185"><span class="lineNum">     185 </span>            :  *          \%uXXXX into a utf8 (wide) character, following ECMA-262</a>
+<a name="186"><span class="lineNum">     186 </span>            :  *          (the Javascript spec) Section B.2.1.</a>
+<a name="187"><span class="lineNum">     187 </span>            :  */</a>
+<a name="188"><span class="lineNum">     188 </span>            : </a>
+<a name="189"><span class="lineNum">     189 </span>            : APREQ_DECLARE(apr_status_t) apreq_decodev(char *dest, apr_size_t *dlen,</a>
+<a name="190"><span class="lineNum">     190 </span>            :                                           struct iovec *v, int nelts);</a>
+<a name="191"><span class="lineNum">     191 </span>            : </a>
+<a name="192"><span class="lineNum">     192 </span>            : /**</a>
+<a name="193"><span class="lineNum">     193 </span>            :  * Returns an url-encoded copy of a string.</a>
+<a name="194"><span class="lineNum">     194 </span>            :  *</a>
+<a name="195"><span class="lineNum">     195 </span>            :  * @param p    Pool used to allocate the return value.</a>
+<a name="196"><span class="lineNum">     196 </span>            :  * @param src  Original string.</a>
+<a name="197"><span class="lineNum">     197 </span>            :  * @param slen Length of original string.</a>
+<a name="198"><span class="lineNum">     198 </span>            :  *</a>
+<a name="199"><span class="lineNum">     199 </span>            :  * @return The url-encoded string.</a>
+<a name="200"><span class="lineNum">     200 </span>            :  *</a>
+<a name="201"><span class="lineNum">     201 </span>            :  * @remarks Use this function insead of apreq_encode if its</a>
+<a name="202"><span class="lineNum">     202 </span>            :  *          caller might otherwise overflow dest.</a>
+<a name="203"><span class="lineNum">     203 </span>            :  */</a>
+<a name="204"><span class="lineNum">     204 </span>            : static APR_INLINE</a>
+<a name="205"><span class="lineNum">     205 </span>            : char *apreq_escape(apr_pool_t *p, const char *src, const apr_size_t slen)</a>
+<a name="206"><span class="lineNum">     206 </span>            : {</a>
+<a name="207"><span class="lineNum">     207 </span>            :     char *rv;</a>
+<a name="208"><span class="lineNum">     208 </span>            : </a>
+<a name="209"><span class="lineNum">     209 </span>            :     if (src == NULL)</a>
+<a name="210"><span class="lineNum">     210 </span>            :         return NULL;</a>
+<a name="211"><span class="lineNum">     211 </span>            : </a>
+<a name="212"><span class="lineNum">     212 </span>            :     rv = (char *)apr_palloc(p, 3 * slen + 1);</a>
+<a name="213"><span class="lineNum">     213 </span>            :     apreq_encode(rv, src, slen);</a>
+<a name="214"><span class="lineNum">     214 </span>            :     return rv;</a>
+<a name="215"><span class="lineNum">     215 </span>            : }</a>
+<a name="216"><span class="lineNum">     216 </span>            : </a>
+<a name="217"><span class="lineNum">     217 </span>            : /**</a>
+<a name="218"><span class="lineNum">     218 </span>            :  * An \e in-situ url-decoder.</a>
+<a name="219"><span class="lineNum">     219 </span>            :  *</a>
+<a name="220"><span class="lineNum">     220 </span>            :  * @param str  The string to decode</a>
+<a name="221"><span class="lineNum">     221 </span>            :  *</a>
+<a name="222"><span class="lineNum">     222 </span>            :  * @return  Length of decoded string, or &lt; 0 on error.</a>
+<a name="223"><span class="lineNum">     223 </span>            :  */</a>
+<a name="224"><span class="lineNum">     224 </span>            : static APR_INLINE apr_ssize_t apreq_unescape(char *str)</a>
+<a name="225"><span class="lineNum">     225 </span>            : {</a>
+<a name="226"><span class="lineNum">     226 </span>            :     apr_size_t len;</a>
+<a name="227"><span class="lineNum">     227 </span>            :     apr_status_t rv = apreq_decode(str, &amp;len, str, strlen(str));</a>
+<a name="228"><span class="lineNum">     228 </span>            :     if (rv == APR_SUCCESS)</a>
+<a name="229"><span class="lineNum">     229 </span>            :         return (apr_ssize_t)len;</a>
+<a name="230"><span class="lineNum">     230 </span>            :     else</a>
+<a name="231"><span class="lineNum">     231 </span>            :         return -1;</a>
+<a name="232"><span class="lineNum">     232 </span>            : }</a>
+<a name="233"><span class="lineNum">     233 </span>            : </a>
+<a name="234"><span class="lineNum">     234 </span>            : /**</a>
+<a name="235"><span class="lineNum">     235 </span>            :  * Converts file sizes (KMG) to bytes</a>
+<a name="236"><span class="lineNum">     236 </span>            :  *</a>
+<a name="237"><span class="lineNum">     237 </span>            :  * @param s  file size matching m/^\\d+[KMG]b?$/i</a>
+<a name="238"><span class="lineNum">     238 </span>            :  *</a>
+<a name="239"><span class="lineNum">     239 </span>            :  * @return 64-bit integer representation of s.</a>
+<a name="240"><span class="lineNum">     240 </span>            :  *</a>
+<a name="241"><span class="lineNum">     241 </span>            :  * @todo What happens when s is malformed?  Should this return</a>
+<a name="242"><span class="lineNum">     242 </span>            :  *       an unsigned value instead?</a>
+<a name="243"><span class="lineNum">     243 </span>            :  */</a>
+<a name="244"><span class="lineNum">     244 </span>            : </a>
+<a name="245"><span class="lineNum">     245 </span>            : APREQ_DECLARE(apr_int64_t) apreq_atoi64f(const char *s);</a>
+<a name="246"><span class="lineNum">     246 </span>            : </a>
+<a name="247"><span class="lineNum">     247 </span>            : /**</a>
+<a name="248"><span class="lineNum">     248 </span>            :  * Converts time strings (YMDhms) to seconds</a>
+<a name="249"><span class="lineNum">     249 </span>            :  *</a>
+<a name="250"><span class="lineNum">     250 </span>            :  * @param s time string matching m/^\\+?\\d+[YMDhms]$/</a>
+<a name="251"><span class="lineNum">     251 </span>            :  *</a>
+<a name="252"><span class="lineNum">     252 </span>            :  * @return 64-bit integer representation of s as seconds.</a>
+<a name="253"><span class="lineNum">     253 </span>            :  *</a>
+<a name="254"><span class="lineNum">     254 </span>            :  * @todo What happens when s is malformed?  Should this return</a>
+<a name="255"><span class="lineNum">     255 </span>            :  *       an unsigned value instead?</a>
+<a name="256"><span class="lineNum">     256 </span>            :  */</a>
+<a name="257"><span class="lineNum">     257 </span>            : </a>
+<a name="258"><span class="lineNum">     258 </span>            : APREQ_DECLARE(apr_int64_t) apreq_atoi64t(const char *s);</a>
+<a name="259"><span class="lineNum">     259 </span>            : </a>
+<a name="260"><span class="lineNum">     260 </span>            : /**</a>
+<a name="261"><span class="lineNum">     261 </span>            :  * Writes brigade to a file.</a>
+<a name="262"><span class="lineNum">     262 </span>            :  *</a>
+<a name="263"><span class="lineNum">     263 </span>            :  * @param f       File that gets the brigade.</a>
+<a name="264"><span class="lineNum">     264 </span>            :  * @param wlen    On a successful return, wlen holds the length of</a>
+<a name="265"><span class="lineNum">     265 </span>            :  *                the brigade, which is the amount of data written to</a>
+<a name="266"><span class="lineNum">     266 </span>            :  *                the file.</a>
+<a name="267"><span class="lineNum">     267 </span>            :  * @param bb      Bucket brigade.</a>
+<a name="268"><span class="lineNum">     268 </span>            :  *</a>
+<a name="269"><span class="lineNum">     269 </span>            :  * @return APR_SUCCESS.</a>
+<a name="270"><span class="lineNum">     270 </span>            :  * @return Error status code from either an unsuccessful apr_bucket_read(),</a>
+<a name="271"><span class="lineNum">     271 </span>            :  *         or a failed apr_file_writev().</a>
+<a name="272"><span class="lineNum">     272 </span>            :  *</a>
+<a name="273"><span class="lineNum">     273 </span>            :  * @remarks       This function leaks a bucket brigade into bb-&gt;p whenever</a>
+<a name="274"><span class="lineNum">     274 </span>            :  *                the final bucket in bb is a spool bucket.</a>
+<a name="275"><span class="lineNum">     275 </span>            :  */</a>
+<a name="276"><span class="lineNum">     276 </span>            : </a>
+<a name="277"><span class="lineNum">     277 </span>            : APREQ_DECLARE(apr_status_t) apreq_brigade_fwrite(apr_file_t *f,</a>
+<a name="278"><span class="lineNum">     278 </span>            :                                                  apr_off_t *wlen,</a>
+<a name="279"><span class="lineNum">     279 </span>            :                                                  apr_bucket_brigade *bb);</a>
+<a name="280"><span class="lineNum">     280 </span>            : /**</a>
+<a name="281"><span class="lineNum">     281 </span>            :  * Makes a temporary file.</a>
+<a name="282"><span class="lineNum">     282 </span>            :  *</a>
+<a name="283"><span class="lineNum">     283 </span>            :  * @param fp    Points to the temporary apr_file_t on success.</a>
+<a name="284"><span class="lineNum">     284 </span>            :  * @param pool  Pool to associate with the temp file.  When the</a>
+<a name="285"><span class="lineNum">     285 </span>            :  *              pool is destroyed, the temp file will be closed</a>
+<a name="286"><span class="lineNum">     286 </span>            :  *              and deleted.</a>
+<a name="287"><span class="lineNum">     287 </span>            :  * @param path  The base directory which will contain the temp file.</a>
+<a name="288"><span class="lineNum">     288 </span>            :  *              If param == NULL, the directory will be selected via</a>
+<a name="289"><span class="lineNum">     289 </span>            :  *              tempnam().  See the tempnam manpage for details.</a>
+<a name="290"><span class="lineNum">     290 </span>            :  *</a>
+<a name="291"><span class="lineNum">     291 </span>            :  * @return APR_SUCCESS.</a>
+<a name="292"><span class="lineNum">     292 </span>            :  * @return Error status code from unsuccessful apr_filepath_merge(),</a>
+<a name="293"><span class="lineNum">     293 </span>            :  *         or a failed apr_file_mktemp().</a>
+<a name="294"><span class="lineNum">     294 </span>            :  */</a>
+<a name="295"><span class="lineNum">     295 </span>            : </a>
+<a name="296"><span class="lineNum">     296 </span>            : APREQ_DECLARE(apr_status_t) apreq_file_mktemp(apr_file_t **fp,</a>
+<a name="297"><span class="lineNum">     297 </span>            :                                               apr_pool_t *pool,</a>
+<a name="298"><span class="lineNum">     298 </span>            :                                               const char *path);</a>
+<a name="299"><span class="lineNum">     299 </span>            : </a>
+<a name="300"><span class="lineNum">     300 </span>            : /**</a>
+<a name="301"><span class="lineNum">     301 </span>            :  * Set aside all buckets in the brigade.</a>
+<a name="302"><span class="lineNum">     302 </span>            :  *</a>
+<a name="303"><span class="lineNum">     303 </span>            :  * @param bb Brigade.</a>
+<a name="304"><span class="lineNum">     304 </span>            :  * @param p  Setaside buckets into this pool.</a>
+<a name="305"><span class="lineNum">     305 </span>            :  * @return APR_SUCCESS.</a>
+<a name="306"><span class="lineNum">     306 </span>            :  * @return Error status code from an unsuccessful apr_bucket_setaside().</a>
+<a name="307"><span class="lineNum">     307 </span>            :  */</a>
+<a name="308"><span class="lineNum">     308 </span>            : </a>
+<a name="309"><span class="lineNum">     309 </span>            : static APR_INLINE</a>
+<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 : apr_status_t apreq_brigade_setaside(apr_bucket_brigade *bb, apr_pool_t *p)</span></a>
+<a name="311"><span class="lineNum">     311 </span>            : {</a>
+<a name="312"><span class="lineNum">     312 </span>            :     apr_bucket *e;</a>
+<a name="313"><span class="lineNum">     313 </span><span class="lineNoCov">          0 :     for (e = APR_BRIGADE_FIRST(bb); e != APR_BRIGADE_SENTINEL(bb);</span></a>
+<a name="314"><span class="lineNum">     314 </span><span class="lineNoCov">          0 :          e = APR_BUCKET_NEXT(e))</span></a>
+<a name="315"><span class="lineNum">     315 </span>            :     {</a>
+<a name="316"><span class="lineNum">     316 </span><span class="lineNoCov">          0 :         apr_status_t rv = apr_bucket_setaside(e, p);</span></a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :         if (rv != APR_SUCCESS)</span></a>
+<a name="318"><span class="lineNum">     318 </span><span class="lineNoCov">          0 :             return rv;</span></a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="320"><span class="lineNum">     320 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="322"><span class="lineNum">     322 </span>            : </a>
+<a name="323"><span class="lineNum">     323 </span>            : </a>
+<a name="324"><span class="lineNum">     324 </span>            : /**</a>
+<a name="325"><span class="lineNum">     325 </span>            :  * Copy a brigade.</a>
+<a name="326"><span class="lineNum">     326 </span>            :  *</a>
+<a name="327"><span class="lineNum">     327 </span>            :  * @param d (destination) Copied buckets are appended to this brigade.</a>
+<a name="328"><span class="lineNum">     328 </span>            :  * @param s (source) Brigade to copy from.</a>
+<a name="329"><span class="lineNum">     329 </span>            :  *</a>
+<a name="330"><span class="lineNum">     330 </span>            :  * @return APR_SUCCESS.</a>
+<a name="331"><span class="lineNum">     331 </span>            :  * @return Error status code from an unsuccessful apr_bucket_copy().</a>
+<a name="332"><span class="lineNum">     332 </span>            :  *</a>
+<a name="333"><span class="lineNum">     333 </span>            :  * @remarks s == d produces Undefined Behavior.</a>
+<a name="334"><span class="lineNum">     334 </span>            :  */</a>
+<a name="335"><span class="lineNum">     335 </span>            : </a>
+<a name="336"><span class="lineNum">     336 </span>            : static APR_INLINE</a>
+<a name="337"><span class="lineNum">     337 </span><span class="lineNoCov">          0 : apr_status_t apreq_brigade_copy(apr_bucket_brigade *d, apr_bucket_brigade *s) {</span></a>
+<a name="338"><span class="lineNum">     338 </span>            :     apr_bucket *e;</a>
+<a name="339"><span class="lineNum">     339 </span><span class="lineNoCov">          0 :     for (e = APR_BRIGADE_FIRST(s); e != APR_BRIGADE_SENTINEL(s);</span></a>
+<a name="340"><span class="lineNum">     340 </span><span class="lineNoCov">          0 :          e = APR_BUCKET_NEXT(e))</span></a>
+<a name="341"><span class="lineNum">     341 </span>            :     {</a>
+<a name="342"><span class="lineNum">     342 </span>            :         apr_bucket *c;</a>
+<a name="343"><span class="lineNum">     343 </span><span class="lineNoCov">          0 :         apr_status_t rv = apr_bucket_copy(e, &amp;c);</span></a>
+<a name="344"><span class="lineNum">     344 </span><span class="lineNoCov">          0 :         if (rv != APR_SUCCESS)</span></a>
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :             return rv;</span></a>
+<a name="346"><span class="lineNum">     346 </span>            : </a>
+<a name="347"><span class="lineNum">     347 </span><span class="lineNoCov">          0 :         APR_BRIGADE_INSERT_TAIL(d, c);</span></a>
+<a name="348"><span class="lineNum">     348 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="349"><span class="lineNum">     349 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="350"><span class="lineNum">     350 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="351"><span class="lineNum">     351 </span>            : </a>
+<a name="352"><span class="lineNum">     352 </span>            : /**</a>
+<a name="353"><span class="lineNum">     353 </span>            :  * Move the front of a brigade.</a>
+<a name="354"><span class="lineNum">     354 </span>            :  *</a>
+<a name="355"><span class="lineNum">     355 </span>            :  * @param d (destination) Append buckets to this brigade.</a>
+<a name="356"><span class="lineNum">     356 </span>            :  * @param s (source) Brigade to take buckets from.</a>
+<a name="357"><span class="lineNum">     357 </span>            :  * @param e First bucket of s after the move.  All buckets</a>
+<a name="358"><span class="lineNum">     358 </span>            :  *          before e are appended to d.</a>
+<a name="359"><span class="lineNum">     359 </span>            :  *</a>
+<a name="360"><span class="lineNum">     360 </span>            :  * @remarks This moves all buckets when e == APR_BRIGADE_SENTINEL(s).</a>
+<a name="361"><span class="lineNum">     361 </span>            :  */</a>
+<a name="362"><span class="lineNum">     362 </span>            : </a>
+<a name="363"><span class="lineNum">     363 </span>            : static APR_INLINE</a>
+<a name="364"><span class="lineNum">     364 </span><span class="lineNoCov">          0 : void apreq_brigade_move(apr_bucket_brigade *d, apr_bucket_brigade *s,</span></a>
+<a name="365"><span class="lineNum">     365 </span>            :                         apr_bucket *e)</a>
+<a name="366"><span class="lineNum">     366 </span>            : {</a>
+<a name="367"><span class="lineNum">     367 </span>            :     apr_bucket *f;</a>
+<a name="368"><span class="lineNum">     368 </span>            : </a>
+<a name="369"><span class="lineNum">     369 </span><span class="lineNoCov">          0 :     if (e != APR_BRIGADE_SENTINEL(s)) {</span></a>
+<a name="370"><span class="lineNum">     370 </span><span class="lineNoCov">          0 :         f = APR_RING_FIRST(&amp;s-&gt;list);</span></a>
+<a name="371"><span class="lineNum">     371 </span><span class="lineNoCov">          0 :         if (f == e) /* zero buckets to be moved */</span></a>
+<a name="372"><span class="lineNum">     372 </span><span class="lineNoCov">          0 :             return;</span></a>
+<a name="373"><span class="lineNum">     373 </span>            : </a>
+<a name="374"><span class="lineNum">     374 </span>            :         /* obtain the last bucket to be moved */</a>
+<a name="375"><span class="lineNum">     375 </span><span class="lineNoCov">          0 :         e = APR_RING_PREV(e, link);</span></a>
+<a name="376"><span class="lineNum">     376 </span>            : </a>
+<a name="377"><span class="lineNum">     377 </span><span class="lineNoCov">          0 :         APR_RING_UNSPLICE(f, e, link);</span></a>
+<a name="378"><span class="lineNum">     378 </span><span class="lineNoCov">          0 :         APR_RING_SPLICE_HEAD(&amp;d-&gt;list, f, e, apr_bucket, link);</span></a>
+<a name="379"><span class="lineNum">     379 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="380"><span class="lineNum">     380 </span>            :     else {</a>
+<a name="381"><span class="lineNum">     381 </span><span class="lineNoCov">          0 :         APR_BRIGADE_CONCAT(d, s);</span></a>
+<a name="382"><span class="lineNum">     382 </span>            :     }</a>
+<a name="383"><span class="lineNum">     383 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="384"><span class="lineNum">     384 </span>            : </a>
+<a name="385"><span class="lineNum">     385 </span>            : </a>
+<a name="386"><span class="lineNum">     386 </span>            : /**</a>
+<a name="387"><span class="lineNum">     387 </span>            :  * Search a header string for the value of a particular named attribute.</a>
+<a name="388"><span class="lineNum">     388 </span>            :  *</a>
+<a name="389"><span class="lineNum">     389 </span>            :  * @param hdr Header string to scan.</a>
+<a name="390"><span class="lineNum">     390 </span>            :  * @param name Name of attribute to search for.</a>
+<a name="391"><span class="lineNum">     391 </span>            :  * @param nlen Length of name.</a>
+<a name="392"><span class="lineNum">     392 </span>            :  * @param val Location of (first) matching value.</a>
+<a name="393"><span class="lineNum">     393 </span>            :  * @param vlen Length of matching value.</a>
+<a name="394"><span class="lineNum">     394 </span>            :  *</a>
+<a name="395"><span class="lineNum">     395 </span>            :  * @return APR_SUCCESS.</a>
+<a name="396"><span class="lineNum">     396 </span>            :  * @return ::APREQ_ERROR_NOATTR if the attribute is not found.</a>
+<a name="397"><span class="lineNum">     397 </span>            :  * @return ::APREQ_ERROR_BADSEQ if an unpaired quote mark was detected.</a>
+<a name="398"><span class="lineNum">     398 </span>            :  */</a>
+<a name="399"><span class="lineNum">     399 </span>            : APREQ_DECLARE(apr_status_t) apreq_header_attribute(const char *hdr,</a>
+<a name="400"><span class="lineNum">     400 </span>            :                                                    const char *name,</a>
+<a name="401"><span class="lineNum">     401 </span>            :                                                    const apr_size_t nlen,</a>
+<a name="402"><span class="lineNum">     402 </span>            :                                                    const char **val,</a>
+<a name="403"><span class="lineNum">     403 </span>            :                                                    apr_size_t *vlen);</a>
+<a name="404"><span class="lineNum">     404 </span>            : </a>
+<a name="405"><span class="lineNum">     405 </span>            : </a>
+<a name="406"><span class="lineNum">     406 </span>            : /**</a>
+<a name="407"><span class="lineNum">     407 </span>            :  * Concatenates the brigades, spooling large brigades into</a>
+<a name="408"><span class="lineNum">     408 </span>            :  * a tempfile (APREQ_SPOOL) bucket.</a>
+<a name="409"><span class="lineNum">     409 </span>            :  *</a>
+<a name="410"><span class="lineNum">     410 </span>            :  * @param pool           Pool for creating a tempfile bucket.</a>
+<a name="411"><span class="lineNum">     411 </span>            :  * @param temp_dir       Directory for tempfile creation.</a>
+<a name="412"><span class="lineNum">     412 </span>            :  * @param brigade_limit  If out's length would exceed this value,</a>
+<a name="413"><span class="lineNum">     413 </span>            :  *                       the appended buckets get written to a tempfile.</a>
+<a name="414"><span class="lineNum">     414 </span>            :  * @param out            Resulting brigade.</a>
+<a name="415"><span class="lineNum">     415 </span>            :  * @param in             Brigade to append.</a>
+<a name="416"><span class="lineNum">     416 </span>            :  *</a>
+<a name="417"><span class="lineNum">     417 </span>            :  * @return APR_SUCCESS.</a>
+<a name="418"><span class="lineNum">     418 </span>            :  * @return Error status code resulting from either apr_brigade_length(),</a>
+<a name="419"><span class="lineNum">     419 </span>            :  *         apreq_file_mktemp(), apreq_brigade_fwrite(), or apr_file_seek().</a>
+<a name="420"><span class="lineNum">     420 </span>            :  *</a>
+<a name="421"><span class="lineNum">     421 </span>            :  * @todo Flesh out these error codes, making them as explicit as possible.</a>
+<a name="422"><span class="lineNum">     422 </span>            :  */</a>
+<a name="423"><span class="lineNum">     423 </span>            : APREQ_DECLARE(apr_status_t) apreq_brigade_concat(apr_pool_t *pool,</a>
+<a name="424"><span class="lineNum">     424 </span>            :                                                  const char *temp_dir,</a>
+<a name="425"><span class="lineNum">     425 </span>            :                                                  apr_size_t brigade_limit,</a>
+<a name="426"><span class="lineNum">     426 </span>            :                                                  apr_bucket_brigade *out,</a>
+<a name="427"><span class="lineNum">     427 </span>            :                                                  apr_bucket_brigade *in);</a>
+<a name="428"><span class="lineNum">     428 </span>            : </a>
+<a name="429"><span class="lineNum">     429 </span>            : /**</a>
+<a name="430"><span class="lineNum">     430 </span>            :  * Determines the spool file used by the brigade. Returns NULL if the</a>
+<a name="431"><span class="lineNum">     431 </span>            :  * brigade is not spooled in a file (does not use an APREQ_SPOOL</a>
+<a name="432"><span class="lineNum">     432 </span>            :  * bucket).</a>
+<a name="433"><span class="lineNum">     433 </span>            :  *</a>
+<a name="434"><span class="lineNum">     434 </span>            :  * @param bb the bucket brigade</a>
+<a name="435"><span class="lineNum">     435 </span>            :  * @return the spool file, or NULL.</a>
+<a name="436"><span class="lineNum">     436 </span>            :  */</a>
+<a name="437"><span class="lineNum">     437 </span>            : APREQ_DECLARE(apr_file_t *) apreq_brigade_spoolfile(apr_bucket_brigade *bb);</a>
+<a name="438"><span class="lineNum">     438 </span>            : </a>
+<a name="439"><span class="lineNum">     439 </span>            : #ifdef __cplusplus</a>
+<a name="440"><span class="lineNum">     440 </span>            :  }</a>
+<a name="441"><span class="lineNum">     441 </span>            : #endif</a>
+<a name="442"><span class="lineNum">     442 </span>            : </a>
+<a name="443"><span class="lineNum">     443 </span>            : #endif /* APREQ_UTIL_H */</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

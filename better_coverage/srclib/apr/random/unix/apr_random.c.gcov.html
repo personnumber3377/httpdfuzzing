@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - better_coverage.lcov_info_final - srclib/apr/random/unix/apr_random.c</title>
+  <link rel="stylesheet" type="text/css" href="../../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../../index.html">top level</a> - <a href="index.html">srclib/apr/random/unix</a> - apr_random.c<span style="font-size: 80%;"> (source / <a href="apr_random.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">better_coverage.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">129</td>
+            <td class="headerCovTableEntry">150</td>
+            <td class="headerCovTableEntryMed">86.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-11 18:12:53</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntry">15</td>
+            <td class="headerCovTableEntryMed">80.0 %</td>
+          </tr>
+          <tr><td><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : /*</a>
+<a name="17"><span class="lineNum">      17 </span>            :  * See the paper &quot;On Randomness&quot; by Ben Laurie for an explanation of this PRNG.</a>
+<a name="18"><span class="lineNum">      18 </span>            :  * http://www.apache-ssl.org/randomness.pdf</a>
+<a name="19"><span class="lineNum">      19 </span>            :  * XXX: Is there a formal proof of this PRNG? Couldn't we use the more popular</a>
+<a name="20"><span class="lineNum">      20 </span>            :  * Mersenne Twister PRNG (and BSD licensed)?</a>
+<a name="21"><span class="lineNum">      21 </span>            :  */</a>
+<a name="22"><span class="lineNum">      22 </span>            : </a>
+<a name="23"><span class="lineNum">      23 </span>            : #include &quot;apr.h&quot;</a>
+<a name="24"><span class="lineNum">      24 </span>            : #include &quot;apr_pools.h&quot;</a>
+<a name="25"><span class="lineNum">      25 </span>            : #include &quot;apr_random.h&quot;</a>
+<a name="26"><span class="lineNum">      26 </span>            : #include &quot;apr_thread_proc.h&quot;</a>
+<a name="27"><span class="lineNum">      27 </span>            : #include &lt;assert.h&gt;</a>
+<a name="28"><span class="lineNum">      28 </span>            : </a>
+<a name="29"><span class="lineNum">      29 </span>            : #ifdef min</a>
+<a name="30"><span class="lineNum">      30 </span>            : #undef min</a>
+<a name="31"><span class="lineNum">      31 </span>            : #endif</a>
+<a name="32"><span class="lineNum">      32 </span>            : #define min(a,b) ((a) &lt; (b) ? (a) : (b))</a>
+<a name="33"><span class="lineNum">      33 </span>            : </a>
+<a name="34"><span class="lineNum">      34 </span>            : #define APR_RANDOM_DEFAULT_POOLS 32</a>
+<a name="35"><span class="lineNum">      35 </span>            : #define APR_RANDOM_DEFAULT_REHASH_SIZE 1024</a>
+<a name="36"><span class="lineNum">      36 </span>            : #define APR_RANDOM_DEFAULT_RESEED_SIZE 32</a>
+<a name="37"><span class="lineNum">      37 </span>            : #define APR_RANDOM_DEFAULT_HASH_SECRET_SIZE 32</a>
+<a name="38"><span class="lineNum">      38 </span>            : #define APR_RANDOM_DEFAULT_G_FOR_INSECURE 32</a>
+<a name="39"><span class="lineNum">      39 </span>            : #define APR_RANDOM_DEFAULT_G_FOR_SECURE 320</a>
+<a name="40"><span class="lineNum">      40 </span>            : </a>
+<a name="41"><span class="lineNum">      41 </span>            : typedef struct apr_random_pool_t {</a>
+<a name="42"><span class="lineNum">      42 </span>            :     unsigned char *pool;</a>
+<a name="43"><span class="lineNum">      43 </span>            :     unsigned int bytes;</a>
+<a name="44"><span class="lineNum">      44 </span>            :     unsigned int pool_size;</a>
+<a name="45"><span class="lineNum">      45 </span>            : } apr_random_pool_t;</a>
+<a name="46"><span class="lineNum">      46 </span>            : </a>
+<a name="47"><span class="lineNum">      47 </span>            : #define hash_init(h)            (h)-&gt;init(h)</a>
+<a name="48"><span class="lineNum">      48 </span>            : #define hash_add(h,b,n)         (h)-&gt;add(h,b,n)</a>
+<a name="49"><span class="lineNum">      49 </span>            : #define hash_finish(h,r)        (h)-&gt;finish(h,r)</a>
+<a name="50"><span class="lineNum">      50 </span>            : </a>
+<a name="51"><span class="lineNum">      51 </span>            : #define hash(h,r,b,n)           hash_init(h),hash_add(h,b,n),hash_finish(h,r)</a>
+<a name="52"><span class="lineNum">      52 </span>            : </a>
+<a name="53"><span class="lineNum">      53 </span>            : #define crypt_setkey(c,k)       (c)-&gt;set_key((c)-&gt;data,k)</a>
+<a name="54"><span class="lineNum">      54 </span>            : #define crypt_crypt(c,out,in)   (c)-&gt;crypt((c)-&gt;date,out,in)</a>
+<a name="55"><span class="lineNum">      55 </span>            : </a>
+<a name="56"><span class="lineNum">      56 </span>            : struct apr_random_t {</a>
+<a name="57"><span class="lineNum">      57 </span>            :     apr_pool_t *apr_pool;</a>
+<a name="58"><span class="lineNum">      58 </span>            :     apr_crypto_hash_t *pool_hash;</a>
+<a name="59"><span class="lineNum">      59 </span>            :     unsigned int npools;</a>
+<a name="60"><span class="lineNum">      60 </span>            :     apr_random_pool_t *pools;</a>
+<a name="61"><span class="lineNum">      61 </span>            :     unsigned int next_pool;</a>
+<a name="62"><span class="lineNum">      62 </span>            :     unsigned int generation;</a>
+<a name="63"><span class="lineNum">      63 </span>            :     apr_size_t rehash_size;</a>
+<a name="64"><span class="lineNum">      64 </span>            :     apr_size_t reseed_size;</a>
+<a name="65"><span class="lineNum">      65 </span>            :     apr_crypto_hash_t *key_hash;</a>
+<a name="66"><span class="lineNum">      66 </span>            : #define K_size(g) ((g)-&gt;key_hash-&gt;size)</a>
+<a name="67"><span class="lineNum">      67 </span>            :     apr_crypto_hash_t *prng_hash;</a>
+<a name="68"><span class="lineNum">      68 </span>            : #define B_size(g) ((g)-&gt;prng_hash-&gt;size)</a>
+<a name="69"><span class="lineNum">      69 </span>            : </a>
+<a name="70"><span class="lineNum">      70 </span>            :     unsigned char *H;</a>
+<a name="71"><span class="lineNum">      71 </span>            :     unsigned char *H_waiting;</a>
+<a name="72"><span class="lineNum">      72 </span>            : #define H_size(g) (B_size(g)+K_size(g))</a>
+<a name="73"><span class="lineNum">      73 </span>            : #define H_current(g) (((g)-&gt;insecure_started &amp;&amp; !(g)-&gt;secure_started) \</a>
+<a name="74"><span class="lineNum">      74 </span>            :                       ? (g)-&gt;H_waiting : (g)-&gt;H)</a>
+<a name="75"><span class="lineNum">      75 </span>            : </a>
+<a name="76"><span class="lineNum">      76 </span>            :     unsigned char *randomness;</a>
+<a name="77"><span class="lineNum">      77 </span>            :     apr_size_t random_bytes;</a>
+<a name="78"><span class="lineNum">      78 </span>            :     unsigned int g_for_insecure;</a>
+<a name="79"><span class="lineNum">      79 </span>            :     unsigned int g_for_secure;</a>
+<a name="80"><span class="lineNum">      80 </span>            :     unsigned int secure_base;</a>
+<a name="81"><span class="lineNum">      81 </span>            :     unsigned int insecure_started:1;</a>
+<a name="82"><span class="lineNum">      82 </span>            :     unsigned int secure_started:1;</a>
+<a name="83"><span class="lineNum">      83 </span>            : </a>
+<a name="84"><span class="lineNum">      84 </span>            :     apr_random_t *next;</a>
+<a name="85"><span class="lineNum">      85 </span>            : };</a>
+<a name="86"><span class="lineNum">      86 </span>            : </a>
+<a name="87"><span class="lineNum">      87 </span>            : static apr_random_t *all_random;</a>
+<a name="88"><span class="lineNum">      88 </span>            : </a>
+<a name="89"><span class="lineNum">      89 </span><span class="lineCov">       3321 : static apr_status_t random_cleanup(void *data)</span></a>
+<a name="90"><span class="lineNum">      90 </span>            : {</a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineCov">       3321 :     apr_random_t *remove_this = data,</span></a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineCov">       3321 :                  *cur = all_random,</span></a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineCov">       3321 :                  **prev_ptr = &amp;all_random;</span></a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineCov">       3321 :     while (cur) {</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineCov">       3321 :         if (cur == remove_this) {</span></a>
+<a name="96"><span class="lineNum">      96 </span><span class="lineCov">       3321 :             *prev_ptr = cur-&gt;next;</span></a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineCov">       3321 :             break;</span></a>
+<a name="98"><span class="lineNum">      98 </span>            :         }</a>
+<a name="99"><span class="lineNum">      99 </span><span class="lineNoCov">          0 :         prev_ptr = &amp;cur-&gt;next;</span></a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineNoCov">          0 :         cur = cur-&gt;next;</span></a>
+<a name="101"><span class="lineNum">     101 </span>            :     }</a>
+<a name="102"><span class="lineNum">     102 </span><span class="lineCov">       3321 :     return APR_SUCCESS;</span></a>
+<a name="103"><span class="lineNum">     103 </span>            : }</a>
+<a name="104"><span class="lineNum">     104 </span>            : </a>
+<a name="105"><span class="lineNum">     105 </span>            : </a>
+<a name="106"><span class="lineNum">     106 </span><span class="lineCov">       3321 : APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,</span></a>
+<a name="107"><span class="lineNum">     107 </span>            :                                   apr_crypto_hash_t *pool_hash,</a>
+<a name="108"><span class="lineNum">     108 </span>            :                                   apr_crypto_hash_t *key_hash,</a>
+<a name="109"><span class="lineNum">     109 </span>            :                                   apr_crypto_hash_t *prng_hash)</a>
+<a name="110"><span class="lineNum">     110 </span>            : {</a>
+<a name="111"><span class="lineNum">     111 </span>            :     unsigned int n;</a>
+<a name="112"><span class="lineNum">     112 </span>            : </a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineCov">       3321 :     g-&gt;apr_pool = p;</span></a>
+<a name="114"><span class="lineNum">     114 </span>            : </a>
+<a name="115"><span class="lineNum">     115 </span><span class="lineCov">       3321 :     g-&gt;pool_hash = pool_hash;</span></a>
+<a name="116"><span class="lineNum">     116 </span><span class="lineCov">       3321 :     g-&gt;key_hash = key_hash;</span></a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineCov">       3321 :     g-&gt;prng_hash = prng_hash;</span></a>
+<a name="118"><span class="lineNum">     118 </span>            : </a>
+<a name="119"><span class="lineNum">     119 </span><span class="lineCov">       3321 :     g-&gt;npools = APR_RANDOM_DEFAULT_POOLS;</span></a>
+<a name="120"><span class="lineNum">     120 </span><span class="lineCov">       3321 :     g-&gt;pools = apr_palloc(p,g-&gt;npools*sizeof *g-&gt;pools);</span></a>
+<a name="121"><span class="lineNum">     121 </span><span class="lineCov">     109593 :     for (n = 0; n &lt; g-&gt;npools; ++n) {</span></a>
+<a name="122"><span class="lineNum">     122 </span><span class="lineCov">     106272 :         g-&gt;pools[n].bytes = g-&gt;pools[n].pool_size = 0;</span></a>
+<a name="123"><span class="lineNum">     123 </span><span class="lineCov">     106272 :         g-&gt;pools[n].pool = NULL;</span></a>
+<a name="124"><span class="lineNum">     124 </span><span class="lineCov">     106272 :     }</span></a>
+<a name="125"><span class="lineNum">     125 </span><span class="lineCov">       3321 :     g-&gt;next_pool = 0;</span></a>
+<a name="126"><span class="lineNum">     126 </span>            : </a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineCov">       3321 :     g-&gt;generation = 0;</span></a>
+<a name="128"><span class="lineNum">     128 </span>            : </a>
+<a name="129"><span class="lineNum">     129 </span><span class="lineCov">       3321 :     g-&gt;rehash_size = APR_RANDOM_DEFAULT_REHASH_SIZE;</span></a>
+<a name="130"><span class="lineNum">     130 </span>            :     /* Ensure that the rehash size is twice the size of the pool hasher */</a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineCov">       6642 :     g-&gt;rehash_size = ((g-&gt;rehash_size+2*g-&gt;pool_hash-&gt;size-1)/g-&gt;pool_hash-&gt;size</span></a>
+<a name="132"><span class="lineNum">     132 </span><span class="lineCov">       3321 :                     /2)*g-&gt;pool_hash-&gt;size*2;</span></a>
+<a name="133"><span class="lineNum">     133 </span><span class="lineCov">       3321 :     g-&gt;reseed_size = APR_RANDOM_DEFAULT_RESEED_SIZE;</span></a>
+<a name="134"><span class="lineNum">     134 </span>            : </a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineCov">       3321 :     g-&gt;H = apr_pcalloc(p,H_size(g));</span></a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineCov">       3321 :     g-&gt;H_waiting = apr_pcalloc(p,H_size(g));</span></a>
+<a name="137"><span class="lineNum">     137 </span>            : </a>
+<a name="138"><span class="lineNum">     138 </span><span class="lineCov">       3321 :     g-&gt;randomness = apr_palloc(p,B_size(g));</span></a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineCov">       3321 :     g-&gt;random_bytes = 0;</span></a>
+<a name="140"><span class="lineNum">     140 </span>            : </a>
+<a name="141"><span class="lineNum">     141 </span><span class="lineCov">       3321 :     g-&gt;g_for_insecure = APR_RANDOM_DEFAULT_G_FOR_INSECURE;</span></a>
+<a name="142"><span class="lineNum">     142 </span><span class="lineCov">       3321 :     g-&gt;secure_base = 0;</span></a>
+<a name="143"><span class="lineNum">     143 </span><span class="lineCov">       3321 :     g-&gt;g_for_secure = APR_RANDOM_DEFAULT_G_FOR_SECURE;</span></a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineCov">       3321 :     g-&gt;secure_started = g-&gt;insecure_started = 0;</span></a>
+<a name="145"><span class="lineNum">     145 </span>            : </a>
+<a name="146"><span class="lineNum">     146 </span><span class="lineCov">       3321 :     g-&gt;next = all_random;</span></a>
+<a name="147"><span class="lineNum">     147 </span><span class="lineCov">       3321 :     all_random = g;</span></a>
+<a name="148"><span class="lineNum">     148 </span><span class="lineCov">       3321 :     apr_pool_cleanup_register(p, g, random_cleanup, apr_pool_cleanup_null);</span></a>
+<a name="149"><span class="lineNum">     149 </span><span class="lineCov">       3321 : }</span></a>
+<a name="150"><span class="lineNum">     150 </span>            : </a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineCov">       6642 : static void mix_pid(apr_random_t *g,unsigned char *H,pid_t pid)</span></a>
+<a name="152"><span class="lineNum">     152 </span>            : {</a>
+<a name="153"><span class="lineNum">     153 </span><span class="lineCov">       6642 :     hash_init(g-&gt;key_hash);</span></a>
+<a name="154"><span class="lineNum">     154 </span><span class="lineCov">       6642 :     hash_add(g-&gt;key_hash,H,H_size(g));</span></a>
+<a name="155"><span class="lineNum">     155 </span><span class="lineCov">       6642 :     hash_add(g-&gt;key_hash,&amp;pid,sizeof pid);</span></a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineCov">       6642 :     hash_finish(g-&gt;key_hash,H);</span></a>
+<a name="157"><span class="lineNum">     157 </span><span class="lineCov">       6642 : }</span></a>
+<a name="158"><span class="lineNum">     158 </span>            : </a>
+<a name="159"><span class="lineNum">     159 </span><span class="lineCov">       3321 : static void mixer(apr_random_t *g,pid_t pid)</span></a>
+<a name="160"><span class="lineNum">     160 </span>            : {</a>
+<a name="161"><span class="lineNum">     161 </span><span class="lineCov">       3321 :     unsigned char *H = H_current(g);</span></a>
+<a name="162"><span class="lineNum">     162 </span>            : </a>
+<a name="163"><span class="lineNum">     163 </span>            :     /* mix the PID into the current H */</a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineCov">       3321 :     mix_pid(g,H,pid);</span></a>
+<a name="165"><span class="lineNum">     165 </span>            :     /* if we are in waiting, then also mix into main H */</a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineCov">       3321 :     if (H != g-&gt;H)</span></a>
+<a name="167"><span class="lineNum">     167 </span><span class="lineCov">       3321 :         mix_pid(g,g-&gt;H,pid);</span></a>
+<a name="168"><span class="lineNum">     168 </span>            :     /* change order of pool mixing for good measure - note that going</a>
+<a name="169"><span class="lineNum">     169 </span>            :        backwards is much better than going forwards */</a>
+<a name="170"><span class="lineNum">     170 </span><span class="lineCov">       3321 :     --g-&gt;generation;</span></a>
+<a name="171"><span class="lineNum">     171 </span>            :     /* blow away any lingering randomness */</a>
+<a name="172"><span class="lineNum">     172 </span><span class="lineCov">       3321 :     g-&gt;random_bytes = 0;</span></a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineCov">       3321 : }</span></a>
+<a name="174"><span class="lineNum">     174 </span>            : </a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineCov">       3321 : APR_DECLARE(void) apr_random_after_fork(apr_proc_t *proc)</span></a>
+<a name="176"><span class="lineNum">     176 </span>            : {</a>
+<a name="177"><span class="lineNum">     177 </span>            :     apr_random_t *r;</a>
+<a name="178"><span class="lineNum">     178 </span>            : </a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineCov">       6642 :     for (r = all_random; r; r = r-&gt;next)</span></a>
+<a name="180"><span class="lineNum">     180 </span>            :         /*</a>
+<a name="181"><span class="lineNum">     181 </span>            :          * XXX Note: the pid does not provide sufficient entropy to</a>
+<a name="182"><span class="lineNum">     182 </span>            :          * actually call this secure.  See Ben's paper referenced at</a>
+<a name="183"><span class="lineNum">     183 </span>            :          * the top of this file.</a>
+<a name="184"><span class="lineNum">     184 </span>            :          */</a>
+<a name="185"><span class="lineNum">     185 </span><span class="lineCov">       3321 :         mixer(r,proc-&gt;pid);</span></a>
+<a name="186"><span class="lineNum">     186 </span><span class="lineCov">       3321 : }</span></a>
+<a name="187"><span class="lineNum">     187 </span>            : </a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineCov">       3321 : APR_DECLARE(apr_random_t *) apr_random_standard_new(apr_pool_t *p)</span></a>
+<a name="189"><span class="lineNum">     189 </span>            : {</a>
+<a name="190"><span class="lineNum">     190 </span><span class="lineCov">       3321 :     apr_random_t *r = apr_palloc(p,sizeof *r);</span></a>
+<a name="191"><span class="lineNum">     191 </span>            : </a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineCov">       6642 :     apr_random_init(r,p,apr_crypto_sha256_new(p),apr_crypto_sha256_new(p),</span></a>
+<a name="193"><span class="lineNum">     193 </span><span class="lineCov">       3321 :                     apr_crypto_sha256_new(p));</span></a>
+<a name="194"><span class="lineNum">     194 </span><span class="lineCov">       3321 :     return r;</span></a>
+<a name="195"><span class="lineNum">     195 </span>            : }</a>
+<a name="196"><span class="lineNum">     196 </span>            : </a>
+<a name="197"><span class="lineNum">     197 </span><span class="lineCov">     109593 : static void rekey(apr_random_t *g)</span></a>
+<a name="198"><span class="lineNum">     198 </span>            : {</a>
+<a name="199"><span class="lineNum">     199 </span>            :     unsigned int n;</a>
+<a name="200"><span class="lineNum">     200 </span><span class="lineCov">     109593 :     unsigned char *H = H_current(g);</span></a>
+<a name="201"><span class="lineNum">     201 </span>            : </a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineCov">     109593 :     hash_init(g-&gt;key_hash);</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineCov">     109593 :     hash_add(g-&gt;key_hash,H,H_size(g));</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineCov">     644274 :     for (n = 0 ; n &lt; g-&gt;npools &amp;&amp; (n == 0 || g-&gt;generation&amp;(1 &lt;&lt; (n-1)))</span></a>
+<a name="205"><span class="lineNum">     205 </span><span class="lineCov">     212544 :             ; ++n) {</span></a>
+<a name="206"><span class="lineNum">     206 </span><span class="lineCov">     212544 :         hash_add(g-&gt;key_hash,g-&gt;pools[n].pool,g-&gt;pools[n].bytes);</span></a>
+<a name="207"><span class="lineNum">     207 </span><span class="lineCov">     212544 :         g-&gt;pools[n].bytes = 0;</span></a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineCov">     212544 :     }</span></a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineCov">     109593 :     hash_finish(g-&gt;key_hash,H+B_size(g));</span></a>
+<a name="210"><span class="lineNum">     210 </span>            : </a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineCov">     109593 :     ++g-&gt;generation;</span></a>
+<a name="212"><span class="lineNum">     212 </span><span class="lineCov">     109593 :     if (!g-&gt;insecure_started &amp;&amp; g-&gt;generation &gt; g-&gt;g_for_insecure) {</span></a>
+<a name="213"><span class="lineNum">     213 </span><span class="lineCov">       3321 :         g-&gt;insecure_started = 1;</span></a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineCov">       3321 :         if (!g-&gt;secure_started) {</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineCov">       3321 :             memcpy(g-&gt;H_waiting,g-&gt;H,H_size(g));</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineCov">       3321 :             g-&gt;secure_base = g-&gt;generation;</span></a>
+<a name="217"><span class="lineNum">     217 </span><span class="lineCov">       3321 :         }</span></a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineCov">       3321 :     }</span></a>
+<a name="219"><span class="lineNum">     219 </span>            : </a>
+<a name="220"><span class="lineNum">     220 </span><span class="lineCov">     109593 :     if (!g-&gt;secure_started &amp;&amp; g-&gt;generation &gt; g-&gt;secure_base+g-&gt;g_for_secure) {</span></a>
+<a name="221"><span class="lineNum">     221 </span><span class="lineNoCov">          0 :         g-&gt;secure_started = 1;</span></a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 :         memcpy(g-&gt;H,g-&gt;H_waiting,H_size(g));</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="224"><span class="lineNum">     224 </span><span class="lineCov">     109593 : }</span></a>
+<a name="225"><span class="lineNum">     225 </span>            : </a>
+<a name="226"><span class="lineNum">     226 </span><span class="lineCov">   14017941 : APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,</span></a>
+<a name="227"><span class="lineNum">     227 </span>            :                                          apr_size_t bytes)</a>
+<a name="228"><span class="lineNum">     228 </span>            : {</a>
+<a name="229"><span class="lineNum">     229 </span>            :     unsigned int n;</a>
+<a name="230"><span class="lineNum">     230 </span><span class="lineCov">   14017941 :     const unsigned char *entropy = entropy_;</span></a>
+<a name="231"><span class="lineNum">     231 </span>            : </a>
+<a name="232"><span class="lineNum">     232 </span><span class="lineCov">  126161469 :     for (n = 0; n &lt; bytes; ++n) {</span></a>
+<a name="233"><span class="lineNum">     233 </span><span class="lineCov">  112143528 :         apr_random_pool_t *p = &amp;g-&gt;pools[g-&gt;next_pool];</span></a>
+<a name="234"><span class="lineNum">     234 </span>            : </a>
+<a name="235"><span class="lineNum">     235 </span><span class="lineCov">  112143528 :         if (++g-&gt;next_pool == g-&gt;npools)</span></a>
+<a name="236"><span class="lineNum">     236 </span><span class="lineCov">    3503655 :             g-&gt;next_pool = 0;</span></a>
+<a name="237"><span class="lineNum">     237 </span>            : </a>
+<a name="238"><span class="lineNum">     238 </span><span class="lineCov">  112143528 :         if (p-&gt;pool_size &lt; p-&gt;bytes+1) {</span></a>
+<a name="239"><span class="lineNum">     239 </span><span class="lineCov">    1012905 :             unsigned char *np = apr_palloc(g-&gt;apr_pool,(p-&gt;bytes+1)*2);</span></a>
+<a name="240"><span class="lineNum">     240 </span>            : </a>
+<a name="241"><span class="lineNum">     241 </span><span class="lineCov">    1012905 :             if (p-&gt;pool) memcpy(np,p-&gt;pool,p-&gt;bytes);</span></a>
+<a name="242"><span class="lineNum">     242 </span><span class="lineCov">    1012905 :             p-&gt;pool = np;</span></a>
+<a name="243"><span class="lineNum">     243 </span><span class="lineCov">    1012905 :             p-&gt;pool_size = (p-&gt;bytes+1)*2;</span></a>
+<a name="244"><span class="lineNum">     244 </span><span class="lineCov">    1012905 :         }</span></a>
+<a name="245"><span class="lineNum">     245 </span><span class="lineCov">  112143528 :         p-&gt;pool[p-&gt;bytes++] = entropy[n];</span></a>
+<a name="246"><span class="lineNum">     246 </span>            : </a>
+<a name="247"><span class="lineNum">     247 </span><span class="lineCov">  112143528 :         if (p-&gt;bytes == g-&gt;rehash_size) {</span></a>
+<a name="248"><span class="lineNum">     248 </span>            :             apr_size_t r;</a>
+<a name="249"><span class="lineNum">     249 </span>            : </a>
+<a name="250"><span class="lineNum">     250 </span><span class="lineCov">    1524339 :             for (r = 0; r &lt; p-&gt;bytes/2; r+=g-&gt;pool_hash-&gt;size)</span></a>
+<a name="251"><span class="lineNum">     251 </span><span class="lineCov">    1434672 :                 hash(g-&gt;pool_hash,p-&gt;pool+r,p-&gt;pool+r*2,g-&gt;pool_hash-&gt;size*2);</span></a>
+<a name="252"><span class="lineNum">     252 </span><span class="lineCov">      89667 :             p-&gt;bytes/=2;</span></a>
+<a name="253"><span class="lineNum">     253 </span><span class="lineCov">      89667 :         }</span></a>
+<a name="254"><span class="lineNum">     254 </span><span class="lineCov">  112143528 :         assert(p-&gt;bytes &lt; g-&gt;rehash_size);</span></a>
+<a name="255"><span class="lineNum">     255 </span><span class="lineCov">  112143528 :     }</span></a>
+<a name="256"><span class="lineNum">     256 </span>            : </a>
+<a name="257"><span class="lineNum">     257 </span><span class="lineCov">   14017941 :     if (g-&gt;pools[0].bytes &gt;= g-&gt;reseed_size)</span></a>
+<a name="258"><span class="lineNum">     258 </span><span class="lineCov">     109593 :         rekey(g);</span></a>
+<a name="259"><span class="lineNum">     259 </span><span class="lineCov">   14017941 : }</span></a>
+<a name="260"><span class="lineNum">     260 </span>            : </a>
+<a name="261"><span class="lineNum">     261 </span>            : /* This will give g-&gt;B_size bytes of randomness */</a>
+<a name="262"><span class="lineNum">     262 </span><span class="lineCov">       3321 : static void apr_random_block(apr_random_t *g,unsigned char *random)</span></a>
+<a name="263"><span class="lineNum">     263 </span>            : {</a>
+<a name="264"><span class="lineNum">     264 </span>            :     /* FIXME: in principle, these are different hashes */</a>
+<a name="265"><span class="lineNum">     265 </span><span class="lineCov">       3321 :     hash(g-&gt;prng_hash,g-&gt;H,g-&gt;H,H_size(g));</span></a>
+<a name="266"><span class="lineNum">     266 </span><span class="lineCov">       3321 :     hash(g-&gt;prng_hash,random,g-&gt;H,B_size(g));</span></a>
+<a name="267"><span class="lineNum">     267 </span><span class="lineCov">       3321 : }</span></a>
+<a name="268"><span class="lineNum">     268 </span>            : </a>
+<a name="269"><span class="lineNum">     269 </span><span class="lineCov">       9963 : static void apr_random_bytes(apr_random_t *g,unsigned char *random,</span></a>
+<a name="270"><span class="lineNum">     270 </span>            :                              apr_size_t bytes)</a>
+<a name="271"><span class="lineNum">     271 </span>            : {</a>
+<a name="272"><span class="lineNum">     272 </span>            :     apr_size_t n;</a>
+<a name="273"><span class="lineNum">     273 </span>            : </a>
+<a name="274"><span class="lineNum">     274 </span><span class="lineCov">      19926 :     for (n = 0; n &lt; bytes; ) {</span></a>
+<a name="275"><span class="lineNum">     275 </span>            :         apr_size_t l;</a>
+<a name="276"><span class="lineNum">     276 </span>            : </a>
+<a name="277"><span class="lineNum">     277 </span><span class="lineCov">       9963 :         if (g-&gt;random_bytes == 0) {</span></a>
+<a name="278"><span class="lineNum">     278 </span><span class="lineCov">       3321 :             apr_random_block(g,g-&gt;randomness);</span></a>
+<a name="279"><span class="lineNum">     279 </span><span class="lineCov">       3321 :             g-&gt;random_bytes = B_size(g);</span></a>
+<a name="280"><span class="lineNum">     280 </span><span class="lineCov">       3321 :         }</span></a>
+<a name="281"><span class="lineNum">     281 </span><span class="lineCov">       9963 :         l = min(bytes-n,g-&gt;random_bytes);</span></a>
+<a name="282"><span class="lineNum">     282 </span><span class="lineCov">       9963 :         memcpy(&amp;random[n],g-&gt;randomness+B_size(g)-g-&gt;random_bytes,l);</span></a>
+<a name="283"><span class="lineNum">     283 </span><span class="lineCov">       9963 :         g-&gt;random_bytes-=l;</span></a>
+<a name="284"><span class="lineNum">     284 </span><span class="lineCov">       9963 :         n+=l;</span></a>
+<a name="285"><span class="lineNum">     285 </span>            :     }</a>
+<a name="286"><span class="lineNum">     286 </span><span class="lineCov">       9963 : }</span></a>
+<a name="287"><span class="lineNum">     287 </span>            : </a>
+<a name="288"><span class="lineNum">     288 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_random_secure_bytes(apr_random_t *g,</span></a>
+<a name="289"><span class="lineNum">     289 </span>            :                                                   void *random,</a>
+<a name="290"><span class="lineNum">     290 </span>            :                                                   apr_size_t bytes)</a>
+<a name="291"><span class="lineNum">     291 </span>            : {</a>
+<a name="292"><span class="lineNum">     292 </span><span class="lineNoCov">          0 :     if (!g-&gt;secure_started)</span></a>
+<a name="293"><span class="lineNum">     293 </span><span class="lineNoCov">          0 :         return APR_ENOTENOUGHENTROPY;</span></a>
+<a name="294"><span class="lineNum">     294 </span><span class="lineNoCov">          0 :     apr_random_bytes(g,random,bytes);</span></a>
+<a name="295"><span class="lineNum">     295 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="296"><span class="lineNum">     296 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="297"><span class="lineNum">     297 </span>            : </a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineCov">       9963 : APR_DECLARE(apr_status_t) apr_random_insecure_bytes(apr_random_t *g,</span></a>
+<a name="299"><span class="lineNum">     299 </span>            :                                                     void *random,</a>
+<a name="300"><span class="lineNum">     300 </span>            :                                                     apr_size_t bytes)</a>
+<a name="301"><span class="lineNum">     301 </span>            : {</a>
+<a name="302"><span class="lineNum">     302 </span><span class="lineCov">       9963 :     if (!g-&gt;insecure_started)</span></a>
+<a name="303"><span class="lineNum">     303 </span><span class="lineNoCov">          0 :         return APR_ENOTENOUGHENTROPY;</span></a>
+<a name="304"><span class="lineNum">     304 </span><span class="lineCov">       9963 :     apr_random_bytes(g,random,bytes);</span></a>
+<a name="305"><span class="lineNum">     305 </span><span class="lineCov">       9963 :     return APR_SUCCESS;</span></a>
+<a name="306"><span class="lineNum">     306 </span><span class="lineCov">       9963 : }</span></a>
+<a name="307"><span class="lineNum">     307 </span>            : </a>
+<a name="308"><span class="lineNum">     308 </span><span class="lineNoCov">          0 : APR_DECLARE(void) apr_random_barrier(apr_random_t *g)</span></a>
+<a name="309"><span class="lineNum">     309 </span>            : {</a>
+<a name="310"><span class="lineNum">     310 </span><span class="lineNoCov">          0 :     g-&gt;secure_started = 0;</span></a>
+<a name="311"><span class="lineNum">     311 </span><span class="lineNoCov">          0 :     g-&gt;secure_base = g-&gt;generation;</span></a>
+<a name="312"><span class="lineNum">     312 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="313"><span class="lineNum">     313 </span>            : </a>
+<a name="314"><span class="lineNum">     314 </span><span class="lineNoCov">          0 : APR_DECLARE(apr_status_t) apr_random_secure_ready(apr_random_t *r)</span></a>
+<a name="315"><span class="lineNum">     315 </span>            : {</a>
+<a name="316"><span class="lineNum">     316 </span><span class="lineNoCov">          0 :     if (!r-&gt;secure_started)</span></a>
+<a name="317"><span class="lineNum">     317 </span><span class="lineNoCov">          0 :         return APR_ENOTENOUGHENTROPY;</span></a>
+<a name="318"><span class="lineNum">     318 </span><span class="lineNoCov">          0 :     return APR_SUCCESS;</span></a>
+<a name="319"><span class="lineNum">     319 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="320"><span class="lineNum">     320 </span>            : </a>
+<a name="321"><span class="lineNum">     321 </span><span class="lineCov">   14017941 : APR_DECLARE(apr_status_t) apr_random_insecure_ready(apr_random_t *r)</span></a>
+<a name="322"><span class="lineNum">     322 </span>            : {</a>
+<a name="323"><span class="lineNum">     323 </span><span class="lineCov">   14017941 :     if (!r-&gt;insecure_started)</span></a>
+<a name="324"><span class="lineNum">     324 </span><span class="lineCov">   14014620 :         return APR_ENOTENOUGHENTROPY;</span></a>
+<a name="325"><span class="lineNum">     325 </span><span class="lineCov">       3321 :     return APR_SUCCESS;</span></a>
+<a name="326"><span class="lineNum">     326 </span><span class="lineCov">   14017941 : }</span></a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
