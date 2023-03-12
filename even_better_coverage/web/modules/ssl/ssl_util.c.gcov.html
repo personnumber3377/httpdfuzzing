@@ -1,0 +1,585 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - trace.lcov_info_final - modules/ssl/ssl_util.c</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">modules/ssl</a> - ssl_util.c<span style="font-size: 80%;"> (source / <a href="ssl_util.c.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">trace.lcov_info_final</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">110</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2023-03-12 19:02:48</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : /* Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<a name="2"><span class="lineNum">       2 </span>            :  * contributor license agreements.  See the NOTICE file distributed with</a>
+<a name="3"><span class="lineNum">       3 </span>            :  * this work for additional information regarding copyright ownership.</a>
+<a name="4"><span class="lineNum">       4 </span>            :  * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<a name="5"><span class="lineNum">       5 </span>            :  * (the &quot;License&quot;); you may not use this file except in compliance with</a>
+<a name="6"><span class="lineNum">       6 </span>            :  * the License.  You may obtain a copy of the License at</a>
+<a name="7"><span class="lineNum">       7 </span>            :  *</a>
+<a name="8"><span class="lineNum">       8 </span>            :  *     http://www.apache.org/licenses/LICENSE-2.0</a>
+<a name="9"><span class="lineNum">       9 </span>            :  *</a>
+<a name="10"><span class="lineNum">      10 </span>            :  * Unless required by applicable law or agreed to in writing, software</a>
+<a name="11"><span class="lineNum">      11 </span>            :  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</a>
+<a name="12"><span class="lineNum">      12 </span>            :  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<a name="13"><span class="lineNum">      13 </span>            :  * See the License for the specific language governing permissions and</a>
+<a name="14"><span class="lineNum">      14 </span>            :  * limitations under the License.</a>
+<a name="15"><span class="lineNum">      15 </span>            :  */</a>
+<a name="16"><span class="lineNum">      16 </span>            : </a>
+<a name="17"><span class="lineNum">      17 </span>            : /*                      _             _</a>
+<a name="18"><span class="lineNum">      18 </span>            :  *  _ __ ___   ___   __| |    ___ ___| |  mod_ssl</a>
+<a name="19"><span class="lineNum">      19 </span>            :  * | '_ ` _ \ / _ \ / _` |   / __/ __| |  Apache Interface to OpenSSL</a>
+<a name="20"><span class="lineNum">      20 </span>            :  * | | | | | | (_) | (_| |   \__ \__ \ |</a>
+<a name="21"><span class="lineNum">      21 </span>            :  * |_| |_| |_|\___/ \__,_|___|___/___/_|</a>
+<a name="22"><span class="lineNum">      22 </span>            :  *                      |_____|</a>
+<a name="23"><span class="lineNum">      23 </span>            :  *  ssl_util.c</a>
+<a name="24"><span class="lineNum">      24 </span>            :  *  Utility Functions</a>
+<a name="25"><span class="lineNum">      25 </span>            :  */</a>
+<a name="26"><span class="lineNum">      26 </span>            :                              /* ``Every day of my life</a>
+<a name="27"><span class="lineNum">      27 </span>            :                                   I am forced to add another</a>
+<a name="28"><span class="lineNum">      28 </span>            :                                   name to the list of people</a>
+<a name="29"><span class="lineNum">      29 </span>            :                                   who piss me off!''</a>
+<a name="30"><span class="lineNum">      30 </span>            :                                             -- Calvin          */</a>
+<a name="31"><span class="lineNum">      31 </span>            : </a>
+<a name="32"><span class="lineNum">      32 </span>            : #include &quot;ssl_private.h&quot;</a>
+<a name="33"><span class="lineNum">      33 </span>            : #include &quot;ap_mpm.h&quot;</a>
+<a name="34"><span class="lineNum">      34 </span>            : #include &quot;apr_thread_mutex.h&quot;</a>
+<a name="35"><span class="lineNum">      35 </span>            : </a>
+<a name="36"><span class="lineNum">      36 </span>            : /*  _________________________________________________________________</a>
+<a name="37"><span class="lineNum">      37 </span>            : **</a>
+<a name="38"><span class="lineNum">      38 </span>            : **  Utility Functions</a>
+<a name="39"><span class="lineNum">      39 </span>            : **  _________________________________________________________________</a>
+<a name="40"><span class="lineNum">      40 </span>            : */</a>
+<a name="41"><span class="lineNum">      41 </span>            : </a>
+<a name="42"><span class="lineNum">      42 </span><span class="lineNoCov">          0 : char *ssl_util_vhostid(apr_pool_t *p, server_rec *s)</span></a>
+<a name="43"><span class="lineNum">      43 </span>            : {</a>
+<a name="44"><span class="lineNum">      44 </span>            :     SSLSrvConfigRec *sc;</a>
+<a name="45"><span class="lineNum">      45 </span>            :     apr_port_t port;</a>
+<a name="46"><span class="lineNum">      46 </span>            : </a>
+<a name="47"><span class="lineNum">      47 </span><span class="lineNoCov">          0 :     if (s-&gt;port != 0)</span></a>
+<a name="48"><span class="lineNum">      48 </span><span class="lineNoCov">          0 :         port = s-&gt;port;</span></a>
+<a name="49"><span class="lineNum">      49 </span>            :     else {</a>
+<a name="50"><span class="lineNum">      50 </span><span class="lineNoCov">          0 :         sc = mySrvConfig(s);</span></a>
+<a name="51"><span class="lineNum">      51 </span><span class="lineNoCov">          0 :         port = sc-&gt;enabled == TRUE ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;</span></a>
+<a name="52"><span class="lineNum">      52 </span>            :     }</a>
+<a name="53"><span class="lineNum">      53 </span>            : </a>
+<a name="54"><span class="lineNum">      54 </span><span class="lineNoCov">          0 :     return apr_psprintf(p, &quot;%s:%lu&quot;, s-&gt;server_hostname, (unsigned long)port);</span></a>
+<a name="55"><span class="lineNum">      55 </span>            : }</a>
+<a name="56"><span class="lineNum">      56 </span>            : </a>
+<a name="57"><span class="lineNum">      57 </span>            : /*</a>
+<a name="58"><span class="lineNum">      58 </span>            :  * Return TRUE iff the given servername matches the server record when</a>
+<a name="59"><span class="lineNum">      59 </span>            :  * selecting virtual hosts.</a>
+<a name="60"><span class="lineNum">      60 </span>            :  */</a>
+<a name="61"><span class="lineNum">      61 </span><span class="lineNoCov">          0 : BOOL ssl_util_vhost_matches(const char *servername, server_rec *s)</span></a>
+<a name="62"><span class="lineNum">      62 </span>            : {</a>
+<a name="63"><span class="lineNum">      63 </span>            :     apr_array_header_t *names;</a>
+<a name="64"><span class="lineNum">      64 </span>            :     int i;</a>
+<a name="65"><span class="lineNum">      65 </span>            :     </a>
+<a name="66"><span class="lineNum">      66 </span>            :     /* check ServerName */</a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineNoCov">          0 :     if (!strcasecmp(servername, s-&gt;server_hostname)) {</span></a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineNoCov">          0 :         return TRUE;</span></a>
+<a name="69"><span class="lineNum">      69 </span>            :     }</a>
+<a name="70"><span class="lineNum">      70 </span>            :     </a>
+<a name="71"><span class="lineNum">      71 </span>            :     /*</a>
+<a name="72"><span class="lineNum">      72 </span>            :      * if not matched yet, check ServerAlias entries</a>
+<a name="73"><span class="lineNum">      73 </span>            :      * (adapted from vhost.c:matches_aliases())</a>
+<a name="74"><span class="lineNum">      74 </span>            :      */</a>
+<a name="75"><span class="lineNum">      75 </span><span class="lineNoCov">          0 :     names = s-&gt;names;</span></a>
+<a name="76"><span class="lineNum">      76 </span><span class="lineNoCov">          0 :     if (names) {</span></a>
+<a name="77"><span class="lineNum">      77 </span><span class="lineNoCov">          0 :         char **name = (char **)names-&gt;elts;</span></a>
+<a name="78"><span class="lineNum">      78 </span><span class="lineNoCov">          0 :         for (i = 0; i &lt; names-&gt;nelts; ++i) {</span></a>
+<a name="79"><span class="lineNum">      79 </span><span class="lineNoCov">          0 :             if (!name[i])</span></a>
+<a name="80"><span class="lineNum">      80 </span><span class="lineNoCov">          0 :                 continue;</span></a>
+<a name="81"><span class="lineNum">      81 </span><span class="lineNoCov">          0 :             if (!strcasecmp(servername, name[i])) {</span></a>
+<a name="82"><span class="lineNum">      82 </span><span class="lineNoCov">          0 :                 return TRUE;</span></a>
+<a name="83"><span class="lineNum">      83 </span>            :             }</a>
+<a name="84"><span class="lineNum">      84 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="85"><span class="lineNum">      85 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="86"><span class="lineNum">      86 </span>            :     </a>
+<a name="87"><span class="lineNum">      87 </span>            :     /* if still no match, check ServerAlias entries with wildcards */</a>
+<a name="88"><span class="lineNum">      88 </span><span class="lineNoCov">          0 :     names = s-&gt;wild_names;</span></a>
+<a name="89"><span class="lineNum">      89 </span><span class="lineNoCov">          0 :     if (names) {</span></a>
+<a name="90"><span class="lineNum">      90 </span><span class="lineNoCov">          0 :         char **name = (char **)names-&gt;elts;</span></a>
+<a name="91"><span class="lineNum">      91 </span><span class="lineNoCov">          0 :         for (i = 0; i &lt; names-&gt;nelts; ++i) {</span></a>
+<a name="92"><span class="lineNum">      92 </span><span class="lineNoCov">          0 :             if (!name[i])</span></a>
+<a name="93"><span class="lineNum">      93 </span><span class="lineNoCov">          0 :                 continue;</span></a>
+<a name="94"><span class="lineNum">      94 </span><span class="lineNoCov">          0 :             if (!ap_strcasecmp_match(servername, name[i])) {</span></a>
+<a name="95"><span class="lineNum">      95 </span><span class="lineNoCov">          0 :                 return TRUE;</span></a>
+<a name="96"><span class="lineNum">      96 </span>            :             }</a>
+<a name="97"><span class="lineNum">      97 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="98"><span class="lineNum">      98 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="99"><span class="lineNum">      99 </span>            :     </a>
+<a name="100"><span class="lineNum">     100 </span><span class="lineNoCov">          0 :     return FALSE;</span></a>
+<a name="101"><span class="lineNum">     101 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<a name="103"><span class="lineNum">     103 </span><span class="lineNoCov">          0 : int modssl_request_is_tls(const request_rec *r, SSLConnRec **scout)</span></a>
+<a name="104"><span class="lineNum">     104 </span>            : {</a>
+<a name="105"><span class="lineNum">     105 </span><span class="lineNoCov">          0 :     SSLConnRec *sslconn = myConnConfig(r-&gt;connection);</span></a>
+<a name="106"><span class="lineNum">     106 </span><span class="lineNoCov">          0 :     SSLSrvConfigRec *sc = mySrvConfig(r-&gt;server);</span></a>
+<a name="107"><span class="lineNum">     107 </span>            : </a>
+<a name="108"><span class="lineNum">     108 </span><span class="lineNoCov">          0 :     if (!(sslconn &amp;&amp; sslconn-&gt;ssl) &amp;&amp; r-&gt;connection-&gt;master) {</span></a>
+<a name="109"><span class="lineNum">     109 </span><span class="lineNoCov">          0 :         sslconn = myConnConfig(r-&gt;connection-&gt;master);</span></a>
+<a name="110"><span class="lineNum">     110 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="111"><span class="lineNum">     111 </span>            : </a>
+<a name="112"><span class="lineNum">     112 </span><span class="lineNoCov">          0 :     if (sc-&gt;enabled == SSL_ENABLED_FALSE || !sslconn || !sslconn-&gt;ssl)</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :         return 0;</span></a>
+<a name="114"><span class="lineNum">     114 </span>            :     </a>
+<a name="115"><span class="lineNum">     115 </span><span class="lineNoCov">          0 :     if (scout) *scout = sslconn;</span></a>
+<a name="116"><span class="lineNum">     116 </span>            : </a>
+<a name="117"><span class="lineNum">     117 </span><span class="lineNoCov">          0 :     return 1;</span></a>
+<a name="118"><span class="lineNum">     118 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="119"><span class="lineNum">     119 </span>            : </a>
+<a name="120"><span class="lineNum">     120 </span><span class="lineNoCov">          0 : apr_file_t *ssl_util_ppopen(server_rec *s, apr_pool_t *p, const char *cmd,</span></a>
+<a name="121"><span class="lineNum">     121 </span>            :                             const char * const *argv)</a>
+<a name="122"><span class="lineNum">     122 </span>            : {</a>
+<a name="123"><span class="lineNum">     123 </span>            :     apr_procattr_t *procattr;</a>
+<a name="124"><span class="lineNum">     124 </span>            :     apr_proc_t *proc;</a>
+<a name="125"><span class="lineNum">     125 </span>            : </a>
+<a name="126"><span class="lineNum">     126 </span><span class="lineNoCov">          0 :     if (apr_procattr_create(&amp;procattr, p) != APR_SUCCESS)</span></a>
+<a name="127"><span class="lineNum">     127 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="128"><span class="lineNum">     128 </span><span class="lineNoCov">          0 :     if (apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_FULL_BLOCK,</span></a>
+<a name="129"><span class="lineNum">     129 </span><span class="lineNoCov">          0 :                             APR_FULL_BLOCK) != APR_SUCCESS)</span></a>
+<a name="130"><span class="lineNum">     130 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="131"><span class="lineNum">     131 </span><span class="lineNoCov">          0 :     if (apr_procattr_dir_set(procattr,</span></a>
+<a name="132"><span class="lineNum">     132 </span><span class="lineNoCov">          0 :                              ap_make_dirstr_parent(p, cmd)) != APR_SUCCESS)</span></a>
+<a name="133"><span class="lineNum">     133 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 :     if (apr_procattr_cmdtype_set(procattr, APR_PROGRAM) != APR_SUCCESS)</span></a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="136"><span class="lineNum">     136 </span><span class="lineNoCov">          0 :     proc = apr_pcalloc(p, sizeof(apr_proc_t));</span></a>
+<a name="137"><span class="lineNum">     137 </span><span class="lineNoCov">          0 :     if (apr_proc_create(proc, cmd, argv, NULL, procattr, p) != APR_SUCCESS)</span></a>
+<a name="138"><span class="lineNum">     138 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="139"><span class="lineNum">     139 </span><span class="lineNoCov">          0 :     return proc-&gt;out;</span></a>
+<a name="140"><span class="lineNum">     140 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="141"><span class="lineNum">     141 </span>            : </a>
+<a name="142"><span class="lineNum">     142 </span><span class="lineNoCov">          0 : void ssl_util_ppclose(server_rec *s, apr_pool_t *p, apr_file_t *fp)</span></a>
+<a name="143"><span class="lineNum">     143 </span>            : {</a>
+<a name="144"><span class="lineNum">     144 </span><span class="lineNoCov">          0 :     apr_file_close(fp);</span></a>
+<a name="145"><span class="lineNum">     145 </span><span class="lineNoCov">          0 :     return;</span></a>
+<a name="146"><span class="lineNum">     146 </span>            : }</a>
+<a name="147"><span class="lineNum">     147 </span>            : </a>
+<a name="148"><span class="lineNum">     148 </span>            : /*</a>
+<a name="149"><span class="lineNum">     149 </span>            :  * Run a filter program and read the first line of its stdout output</a>
+<a name="150"><span class="lineNum">     150 </span>            :  */</a>
+<a name="151"><span class="lineNum">     151 </span><span class="lineNoCov">          0 : char *ssl_util_readfilter(server_rec *s, apr_pool_t *p, const char *cmd,</span></a>
+<a name="152"><span class="lineNum">     152 </span>            :                           const char * const *argv)</a>
+<a name="153"><span class="lineNum">     153 </span>            : {</a>
+<a name="154"><span class="lineNum">     154 </span>            :     static char buf[MAX_STRING_LEN];</a>
+<a name="155"><span class="lineNum">     155 </span>            :     apr_file_t *fp;</a>
+<a name="156"><span class="lineNum">     156 </span><span class="lineNoCov">          0 :     apr_size_t nbytes = 1;</span></a>
+<a name="157"><span class="lineNum">     157 </span>            :     char c;</a>
+<a name="158"><span class="lineNum">     158 </span>            :     int k;</a>
+<a name="159"><span class="lineNum">     159 </span>            : </a>
+<a name="160"><span class="lineNum">     160 </span><span class="lineNoCov">          0 :     if ((fp = ssl_util_ppopen(s, p, cmd, argv)) == NULL)</span></a>
+<a name="161"><span class="lineNum">     161 </span><span class="lineNoCov">          0 :         return NULL;</span></a>
+<a name="162"><span class="lineNum">     162 </span>            :     /* XXX: we are reading 1 byte at a time here */</a>
+<a name="163"><span class="lineNum">     163 </span><span class="lineNoCov">          0 :     for (k = 0; apr_file_read(fp, &amp;c, &amp;nbytes) == APR_SUCCESS</span></a>
+<a name="164"><span class="lineNum">     164 </span><span class="lineNoCov">          0 :                 &amp;&amp; nbytes == 1 &amp;&amp; (k &lt; MAX_STRING_LEN-1)     ; ) {</span></a>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :         if (c == '\n' || c == '\r')</span></a>
+<a name="166"><span class="lineNum">     166 </span><span class="lineNoCov">          0 :             break;</span></a>
+<a name="167"><span class="lineNum">     167 </span><span class="lineNoCov">          0 :         buf[k++] = c;</span></a>
+<a name="168"><span class="lineNum">     168 </span>            :     }</a>
+<a name="169"><span class="lineNum">     169 </span><span class="lineNoCov">          0 :     buf[k] = NUL;</span></a>
+<a name="170"><span class="lineNum">     170 </span><span class="lineNoCov">          0 :     ssl_util_ppclose(s, p, fp);</span></a>
+<a name="171"><span class="lineNum">     171 </span>            : </a>
+<a name="172"><span class="lineNum">     172 </span><span class="lineNoCov">          0 :     return buf;</span></a>
+<a name="173"><span class="lineNum">     173 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="174"><span class="lineNum">     174 </span>            : </a>
+<a name="175"><span class="lineNum">     175 </span><span class="lineNoCov">          0 : BOOL ssl_util_path_check(ssl_pathcheck_t pcm, const char *path, apr_pool_t *p)</span></a>
+<a name="176"><span class="lineNum">     176 </span>            : {</a>
+<a name="177"><span class="lineNum">     177 </span>            :     apr_finfo_t finfo;</a>
+<a name="178"><span class="lineNum">     178 </span>            : </a>
+<a name="179"><span class="lineNum">     179 </span><span class="lineNoCov">          0 :     if (path == NULL)</span></a>
+<a name="180"><span class="lineNum">     180 </span><span class="lineNoCov">          0 :         return FALSE;</span></a>
+<a name="181"><span class="lineNum">     181 </span><span class="lineNoCov">          0 :     if (pcm &amp; SSL_PCM_EXISTS &amp;&amp; apr_stat(&amp;finfo, path,</span></a>
+<a name="182"><span class="lineNum">     182 </span><span class="lineNoCov">          0 :                                 APR_FINFO_TYPE|APR_FINFO_SIZE, p) != 0)</span></a>
+<a name="183"><span class="lineNum">     183 </span><span class="lineNoCov">          0 :         return FALSE;</span></a>
+<a name="184"><span class="lineNum">     184 </span><span class="lineNoCov">          0 :     AP_DEBUG_ASSERT((pcm &amp; SSL_PCM_EXISTS) ||</span></a>
+<a name="185"><span class="lineNum">     185 </span>            :                     !(pcm &amp; (SSL_PCM_ISREG|SSL_PCM_ISDIR|SSL_PCM_ISNONZERO)));</a>
+<a name="186"><span class="lineNum">     186 </span><span class="lineNoCov">          0 :     if (pcm &amp; SSL_PCM_ISREG &amp;&amp; finfo.filetype != APR_REG)</span></a>
+<a name="187"><span class="lineNum">     187 </span><span class="lineNoCov">          0 :         return FALSE;</span></a>
+<a name="188"><span class="lineNum">     188 </span><span class="lineNoCov">          0 :     if (pcm &amp; SSL_PCM_ISDIR &amp;&amp; finfo.filetype != APR_DIR)</span></a>
+<a name="189"><span class="lineNum">     189 </span><span class="lineNoCov">          0 :         return FALSE;</span></a>
+<a name="190"><span class="lineNum">     190 </span><span class="lineNoCov">          0 :     if (pcm &amp; SSL_PCM_ISNONZERO &amp;&amp; finfo.size &lt;= 0)</span></a>
+<a name="191"><span class="lineNum">     191 </span><span class="lineNoCov">          0 :         return FALSE;</span></a>
+<a name="192"><span class="lineNum">     192 </span><span class="lineNoCov">          0 :     return TRUE;</span></a>
+<a name="193"><span class="lineNum">     193 </span><span class="lineNoCov">          0 : }</span></a>
+<a name="194"><span class="lineNum">     194 </span>            : </a>
+<a name="195"><span class="lineNum">     195 </span>            : /* Decrypted private keys are cached to survive restarts.  The cached</a>
+<a name="196"><span class="lineNum">     196 </span>            :  * data must have lifetime of the process (hence malloc/free rather</a>
+<a name="197"><span class="lineNum">     197 </span>            :  * than pools), and uses raw DER since the EVP_PKEY structure</a>
+<a name="198"><span class="lineNum">     198 </span>            :  * internals may not survive across a module reload. */</a>
+<a name="199"><span class="lineNum">     199 </span><span class="lineNoCov">          0 : ssl_asn1_t *ssl_asn1_table_set(apr_hash_t *table, const char *key,</span></a>
+<a name="200"><span class="lineNum">     200 </span>            :                                EVP_PKEY *pkey)</a>
+<a name="201"><span class="lineNum">     201 </span>            : {</a>
+<a name="202"><span class="lineNum">     202 </span><span class="lineNoCov">          0 :     apr_ssize_t klen = strlen(key);</span></a>
+<a name="203"><span class="lineNum">     203 </span><span class="lineNoCov">          0 :     ssl_asn1_t *asn1 = apr_hash_get(table, key, klen);</span></a>
+<a name="204"><span class="lineNum">     204 </span><span class="lineNoCov">          0 :     apr_size_t length = i2d_PrivateKey(pkey, NULL);</span></a>
+<a name="205"><span class="lineNum">     205 </span>            :     unsigned char *p;</a>
+<a name="206"><span class="lineNum">     206 </span>            : </a>
+<a name="207"><span class="lineNum">     207 </span>            :     /* Re-use structure if cached previously. */</a>
+<a name="208"><span class="lineNum">     208 </span><span class="lineNoCov">          0 :     if (asn1) {</span></a>
+<a name="209"><span class="lineNum">     209 </span><span class="lineNoCov">          0 :         if (asn1-&gt;nData != length) {</span></a>
+<a name="210"><span class="lineNum">     210 </span><span class="lineNoCov">          0 :             asn1-&gt;cpData = ap_realloc(asn1-&gt;cpData, length);</span></a>
+<a name="211"><span class="lineNum">     211 </span><span class="lineNoCov">          0 :         }</span></a>
+<a name="212"><span class="lineNum">     212 </span><span class="lineNoCov">          0 :     }</span></a>
+<a name="213"><span class="lineNum">     213 </span>            :     else {</a>
+<a name="214"><span class="lineNum">     214 </span><span class="lineNoCov">          0 :         asn1 = ap_malloc(sizeof(*asn1));</span></a>
+<a name="215"><span class="lineNum">     215 </span><span class="lineNoCov">          0 :         asn1-&gt;source_mtime = 0; /* used as a note for encrypted private keys */</span></a>
+<a name="216"><span class="lineNum">     216 </span><span class="lineNoCov">          0 :         asn1-&gt;cpData = ap_malloc(length);</span></a>
+<a name="217"><span class="lineNum">     217 </span>            : </a>
+<a name="218"><span class="lineNum">     218 </span><span class="lineNoCov">          0 :         apr_hash_set(table, key, klen, asn1);</span></a>
+<a name="219"><span class="lineNum">     219 </span>            :     }</a>
+<a name="220"><span class="lineNum">     220 </span>            : </a>
+<a name="221"><span class="lineNum">     221 </span><span class="lineNoCov">          0 :     asn1-&gt;nData = length;</span></a>
+<a name="222"><span class="lineNum">     222 </span><span class="lineNoCov">          0 :     p = asn1-&gt;cpData;</span></a>
+<a name="223"><span class="lineNum">     223 </span><span class="lineNoCov">          0 :     i2d_PrivateKey(pkey, &amp;p); /* increases p by length */</span></a>
+<a name="224"><span class="lineNum">     224 </span>            : </a>
+<a name="225"><span class="lineNum">     225 </span><span class="lineNoCov">          0 :     return asn1;</span></a>
+<a name="226"><span class="lineNum">     226 </span>            : }</a>
+<a name="227"><span class="lineNum">     227 </span>            : </a>
+<a name="228"><span class="lineNum">     228 </span><span class="lineNoCov">          0 : ssl_asn1_t *ssl_asn1_table_get(apr_hash_t *table,</span></a>
+<a name="229"><span class="lineNum">     229 </span>            :                                const char *key)</a>
+<a name="230"><span class="lineNum">     230 </span>            : {</a>
+<a name="231"><span class="lineNum">     231 </span><span class="lineNoCov">          0 :     return (ssl_asn1_t *)apr_hash_get(table, key, APR_HASH_KEY_STRING);</span></a>
+<a name="232"><span class="lineNum">     232 </span>            : }</a>
+<a name="233"><span class="lineNum">     233 </span>            : </a>
+<a name="234"><span class="lineNum">     234 </span>            : #if APR_HAS_THREADS &amp;&amp; MODSSL_USE_OPENSSL_PRE_1_1_API</a>
+<a name="235"><span class="lineNum">     235 </span>            : </a>
+<a name="236"><span class="lineNum">     236 </span>            : /*</a>
+<a name="237"><span class="lineNum">     237 </span>            :  * To ensure thread-safetyness in OpenSSL - work in progress</a>
+<a name="238"><span class="lineNum">     238 </span>            :  */</a>
+<a name="239"><span class="lineNum">     239 </span>            : </a>
+<a name="240"><span class="lineNum">     240 </span>            : #if (OPENSSL_VERSION_NUMBER &gt;= 0x10000000L) &amp;&amp; \</a>
+<a name="241"><span class="lineNum">     241 </span>            :         (_WIN32 || __BEOS__ || AP_OPENSSL_USE_ERRNO_THREADID)</a>
+<a name="242"><span class="lineNum">     242 </span>            : /* Windows and BeOS can use the default THREADID callback shipped with OpenSSL</a>
+<a name="243"><span class="lineNum">     243 </span>            :  * 1.0.x, as can any platform with a thread-safe errno. */</a>
+<a name="244"><span class="lineNum">     244 </span>            : # define DEFAULT_THREADID_IS_SAFE 1</a>
+<a name="245"><span class="lineNum">     245 </span>            : #endif</a>
+<a name="246"><span class="lineNum">     246 </span>            : </a>
+<a name="247"><span class="lineNum">     247 </span>            : static apr_thread_mutex_t **lock_cs;</a>
+<a name="248"><span class="lineNum">     248 </span>            : static int                  lock_num_locks;</a>
+<a name="249"><span class="lineNum">     249 </span>            : </a>
+<a name="250"><span class="lineNum">     250 </span>            : static void ssl_util_thr_lock(int mode, int type,</a>
+<a name="251"><span class="lineNum">     251 </span>            :                               const char *file, int line)</a>
+<a name="252"><span class="lineNum">     252 </span>            : {</a>
+<a name="253"><span class="lineNum">     253 </span>            :     if (type &lt; lock_num_locks) {</a>
+<a name="254"><span class="lineNum">     254 </span>            :         if (mode &amp; CRYPTO_LOCK) {</a>
+<a name="255"><span class="lineNum">     255 </span>            :             apr_thread_mutex_lock(lock_cs[type]);</a>
+<a name="256"><span class="lineNum">     256 </span>            :         }</a>
+<a name="257"><span class="lineNum">     257 </span>            :         else {</a>
+<a name="258"><span class="lineNum">     258 </span>            :             apr_thread_mutex_unlock(lock_cs[type]);</a>
+<a name="259"><span class="lineNum">     259 </span>            :         }</a>
+<a name="260"><span class="lineNum">     260 </span>            :     }</a>
+<a name="261"><span class="lineNum">     261 </span>            : }</a>
+<a name="262"><span class="lineNum">     262 </span>            : </a>
+<a name="263"><span class="lineNum">     263 </span>            : /* Dynamic lock structure */</a>
+<a name="264"><span class="lineNum">     264 </span>            : struct CRYPTO_dynlock_value {</a>
+<a name="265"><span class="lineNum">     265 </span>            :     apr_pool_t *pool;</a>
+<a name="266"><span class="lineNum">     266 </span>            :     const char* file;</a>
+<a name="267"><span class="lineNum">     267 </span>            :     int line;</a>
+<a name="268"><span class="lineNum">     268 </span>            :     apr_thread_mutex_t *mutex;</a>
+<a name="269"><span class="lineNum">     269 </span>            : };</a>
+<a name="270"><span class="lineNum">     270 </span>            : </a>
+<a name="271"><span class="lineNum">     271 </span>            : /* Global reference to the pool passed into ssl_util_thread_setup() */</a>
+<a name="272"><span class="lineNum">     272 </span>            : apr_pool_t *dynlockpool = NULL;</a>
+<a name="273"><span class="lineNum">     273 </span>            : </a>
+<a name="274"><span class="lineNum">     274 </span>            : /*</a>
+<a name="275"><span class="lineNum">     275 </span>            :  * Dynamic lock creation callback</a>
+<a name="276"><span class="lineNum">     276 </span>            :  */</a>
+<a name="277"><span class="lineNum">     277 </span>            : static struct CRYPTO_dynlock_value *ssl_dyn_create_function(const char *file,</a>
+<a name="278"><span class="lineNum">     278 </span>            :                                                      int line)</a>
+<a name="279"><span class="lineNum">     279 </span>            : {</a>
+<a name="280"><span class="lineNum">     280 </span>            :     struct CRYPTO_dynlock_value *value;</a>
+<a name="281"><span class="lineNum">     281 </span>            :     apr_pool_t *p;</a>
+<a name="282"><span class="lineNum">     282 </span>            :     apr_status_t rv;</a>
+<a name="283"><span class="lineNum">     283 </span>            : </a>
+<a name="284"><span class="lineNum">     284 </span>            :     /*</a>
+<a name="285"><span class="lineNum">     285 </span>            :      * We need a pool to allocate our mutex.  Since we can't clear</a>
+<a name="286"><span class="lineNum">     286 </span>            :      * allocated memory from a pool, create a subpool that we can blow</a>
+<a name="287"><span class="lineNum">     287 </span>            :      * away in the destruction callback.</a>
+<a name="288"><span class="lineNum">     288 </span>            :      */</a>
+<a name="289"><span class="lineNum">     289 </span>            :     apr_pool_create(&amp;p, dynlockpool);</a>
+<a name="290"><span class="lineNum">     290 </span>            :     apr_pool_tag(p, &quot;modssl_dynlock_value&quot;);</a>
+<a name="291"><span class="lineNum">     291 </span>            :     ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE1, 0, p,</a>
+<a name="292"><span class="lineNum">     292 </span>            :                   &quot;Creating dynamic lock&quot;);</a>
+<a name="293"><span class="lineNum">     293 </span>            : </a>
+<a name="294"><span class="lineNum">     294 </span>            :     value = apr_palloc(p, sizeof(struct CRYPTO_dynlock_value));</a>
+<a name="295"><span class="lineNum">     295 </span>            :     value-&gt;pool = p;</a>
+<a name="296"><span class="lineNum">     296 </span>            :     /* Keep our own copy of the place from which we were created,</a>
+<a name="297"><span class="lineNum">     297 </span>            :        using our own pool. */</a>
+<a name="298"><span class="lineNum">     298 </span>            :     value-&gt;file = apr_pstrdup(p, file);</a>
+<a name="299"><span class="lineNum">     299 </span>            :     value-&gt;line = line;</a>
+<a name="300"><span class="lineNum">     300 </span>            :     rv = apr_thread_mutex_create(&amp;(value-&gt;mutex), APR_THREAD_MUTEX_DEFAULT,</a>
+<a name="301"><span class="lineNum">     301 </span>            :                                 p);</a>
+<a name="302"><span class="lineNum">     302 </span>            :     if (rv != APR_SUCCESS) {</a>
+<a name="303"><span class="lineNum">     303 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_ERR, rv, p, APLOGNO(02186)</a>
+<a name="304"><span class="lineNum">     304 </span>            :                       &quot;Failed to create thread mutex for dynamic lock&quot;);</a>
+<a name="305"><span class="lineNum">     305 </span>            :         apr_pool_destroy(p);</a>
+<a name="306"><span class="lineNum">     306 </span>            :         return NULL;</a>
+<a name="307"><span class="lineNum">     307 </span>            :     }</a>
+<a name="308"><span class="lineNum">     308 </span>            :     return value;</a>
+<a name="309"><span class="lineNum">     309 </span>            : }</a>
+<a name="310"><span class="lineNum">     310 </span>            : </a>
+<a name="311"><span class="lineNum">     311 </span>            : /*</a>
+<a name="312"><span class="lineNum">     312 </span>            :  * Dynamic locking and unlocking function</a>
+<a name="313"><span class="lineNum">     313 </span>            :  */</a>
+<a name="314"><span class="lineNum">     314 </span>            : </a>
+<a name="315"><span class="lineNum">     315 </span>            : static void ssl_dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l,</a>
+<a name="316"><span class="lineNum">     316 </span>            :                            const char *file, int line)</a>
+<a name="317"><span class="lineNum">     317 </span>            : {</a>
+<a name="318"><span class="lineNum">     318 </span>            :     apr_status_t rv;</a>
+<a name="319"><span class="lineNum">     319 </span>            : </a>
+<a name="320"><span class="lineNum">     320 </span>            :     if (mode &amp; CRYPTO_LOCK) {</a>
+<a name="321"><span class="lineNum">     321 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE3, 0, l-&gt;pool,</a>
+<a name="322"><span class="lineNum">     322 </span>            :                       &quot;Acquiring mutex %s:%d&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="323"><span class="lineNum">     323 </span>            :         rv = apr_thread_mutex_lock(l-&gt;mutex);</a>
+<a name="324"><span class="lineNum">     324 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE3, rv, l-&gt;pool,</a>
+<a name="325"><span class="lineNum">     325 </span>            :                       &quot;Mutex %s:%d acquired!&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="326"><span class="lineNum">     326 </span>            :     }</a>
+<a name="327"><span class="lineNum">     327 </span>            :     else {</a>
+<a name="328"><span class="lineNum">     328 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE3, 0, l-&gt;pool,</a>
+<a name="329"><span class="lineNum">     329 </span>            :                       &quot;Releasing mutex %s:%d&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="330"><span class="lineNum">     330 </span>            :         rv = apr_thread_mutex_unlock(l-&gt;mutex);</a>
+<a name="331"><span class="lineNum">     331 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE3, rv, l-&gt;pool,</a>
+<a name="332"><span class="lineNum">     332 </span>            :                       &quot;Mutex %s:%d released!&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="333"><span class="lineNum">     333 </span>            :     }</a>
+<a name="334"><span class="lineNum">     334 </span>            : }</a>
+<a name="335"><span class="lineNum">     335 </span>            : </a>
+<a name="336"><span class="lineNum">     336 </span>            : /*</a>
+<a name="337"><span class="lineNum">     337 </span>            :  * Dynamic lock destruction callback</a>
+<a name="338"><span class="lineNum">     338 </span>            :  */</a>
+<a name="339"><span class="lineNum">     339 </span>            : static void ssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,</a>
+<a name="340"><span class="lineNum">     340 </span>            :                           const char *file, int line)</a>
+<a name="341"><span class="lineNum">     341 </span>            : {</a>
+<a name="342"><span class="lineNum">     342 </span>            :     apr_status_t rv;</a>
+<a name="343"><span class="lineNum">     343 </span>            : </a>
+<a name="344"><span class="lineNum">     344 </span>            :     ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_TRACE1, 0, l-&gt;pool,</a>
+<a name="345"><span class="lineNum">     345 </span>            :                   &quot;Destroying dynamic lock %s:%d&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="346"><span class="lineNum">     346 </span>            :     rv = apr_thread_mutex_destroy(l-&gt;mutex);</a>
+<a name="347"><span class="lineNum">     347 </span>            :     if (rv != APR_SUCCESS) {</a>
+<a name="348"><span class="lineNum">     348 </span>            :         ap_log_perror(file, line, APLOG_MODULE_INDEX, APLOG_ERR, rv, l-&gt;pool,</a>
+<a name="349"><span class="lineNum">     349 </span>            :                       APLOGNO(02192) &quot;Failed to destroy mutex for dynamic &quot;</a>
+<a name="350"><span class="lineNum">     350 </span>            :                       &quot;lock %s:%d&quot;, l-&gt;file, l-&gt;line);</a>
+<a name="351"><span class="lineNum">     351 </span>            :     }</a>
+<a name="352"><span class="lineNum">     352 </span>            : </a>
+<a name="353"><span class="lineNum">     353 </span>            :     /* Trust that whomever owned the CRYPTO_dynlock_value we were</a>
+<a name="354"><span class="lineNum">     354 </span>            :      * passed has no future use for it...</a>
+<a name="355"><span class="lineNum">     355 </span>            :      */</a>
+<a name="356"><span class="lineNum">     356 </span>            :     apr_pool_destroy(l-&gt;pool);</a>
+<a name="357"><span class="lineNum">     357 </span>            : }</a>
+<a name="358"><span class="lineNum">     358 </span>            : </a>
+<a name="359"><span class="lineNum">     359 </span>            : #if DEFAULT_THREADID_IS_SAFE</a>
+<a name="360"><span class="lineNum">     360 </span>            : </a>
+<a name="361"><span class="lineNum">     361 </span>            : /* We don't need to set up a threadid callback on this platform. */</a>
+<a name="362"><span class="lineNum">     362 </span>            : void ssl_util_thread_id_setup(apr_pool_t *p)</a>
+<a name="363"><span class="lineNum">     363 </span>            : {</a>
+<a name="364"><span class="lineNum">     364 </span>            :     ap_log_perror(APLOG_MARK, APLOG_NOTICE, 0, p, APLOGNO(10027)</a>
+<a name="365"><span class="lineNum">     365 </span>            :                   &quot;using builtin threadid callback for OpenSSL&quot;);</a>
+<a name="366"><span class="lineNum">     366 </span>            : }</a>
+<a name="367"><span class="lineNum">     367 </span>            : </a>
+<a name="368"><span class="lineNum">     368 </span>            : #else</a>
+<a name="369"><span class="lineNum">     369 </span>            : </a>
+<a name="370"><span class="lineNum">     370 </span>            : /**</a>
+<a name="371"><span class="lineNum">     371 </span>            :  * Used by both versions of ssl_util_thr_id(). Returns an unsigned long that</a>
+<a name="372"><span class="lineNum">     372 </span>            :  * should be unique to the currently executing thread.</a>
+<a name="373"><span class="lineNum">     373 </span>            :  */</a>
+<a name="374"><span class="lineNum">     374 </span>            : static unsigned long ssl_util_thr_id_internal(void)</a>
+<a name="375"><span class="lineNum">     375 </span>            : {</a>
+<a name="376"><span class="lineNum">     376 </span>            :     /* OpenSSL needs this to return an unsigned long.  On OS/390, the pthread</a>
+<a name="377"><span class="lineNum">     377 </span>            :      * id is a structure twice that big.  Use the TCB pointer instead as a</a>
+<a name="378"><span class="lineNum">     378 </span>            :      * unique unsigned long.</a>
+<a name="379"><span class="lineNum">     379 </span>            :      */</a>
+<a name="380"><span class="lineNum">     380 </span>            : #ifdef __MVS__</a>
+<a name="381"><span class="lineNum">     381 </span>            :     struct PSA {</a>
+<a name="382"><span class="lineNum">     382 </span>            :         char unmapped[540]; /* PSATOLD is at offset 540 in the PSA */</a>
+<a name="383"><span class="lineNum">     383 </span>            :         unsigned long PSATOLD;</a>
+<a name="384"><span class="lineNum">     384 </span>            :     } *psaptr = 0; /* PSA is at address 0 */</a>
+<a name="385"><span class="lineNum">     385 </span>            : </a>
+<a name="386"><span class="lineNum">     386 </span>            :     return psaptr-&gt;PSATOLD;</a>
+<a name="387"><span class="lineNum">     387 </span>            : #else</a>
+<a name="388"><span class="lineNum">     388 </span>            :     return (unsigned long) apr_os_thread_current();</a>
+<a name="389"><span class="lineNum">     389 </span>            : #endif</a>
+<a name="390"><span class="lineNum">     390 </span>            : }</a>
+<a name="391"><span class="lineNum">     391 </span>            : </a>
+<a name="392"><span class="lineNum">     392 </span>            : #if HAVE_CRYPTO_SET_ID_CALLBACK</a>
+<a name="393"><span class="lineNum">     393 </span>            : </a>
+<a name="394"><span class="lineNum">     394 </span>            : static unsigned long ssl_util_thr_id(void)</a>
+<a name="395"><span class="lineNum">     395 </span>            : {</a>
+<a name="396"><span class="lineNum">     396 </span>            :     return ssl_util_thr_id_internal();</a>
+<a name="397"><span class="lineNum">     397 </span>            : }</a>
+<a name="398"><span class="lineNum">     398 </span>            : </a>
+<a name="399"><span class="lineNum">     399 </span>            : #else</a>
+<a name="400"><span class="lineNum">     400 </span>            : </a>
+<a name="401"><span class="lineNum">     401 </span>            : static void ssl_util_thr_id(CRYPTO_THREADID *id)</a>
+<a name="402"><span class="lineNum">     402 </span>            : {</a>
+<a name="403"><span class="lineNum">     403 </span>            :     /* XXX Ideally we would be using the _set_pointer() callback on platforms</a>
+<a name="404"><span class="lineNum">     404 </span>            :      * that have a pointer-based thread &quot;identity&quot;. But this entire API is</a>
+<a name="405"><span class="lineNum">     405 </span>            :      * fraught with problems (see PR60947) and has been removed completely in</a>
+<a name="406"><span class="lineNum">     406 </span>            :      * OpenSSL 1.1.0, so I'm not too invested in fixing it right now. */</a>
+<a name="407"><span class="lineNum">     407 </span>            :     CRYPTO_THREADID_set_numeric(id, ssl_util_thr_id_internal());</a>
+<a name="408"><span class="lineNum">     408 </span>            : }</a>
+<a name="409"><span class="lineNum">     409 </span>            : </a>
+<a name="410"><span class="lineNum">     410 </span>            : #endif /* HAVE_CRYPTO_SET_ID_CALLBACK */</a>
+<a name="411"><span class="lineNum">     411 </span>            : </a>
+<a name="412"><span class="lineNum">     412 </span>            : static apr_status_t ssl_util_thr_id_cleanup(void *old)</a>
+<a name="413"><span class="lineNum">     413 </span>            : {</a>
+<a name="414"><span class="lineNum">     414 </span>            : #if HAVE_CRYPTO_SET_ID_CALLBACK</a>
+<a name="415"><span class="lineNum">     415 </span>            :     CRYPTO_set_id_callback(old);</a>
+<a name="416"><span class="lineNum">     416 </span>            : #else</a>
+<a name="417"><span class="lineNum">     417 </span>            :     /* XXX This does nothing. The new-style THREADID callback is write-once. */</a>
+<a name="418"><span class="lineNum">     418 </span>            :     CRYPTO_THREADID_set_callback(old);</a>
+<a name="419"><span class="lineNum">     419 </span>            : #endif</a>
+<a name="420"><span class="lineNum">     420 </span>            : </a>
+<a name="421"><span class="lineNum">     421 </span>            :     return APR_SUCCESS;</a>
+<a name="422"><span class="lineNum">     422 </span>            : }</a>
+<a name="423"><span class="lineNum">     423 </span>            : </a>
+<a name="424"><span class="lineNum">     424 </span>            : void ssl_util_thread_id_setup(apr_pool_t *p)</a>
+<a name="425"><span class="lineNum">     425 </span>            : {</a>
+<a name="426"><span class="lineNum">     426 </span>            : #if HAVE_CRYPTO_SET_ID_CALLBACK</a>
+<a name="427"><span class="lineNum">     427 </span>            :     ap_log_perror(APLOG_MARK, APLOG_NOTICE, 0, p, APLOGNO(10028)</a>
+<a name="428"><span class="lineNum">     428 </span>            :                   &quot;using deprecated CRYPTO_set_id_callback for OpenSSL&quot;);</a>
+<a name="429"><span class="lineNum">     429 </span>            : </a>
+<a name="430"><span class="lineNum">     430 </span>            :     /* This API is deprecated, but we prefer it to its replacement since it</a>
+<a name="431"><span class="lineNum">     431 </span>            :      * allows us to unset the callback when this module is being unloaded. */</a>
+<a name="432"><span class="lineNum">     432 </span>            :     CRYPTO_set_id_callback(ssl_util_thr_id);</a>
+<a name="433"><span class="lineNum">     433 </span>            : #else</a>
+<a name="434"><span class="lineNum">     434 </span>            :     ap_log_perror(APLOG_MARK, APLOG_NOTICE, 0, p, APLOGNO(10029)</a>
+<a name="435"><span class="lineNum">     435 </span>            :                   &quot;using dangerous CRYPTO_THREADID_set_callback for OpenSSL&quot;);</a>
+<a name="436"><span class="lineNum">     436 </span>            : </a>
+<a name="437"><span class="lineNum">     437 </span>            :     /* This is a last resort. We can only set this once, which means that we'd</a>
+<a name="438"><span class="lineNum">     438 </span>            :      * better not get loaded into a different address during a restart. See</a>
+<a name="439"><span class="lineNum">     439 </span>            :      * PR60947. */</a>
+<a name="440"><span class="lineNum">     440 </span>            :     CRYPTO_THREADID_set_callback(ssl_util_thr_id);</a>
+<a name="441"><span class="lineNum">     441 </span>            : </a>
+<a name="442"><span class="lineNum">     442 </span>            :     if (CRYPTO_THREADID_get_callback() != ssl_util_thr_id) {</a>
+<a name="443"><span class="lineNum">     443 </span>            :         /* XXX Unfortunately this doesn't seem to get logged unless you're</a>
+<a name="444"><span class="lineNum">     444 </span>            :          * running in one-process mode, due to PR60999. */</a>
+<a name="445"><span class="lineNum">     445 </span>            :         ap_log_perror(APLOG_MARK, APLOG_CRIT, 0, p, APLOGNO(10030)</a>
+<a name="446"><span class="lineNum">     446 </span>            :             &quot;OpenSSL's THREADID callback was already set to another address, &quot;</a>
+<a name="447"><span class="lineNum">     447 </span>            :             &quot;and the server is probably going to crash. See bug #60947 for &quot;</a>
+<a name="448"><span class="lineNum">     448 </span>            :             &quot;more details. You may need to recompile or upgrade either OpenSSL &quot;</a>
+<a name="449"><span class="lineNum">     449 </span>            :             &quot;or httpd.&quot;);</a>
+<a name="450"><span class="lineNum">     450 </span>            :     }</a>
+<a name="451"><span class="lineNum">     451 </span>            : #endif</a>
+<a name="452"><span class="lineNum">     452 </span>            : </a>
+<a name="453"><span class="lineNum">     453 </span>            :     apr_pool_cleanup_register(p, NULL, ssl_util_thr_id_cleanup,</a>
+<a name="454"><span class="lineNum">     454 </span>            :                                        apr_pool_cleanup_null);</a>
+<a name="455"><span class="lineNum">     455 </span>            : }</a>
+<a name="456"><span class="lineNum">     456 </span>            : </a>
+<a name="457"><span class="lineNum">     457 </span>            : #endif /* DEFAULT_THREADID_IS_SAFE */</a>
+<a name="458"><span class="lineNum">     458 </span>            : </a>
+<a name="459"><span class="lineNum">     459 </span>            : static apr_status_t ssl_util_thread_cleanup(void *data)</a>
+<a name="460"><span class="lineNum">     460 </span>            : {</a>
+<a name="461"><span class="lineNum">     461 </span>            :     CRYPTO_set_locking_callback(NULL);</a>
+<a name="462"><span class="lineNum">     462 </span>            : </a>
+<a name="463"><span class="lineNum">     463 </span>            :     CRYPTO_set_dynlock_create_callback(NULL);</a>
+<a name="464"><span class="lineNum">     464 </span>            :     CRYPTO_set_dynlock_lock_callback(NULL);</a>
+<a name="465"><span class="lineNum">     465 </span>            :     CRYPTO_set_dynlock_destroy_callback(NULL);</a>
+<a name="466"><span class="lineNum">     466 </span>            : </a>
+<a name="467"><span class="lineNum">     467 </span>            :     dynlockpool = NULL;</a>
+<a name="468"><span class="lineNum">     468 </span>            : </a>
+<a name="469"><span class="lineNum">     469 </span>            :     /* Let the registered mutex cleanups do their own thing</a>
+<a name="470"><span class="lineNum">     470 </span>            :      */</a>
+<a name="471"><span class="lineNum">     471 </span>            :     return APR_SUCCESS;</a>
+<a name="472"><span class="lineNum">     472 </span>            : }</a>
+<a name="473"><span class="lineNum">     473 </span>            : </a>
+<a name="474"><span class="lineNum">     474 </span>            : void ssl_util_thread_setup(apr_pool_t *p)</a>
+<a name="475"><span class="lineNum">     475 </span>            : {</a>
+<a name="476"><span class="lineNum">     476 </span>            :     int i;</a>
+<a name="477"><span class="lineNum">     477 </span>            : </a>
+<a name="478"><span class="lineNum">     478 </span>            :     lock_num_locks = CRYPTO_num_locks();</a>
+<a name="479"><span class="lineNum">     479 </span>            :     lock_cs = apr_palloc(p, lock_num_locks * sizeof(*lock_cs));</a>
+<a name="480"><span class="lineNum">     480 </span>            : </a>
+<a name="481"><span class="lineNum">     481 </span>            :     for (i = 0; i &lt; lock_num_locks; i++) {</a>
+<a name="482"><span class="lineNum">     482 </span>            :         apr_thread_mutex_create(&amp;(lock_cs[i]), APR_THREAD_MUTEX_DEFAULT, p);</a>
+<a name="483"><span class="lineNum">     483 </span>            :     }</a>
+<a name="484"><span class="lineNum">     484 </span>            : </a>
+<a name="485"><span class="lineNum">     485 </span>            :     CRYPTO_set_locking_callback(ssl_util_thr_lock);</a>
+<a name="486"><span class="lineNum">     486 </span>            : </a>
+<a name="487"><span class="lineNum">     487 </span>            :     /* Set up dynamic locking scaffolding for OpenSSL to use at its</a>
+<a name="488"><span class="lineNum">     488 </span>            :      * convenience.</a>
+<a name="489"><span class="lineNum">     489 </span>            :      */</a>
+<a name="490"><span class="lineNum">     490 </span>            :     dynlockpool = p;</a>
+<a name="491"><span class="lineNum">     491 </span>            :     CRYPTO_set_dynlock_create_callback(ssl_dyn_create_function);</a>
+<a name="492"><span class="lineNum">     492 </span>            :     CRYPTO_set_dynlock_lock_callback(ssl_dyn_lock_function);</a>
+<a name="493"><span class="lineNum">     493 </span>            :     CRYPTO_set_dynlock_destroy_callback(ssl_dyn_destroy_function);</a>
+<a name="494"><span class="lineNum">     494 </span>            : </a>
+<a name="495"><span class="lineNum">     495 </span>            :     apr_pool_cleanup_register(p, NULL, ssl_util_thread_cleanup,</a>
+<a name="496"><span class="lineNum">     496 </span>            :                                        apr_pool_cleanup_null);</a>
+<a name="497"><span class="lineNum">     497 </span>            : }</a>
+<a name="498"><span class="lineNum">     498 </span>            : </a>
+<a name="499"><span class="lineNum">     499 </span>            : #endif /* #if APR_HAS_THREADS &amp;&amp; MODSSL_USE_OPENSSL_PRE_1_1_API */</a>
+<a name="500"><span class="lineNum">     500 </span>            : </a>
+<a name="501"><span class="lineNum">     501 </span><span class="lineNoCov">          0 : int modssl_is_engine_id(const char *name)</span></a>
+<a name="502"><span class="lineNum">     502 </span>            : {</a>
+<a name="503"><span class="lineNum">     503 </span>            : #if defined(HAVE_OPENSSL_ENGINE_H) &amp;&amp; defined(HAVE_ENGINE_INIT)</a>
+<a name="504"><span class="lineNum">     504 </span>            :     /* ### Can handle any other special ENGINE key names here? */</a>
+<a name="505"><span class="lineNum">     505 </span><span class="lineNoCov">          0 :     return strncmp(name, &quot;pkcs11:&quot;, 7) == 0;</span></a>
+<a name="506"><span class="lineNum">     506 </span>            : #else</a>
+<a name="507"><span class="lineNum">     507 </span>            :     return 0;</a>
+<a name="508"><span class="lineNum">     508 </span>            : #endif</a>
+<a name="509"><span class="lineNum">     509 </span>            : }</a>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.14</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
